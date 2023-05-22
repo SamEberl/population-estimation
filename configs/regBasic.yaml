@@ -1,0 +1,23 @@
+model_params:
+  name: 'regBasic'
+  in_size: 64
+#  hidden_dims: [8, 16, 32, 64, 128, 256]
+
+
+data_params:
+  data_path: "/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1"
+#  data_path: "/home/sam/Desktop/DLR/Data/Data_testing/AE"
+  train_batch_size: 256
+  val_batch_size:  256
+  num_workers: 4
+
+
+train_params:
+  LR: 0.005
+  max_epochs: 10
+  L2_reg: 0.001
+
+logging_params:
+  save_dir: "/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/"
+  name: "regBasic.pth"
+

@@ -1,0 +1,25 @@
+model_params:
+  name: 'aeResNet'
+  in_channels: 4
+  latent_dim: 64
+
+
+data_params:
+  data_path: "/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1"
+#  data_path: "/home/sam/Desktop/DLR/Data/Data_testing/AE"
+  train_batch_size: 64
+  val_batch_size:  64
+  patch_size: 100
+  num_workers: 4
+
+
+train_params:
+  LR: 0.002
+  max_epochs: 10
+  L2_reg: 0.0001
+
+
+logging_params:
+  save_dir: "/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/"
+  name: "aeResNet.pth"
+
