@@ -88,6 +88,9 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
+def check_sizes():
+    pass
+
 
 # open_tensorboard("/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/")
 

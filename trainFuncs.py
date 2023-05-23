@@ -60,7 +60,7 @@ def train_ae(ae_config, log_dir):
             train_loss.backward()
             optimizer.step()
 
-            writer.add_scalar('Loss/train', train_loss.item(), epoch * len(train_dataloader) + i + 1)
+            writer.add_scalar('Loss-ae/train', train_loss.item(), epoch * len(train_dataloader) + i + 1)
 
         with torch.no_grad():
             for j, data in enumerate(val_dataloader):
@@ -71,7 +71,7 @@ def train_ae(ae_config, log_dir):
                 model_outs = ae_model(inputs)
                 val_loss = ae_model.loss_function(*model_outs, M_N=0.005)
 
-                writer.add_scalar('Loss/valid', val_loss.item(), epoch * len(val_dataloader) + j + 1)
+                writer.add_scalar('Loss-ae/valid', val_loss.item(), epoch * len(val_dataloader) + j + 1)
 
         # for name, param in model.named_parameters():
         #     if 'weight' in name:
@@ -149,10 +149,10 @@ def train_reg(reg_config, log_dir, ae_model): # TODO Continue here and make sure
             train_loss.backward()
             optimizer.step()
 
-            writer.add_scalar('Loss/train', train_loss.item(), epoch * len(train_dataloader) + i + 1)
+            writer.add_scalar('Loss-reg/train', train_loss.item(), epoch * len(train_dataloader) + i + 1)
             with torch.no_grad():
                 loss_mae = torch.nn.functional.l1_loss(prediction, labels)
-                writer.add_scalar('Loss/train-MAE', loss_mae, epoch * len(train_dataloader) + i + 1)
+                writer.add_scalar('Loss-reg-MAE/train', loss_mae, epoch * len(train_dataloader) + i + 1)
 
         with torch.no_grad():
             for i, data in enumerate(val_dataloader):
@@ -164,11 +164,11 @@ def train_reg(reg_config, log_dir, ae_model): # TODO Continue here and make sure
                 prediction = reg_model(ae_features)
                 val_loss = reg_model.loss_function(prediction, labels)
 
-                writer.add_scalar('Loss/valid', val_loss.item(), epoch * len(val_dataloader) + i + 1)
+                writer.add_scalar('Loss-reg/valid', val_loss.item(), epoch * len(val_dataloader) + i + 1)
 
                 with torch.no_grad():
                     loss_mae = torch.nn.functional.l1_loss(prediction, labels)
-                    writer.add_scalar('Loss/val-MAE', loss_mae, epoch * len(val_dataloader) + i + 1)
+                    writer.add_scalar('Loss-reg-MAE/valid', loss_mae, epoch * len(val_dataloader) + i + 1)
 
         # for name, param in model.named_parameters():
         #     if 'weight' in name:

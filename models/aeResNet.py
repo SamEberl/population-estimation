@@ -20,13 +20,18 @@ class aeResNet(BaseAE):
             nn.MaxPool2d(kernel_size=2, stride=2),
             ResBlock(in_channels=128, out_channels=256, kernel_size=4),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            ResBlock(in_channels=256, out_channels=512, kernel_size=4),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
-        self.encoder_fc = nn.Linear(2304, latent_dim)
+        self.encoder_fc = nn.Linear(512, latent_dim)
 
-        self.decoder_fc = nn.Linear(latent_dim, 2304)
+        self.decoder_fc = nn.Linear(latent_dim, 512)
 
         self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(in_channels=512, out_channels=256, kernel_size=3, stride=1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(inplace=True),
             nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(inplace=True),
@@ -40,11 +45,48 @@ class aeResNet(BaseAE):
             nn.BatchNorm2d(16),
             nn.LeakyReLU(inplace=True),
             nn.ConvTranspose2d(in_channels=16, out_channels=in_channels, kernel_size=4, stride=2),
-            # nn.BatchNorm2d(in_channels),
-            # nn.LeakyReLU(inplace=True),
-            # nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size)
             nn.Sigmoid(),
         )
+
+
+        # self.encoder = nn.Sequential(
+        #     ResBlock(in_channels=in_channels, out_channels=in_channels, kernel_size=4),
+        #     nn.Conv2d(in_channels=in_channels, out_channels=16, kernel_size=4, stride=2),
+        #     nn.BatchNorm2d(16),
+        #     nn.LeakyReLU(inplace=True),
+        #
+        #     ResBlock(in_channels=16, out_channels=16, kernel_size=4),
+        #     nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2),
+        #     nn.BatchNorm2d(32),
+        #     nn.LeakyReLU(inplace=True),
+        #
+        #     ResBlock(in_channels=32, out_channels=32, kernel_size=4),
+        #     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=4, stride=2),
+        #     nn.BatchNorm2d(64),
+        #     nn.LeakyReLU(inplace=True),
+        #
+        #     ResBlock(in_channels=64, out_channels=64, kernel_size=4),
+        #     nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=2),
+        #     nn.BatchNorm2d(128),
+        # )
+        #
+        # self.encoder_fc = nn.Linear(2048, latent_dim)
+        #
+        # self.decoder_fc = nn.Linear(latent_dim, 2048)
+        #
+        # self.decoder = nn.Sequential(
+        #     nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=4, stride=2),
+        #     nn.BatchNorm2d(64),
+        #     nn.LeakyReLU(inplace=True),
+        #     nn.ConvTranspose2d(in_channels=64, out_channels=32, kernel_size=5, stride=2),
+        #     nn.BatchNorm2d(32),
+        #     nn.LeakyReLU(inplace=True),
+        #     nn.ConvTranspose2d(in_channels=32, out_channels=16, kernel_size=5, stride=2),
+        #     nn.BatchNorm2d(16),
+        #     nn.LeakyReLU(inplace=True),
+        #     nn.ConvTranspose2d(in_channels=16, out_channels=in_channels, kernel_size=4, stride=2),
+        #     nn.Sigmoid(),
+        # )
 
     def encode(self, input):
         """
@@ -68,7 +110,9 @@ class aeResNet(BaseAE):
         :return: (Tensor) [B x C x H x W]
         """
         output = self.decoder_fc(z)
-        output = output.view(-1, 256, 3, 3)
+        # output = output.view(-1, 256, 3, 3)
+        # output = output.view(-1, 128, 4, 4)
+        output = output.view(-1, 512, 1, 1)
         output = self.decoder(output)
         return output
 
@@ -86,6 +130,19 @@ class aeResNet(BaseAE):
         criterion = nn.MSELoss()
         loss = criterion(outputs, inputs)
         return loss
+
+    # def loss_function(self, *args, **kwargs):
+    #     outputs = args[0]
+    #     inputs = args[1]
+    #
+    #     channel_mean = torch.mean(inputs, dim=(0, 2, 3))
+    #     channel_weights = 1.0 / channel_mean
+    #     channel_weights /= torch.sum(channel_weights)
+    #
+    #     squared_error = torch.square(inputs - outputs)
+    #     weighted_error = squared_error * channel_weights.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+    #     return torch.mean(weighted_error)
+
 
 
 class ResBlock(nn.Module):

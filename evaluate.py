@@ -37,20 +37,8 @@ def display_input_output(model, input_tensor):
         if event.key == 'left':
             idx = (idx - 1) % input_tensor.shape[0]
             show_images()
-        print('-----')
-        # print(str(input_tensor[idx][0].mean()) + '    ' + str(output_tensor[idx][0].mean()))
-        # print(str(input_tensor[idx][1].mean()) + '    ' + str(output_tensor[idx][1].mean()))
-        # print(str(input_tensor[idx][2].mean()) + '    ' + str(output_tensor[idx][2].mean()))
-        # print(str(input_tensor[idx][3].mean()) + '    ' + str(output_tensor[idx][3].mean()))
-        # print(str(input_tensor[idx].mean()) + '    ' + str(output_tensor[idx].mean()))
-        #
-        # print(str(output_tensor[idx][0]) + '    ' + str(output_tensor[idx][3]))
 
-
-
-    # output_tensor = model(input_tensor)[0]
     input_np = input_tensor.detach().cpu().numpy()
-    # output_np = output_tensor.detach().cpu().numpy()
     idx = 0
     n_channels = input_np[idx].shape[0]
     fig, axes = plt.subplots(nrows=n_channels, ncols=2, figsize=(7, 10))
