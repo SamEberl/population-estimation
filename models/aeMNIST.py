@@ -1,5 +1,5 @@
 import torch.nn as nn
-from autoencoder.models import BaseAE
+from models import BaseAE
 
 class aeMNIST(BaseAE):
     def __init__(self,

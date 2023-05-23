@@ -16,6 +16,8 @@ train_params:
   LR: 0.005
   max_epochs: 10
   L2_reg: 0.001
+  beta1: 0.9
+  beta2: 0.999
 
 logging_params:
   save_dir: "/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/"

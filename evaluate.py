@@ -7,62 +7,13 @@ import argparse
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from dataset import CustomDataset
-from autoencoder.models import *
+from models import *
 import matplotlib.pyplot as plt
 
 
-def eval_model():
-    # Define the path to the saved model
-    model_path = '/home/sam/Desktop/DLR/Data/Data_100GB/test_conv_model.pth'
-
-    # instantiate the model and load saved state dictionary
-    model = Autoencoder()
-    model.load_state_dict(torch.load(model_path))
-
-    # Set the model to evaluation mode
-    model.eval()
-
-    data = "/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1/train/"
-    # Define the test dataset
-    test_dataset = CustomDataset(data_dir=data,
-                                 transform=transforms.ToTensor())
-
-    # Define the test dataloader
-    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False, collate_fn=custom_collate)
-
-    # Define the loss function (MSE)
-    criterion = nn.MSELoss()
-
-    # Initialize the running loss
-    running_loss = 0.0
-
-    # Loop over the test dataset
-    for data in test_loader:
-        # Get the inputs and labels
-        inputs, labels = data
-
-        # Pass the inputs through the model
-        outputs = model(inputs)
-
-        # Compute the loss between the inputs and outputs
-        loss = criterion(outputs, inputs)
-
-        # Add the batch loss to the running loss
-        running_loss += loss.item() * inputs.size(0)
-
-    # Calculate the average loss
-    test_loss = running_loss / len(test_loader.dataset)
-
-    print('Test Loss: {:.6f}'.format(test_loss))
-
-import numpy as np
 def display_input_output(model, input_tensor):
     def show_images():
         output_np = model(input_tensor)[0].detach().numpy()
-        array_questionable = output_np[0, 0, :, :]
-        array_comparison = torch.full((100, 100), 0.00217692).numpy()
-        diff = np.where(array_questionable != array_comparison)
-        print(diff)
         for c in range(n_channels):
             # Show input image
             axes[c, 0].imshow(input_np[idx][c], cmap='gray', vmin=0, vmax=1)

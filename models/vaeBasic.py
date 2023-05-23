@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from autoencoder.models import BaseAE
+from models import BaseAE
 
 class vaeBasic(BaseAE):
     def __init__(self,

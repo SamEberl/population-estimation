@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from autoencoder.models import BaseAE
+from models import BaseAE
 
 class aeResNet(BaseAE):
     def __init__(self,

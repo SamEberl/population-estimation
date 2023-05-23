@@ -17,6 +17,8 @@ train_params:
   LR: 0.002
   max_epochs: 100
   L2_reg: 0.0001
+  beta1: 0.9
+  beta2: 0.999
 
 
 logging_params:
