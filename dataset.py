@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
+from rasterio.enums import Resampling
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torchvision import transforms
@@ -18,6 +19,9 @@ class CustomDataset(Dataset):
         self.transform = transform
         self.data_sub_dir = os.path.join(data_dir, split)
         self.data = []
+
+        self.clip_min = 0
+        self.clip_max = 3000
 
         splits = ['train', 'valid', 'test']
 
@@ -36,12 +40,13 @@ class CustomDataset(Dataset):
     def __getitem__(self, idx):
         try:
             # Open the satellite data file
-            with rasterio.open(self.data[idx][0][0]) as lu:
+            with rasterio.open(self.data[idx][0][0], 'r') as data:
                 # Read all bands/channels
-                image_bands = lu.read().astype(np.float32)
+                image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], 1:99, 1:99]
+                image_bands = np.clip(image_bands, self.clip_min, self.clip_max) / self.clip_max
                 # Convert the data to a PyTorch tensor
+                # tensor_data = torch.from_numpy(image_bands)[[3, 2, 1], 1:99, 1:99]
                 tensor_data = torch.from_numpy(image_bands)
-
                 label = self.data[idx][1]
 
                 return tensor_data, label
@@ -82,12 +87,15 @@ class CustomDataset(Dataset):
             # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lcz')):
             #     for file in files:
             #         file_list.append(os.path.join(root, file))
-            for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lu')):
-                for file in files:
-                    file_list.append(os.path.join(root, file))
+            # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lu')):
+            #     for file in files:
+            #         file_list.append(os.path.join(root, file))
             # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/viirs')):
             #     for file in files:
             #         file_list.append(os.path.join(root, file))
+            for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/sen2summer')):
+                for file in files:
+                    file_list.append(os.path.join(root, file))
 
             # Load the csv file that maps datapoint names to folder names
             with open(os.path.join(self.data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:

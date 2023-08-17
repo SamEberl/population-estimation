@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate Conda environment
-source activate dlr_torch
+source activate dino
 
 # Run Python script
 python - << END

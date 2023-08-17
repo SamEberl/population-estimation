@@ -1,14 +1,14 @@
 model_params:
-  name: 'regBasic'
-  in_size: 64
+  name: 'regBasicDINOv2'
+  in_size: 384
 #  hidden_dims: [8, 16, 32, 64, 128, 256]
 
 
 data_params:
-  data_path: "/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1"
+  data_path: "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1/tmp_train"
 #  data_path: "/home/sam/Desktop/DLR/Data/Data_testing/AE"
-  train_batch_size: 256
-  val_batch_size:  256
+  train_batch_size: 512
+  val_batch_size:  512
   num_workers: 4
 
 
@@ -21,5 +21,5 @@ train_params:
 
 logging_params:
   save_dir: "/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/"
-  name: "regBasic.pth"
+  name: "regBasicDINOv2.pth"
 

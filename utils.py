@@ -92,11 +92,11 @@ def check_sizes():
     pass
 
 
-# open_tensorboard("/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/")
+#open_tensorboard("/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/")
 
 
 # Specify the directory to search for .tiff images
-directory = '/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1/train/'
+#directory = '/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1/train/'
 
 # filter_images_by_mean(directory)
 # browse_images_with_mean(directory)

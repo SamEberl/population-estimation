@@ -2,11 +2,11 @@ import torch
 import torch.nn as nn
 
 
-class regBasic(nn.Module):
+class regBasicDINOv2(nn.Module):
     def __init__(self,
                  in_size,
                  **kwargs):
-        super(regBasic, self).__init__()
+        super(regBasicDINOv2, self).__init__()
 
         self.network = nn.Sequential(nn.Linear(in_size, 32),
                                      nn.BatchNorm1d(32),
@@ -25,6 +25,7 @@ class regBasic(nn.Module):
     def loss_function(self, predictions, labels):
         criterion = RMSLELoss()
         # criterion = nn.MSELoss()
+        # criterion = nn.L1Loss()
         loss = criterion(predictions, labels)
         return loss
 
