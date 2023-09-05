@@ -1,14 +1,18 @@
 import csv
 import numpy as np
 import torch
+from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from rasterio.enums import Resampling
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torchvision import transforms
 
+from logging_utils import logger
+
 import os
 import rasterio
+import math
 
 
 class CustomDataset(Dataset):
@@ -21,7 +25,7 @@ class CustomDataset(Dataset):
         self.data = []
 
         self.clip_min = 0
-        self.clip_max = 3000
+        self.clip_max = 4000
 
         splits = ['train', 'valid', 'test']
 
@@ -34,26 +38,45 @@ class CustomDataset(Dataset):
         else:
             self.get_data()
 
+        logger.info(f'{split}-dataset length: {len(self.data)}')
+
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
+        file_path = self.data[idx][0]
+        label = self.data[idx][1]
+        datapoint_name = self.data[idx][2]
         try:
-            # Open the satellite data file
-            with rasterio.open(self.data[idx][0][0], 'r') as data:
+            with rasterio.open(file_path, 'r') as data:
                 # Read all bands/channels
-                image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], 1:99, 1:99]
-                image_bands = np.clip(image_bands, self.clip_min, self.clip_max) / self.clip_max
-                # Convert the data to a PyTorch tensor
-                # tensor_data = torch.from_numpy(image_bands)[[3, 2, 1], 1:99, 1:99]
-                tensor_data = torch.from_numpy(image_bands)
-                label = self.data[idx][1]
+                #image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], :, :]
+                image_bands = data.read(out_shape=(data.count, 100, 100))[[3, 2, 1], :, :].astype(np.float16)
 
-                return tensor_data, label
+                image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
+
+                # Set empty parts to mean to avoid skewing the normalization
+                mask_0 = (image_bands == 0)
+                image_bands[mask_0] = image_bands.mean()
+
+                # normalize channelwise
+                image_bands[0, :, :] = (image_bands[0, :, :] - image_bands[0, :, :].min()) / (image_bands[0, :, :].max() - image_bands[0, :, :].min())
+                image_bands[1, :, :] = (image_bands[1, :, :] - image_bands[1, :, :].min()) / (image_bands[1, :, :].max() - image_bands[1, :, :].min())
+                image_bands[2, :, :] = (image_bands[2, :, :] - image_bands[2, :, :].min()) / (image_bands[2, :, :].max() - image_bands[2, :, :].min())
+
+                # reset empty parts back to 0
+                image_bands[mask_0] = 0
+
+                # pil_image = Image.fromarray((image_bands * 255).astype(np.uint8), mode="RGB")
+                # pil_image = Image.fromarray(image_bands)
+                tensor_data = torch.from_numpy(image_bands)
+                tensor_data = self.transform(tensor_data)
+                return tensor_data, label, datapoint_name
+                #return {'inputs': tensor_data, 'label': label, 'name': datapoint_name}
         except rasterio.RasterioIOError:
-            # Handle the case where the image file cannot be opened
-            # Return None or a sentinel value to indicate the failure
-            return None, None
+            print(f'Image not found at: {file_path}')
+            return None, None, None
+            #return {'data': None, 'label': None, 'name': None}
 
     # def __getitem__(self, idx):
     #     try:
@@ -81,9 +104,35 @@ class CustomDataset(Dataset):
 
     def get_data(self):
         for city_folder in os.listdir(self.data_sub_dir):
+            # Load the csv file that maps datapoint names to folder names
+            with open(os.path.join(self.data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    datapoint_name = row[0]
+                    label = row[2]
+
+                    if label == 'POP':  # skip first row which is header of file
+                        continue
+                    elif int(label) == 0:
+                        Class_nbr = 'Class_0'
+                    else:
+                        Class_nbr = f'Class_{math.ceil(math.log(int(label), 2)+0.00001)}'
+
+                    modality = 'sen2spring'
+                    file_name = datapoint_name + '_' + modality + '.tif'
+                    file_path = os.path.join(self.data_sub_dir, city_folder, modality, Class_nbr, file_name)
+                    #print(f'Class {Class_nbr}')
+                    if os.path.isfile(file_path):
+                        self.data.append((file_path, label, datapoint_name))
+                    else:
+                        print(f'Could not find file: {file_path}')
+
+
+    def get_data_archive(self):
+        for city_folder in os.listdir(self.data_sub_dir):
 
             # get list of all files in directory and its subdirectories
-            file_list = []
+            path_list = []
             # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lcz')):
             #     for file in files:
             #         file_list.append(os.path.join(root, file))
@@ -93,9 +142,9 @@ class CustomDataset(Dataset):
             # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/viirs')):
             #     for file in files:
             #         file_list.append(os.path.join(root, file))
-            for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/sen2summer')):
+            for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/sen2spring')):
                 for file in files:
-                    file_list.append(os.path.join(root, file))
+                    path_list.append(os.path.join(root, file))
 
             # Load the csv file that maps datapoint names to folder names
             with open(os.path.join(self.data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:
@@ -104,23 +153,20 @@ class CustomDataset(Dataset):
                     datapoint_name = row[0]
                     label = row[2]
 
-                    if '1kmN' not in datapoint_name:
-                        continue
-
                     # Filter the file list to include only files with the datapoint name
-                    filtered_files = [f for f in file_list if datapoint_name in os.path.basename(f)]
+                    for path in path_list:
+                        file_path = None
+                        basename = os.path.basename(path)
+                        if basename.startswith(datapoint_name) and basename.endswith('.tif'):
+                            print(f'basename: {basename}    datapoint: {datapoint_name}')
+                            print(path)
+                            file_path = path
+                            break
+                    #filtered_files = [f for f in path_list if datapoint_name in os.path.basename(f)]
+                    #print(filtered_files)
 
-                    # Read the data from the files for this datapoint
-                    # datapoint_data = []
-                    # for filename in filtered_files:
-                    #     file_path = os.path.join(self.data_sub_dir, city_folder, filename)
-                    #     datapoint_data.append(file_path)
-
-                    # if len(datapoint_data) != 0:
-                    #     self.data.append((datapoint_data[0], label))
-
-                    if len(filtered_files) == 1:
-                        self.data.append((filtered_files, label))
+                    if file_path != None:
+                        self.data.append((file_path, label, datapoint_name))
 
 
 class aeDataset():
@@ -153,18 +199,20 @@ class aeDataset():
         self.num_workers = num_workers
         self.pin_memory = pin_memory
 
-        train_transforms = transforms.Compose([transforms.RandomHorizontalFlip(),
-                                               transforms.CenterCrop(148),
-                                               transforms.Resize(self.patch_size),
-                                               transforms.ToTensor(),
-                                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        train_transforms = transforms.Compose([#transforms.RandomHorizontalFlip(),
+                                               transforms.Pad(6, 0, padding_mode='constant'),
+                                               #transforms.CenterCrop(98),
+                                               #transforms.Resize(self.patch_size),
+                                               #transforms.ToTensor(),
+                                               #transforms.Normalize((0.34234527, 0.38267878, 0.41151279), (0.12574408, 0.07536756, 0.0596833))
                                                ])
 
-        val_transforms = transforms.Compose([transforms.RandomHorizontalFlip(),
-                                             transforms.CenterCrop(148),
-                                             transforms.Resize(self.patch_size),
-                                             transforms.ToTensor(),
-                                             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        val_transforms = transforms.Compose([#transforms.RandomHorizontalFlip(),
+                                             transforms.Pad(6, 0, padding_mode='constant'),
+                                             #transforms.CenterCrop(98),
+                                             #transforms.Resize(self.patch_size),
+                                             #transforms.ToTensor(),
+                                             #transforms.Normalize((0.01, 0.01, 0.01), (1, 1, 1))
                                              ])
 
         self.train_dataset = CustomDataset(
@@ -219,16 +267,18 @@ class aeDataset():
 
         # Create an empty list for the labels
         y_batch = []
+        names = []
 
         # Loop through the batch and fill in the tensor and label list
-        for i, (x, y) in enumerate(batch):
+        for i, (x, y, name) in enumerate(batch):
             x_batch[i, :x.shape[0], :, :] = x
             # x_batch[i, :x.shape[0], :100, :100] = x
             y_batch.append(int(y))
+            names.append(batch[i][2])
 
         # Convert the label list to a tensor
         y_batch = torch.reshape(torch.tensor(y_batch, dtype=torch.float32), (-1, 1))
 
-        return x_batch, y_batch
+        return x_batch, y_batch, names
 
 
