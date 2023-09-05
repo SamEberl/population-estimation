@@ -7,7 +7,7 @@ from .regBasicDINOv2 import *
 from .aeResNet import *
 
 # Aliases
-ae_models = {'aeBasic': aeBasic,
+ssl_models = {'aeBasic': aeBasic,
              'vaeBasic': vaeBasic,
              'aeResNet': aeResNet,
              'aeMNIST': aeMNIST}

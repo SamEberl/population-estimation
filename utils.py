@@ -192,3 +192,35 @@ def save_data_as_jpg(reg_config, save_dir):
             for i, input in enumerate(inputs):
                 image = torchvision.transforms.ToPILImage()(input)
                 image.save(os.path.join(save_dir, names[i] + '.jpg'), quality=100)
+
+
+def get_img_stats():
+    reg_config = parse_yaml('configs/regBasicDINOv2.yaml')
+
+    data = sslDataset(**reg_config["data_params"])
+    train_dataloader = data.train_dataloader()
+
+    channel_sums = np.zeros(3)
+    channel_sums_squared = np.zeros(3)
+    total_samples = 0
+
+    for batch in train_dataloader:
+        # Convert batch tensor to numpy array
+        batch_np = batch[0].numpy()
+        batch_size = batch_np.shape[0]
+
+        # Sum pixel values for each channel
+        channel_sums += np.sum(batch_np, axis=(0, 2, 3))
+        channel_sums_squared += np.sum(batch_np ** 2, axis=(0, 2, 3))
+        total_samples += batch_size
+
+    # Calculate mean and standard deviation for each channel
+    channel_means = channel_sums / (total_samples * 9604)
+    channel_stddevs = np.sqrt((channel_sums_squared / (total_samples * 98 * 98)) - (channel_means ** 2))
+
+    print("Mean of each channel (RGB):")
+    print(channel_means)
+
+    print("\nStandard deviation of each channel (RGB):")
+    print(channel_stddevs)
+
