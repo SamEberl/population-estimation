@@ -1,13 +1,55 @@
 import subprocess
 import webbrowser
 import argparse
+import torchvision.transforms
 import yaml
 import os
+import torch
+
 import numpy as np
 import tifffile as tiff
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import imageio.v2 as imageio
+import pandas as pd
+
+from tqdm import tqdm
+from dataset import sslDataset
+
+
+def display_input_output(model, input_tensor):
+    def show_images():
+        output_np = model(input_tensor)[0].detach().numpy()
+        for c in range(n_channels):
+            # Show input image
+            axes[c, 0].imshow(input_np[idx][c], cmap='gray', vmin=0, vmax=1)
+            axes[c, 0].set_title(f'In: {c} | mean: {input_tensor[idx][c].mean().item():.4f}')
+            axes[c, 0].axis('off')
+
+            # Show output image
+            axes[c, 1].imshow(output_np[idx][c], cmap='gray', vmin=0, vmax=1)
+            print(f'shape: {output_np[idx][c].shape} | mean: {output_np[idx][c].mean():.4f} | type: {type(output_np[idx][c])}')
+            axes[c, 1].set_title(f'Out: {c} | mean: {output_np[idx][c].mean().item():.4f}')
+            axes[c, 1].axis('off')
+
+        plt.tight_layout()
+        plt.show(block=True)
+
+    def on_key_press(event):
+        nonlocal idx
+        if event.key == 'right':
+            idx = (idx + 1) % input_tensor.shape[0]
+            show_images()
+        if event.key == 'left':
+            idx = (idx - 1) % input_tensor.shape[0]
+            show_images()
+
+    input_np = input_tensor.detach().cpu().numpy()
+    idx = 0
+    n_channels = input_np[idx].shape[0]
+    fig, axes = plt.subplots(nrows=n_channels, ncols=2, figsize=(7, 10))
+    fig.canvas.mpl_connect('key_press_event', on_key_press)
+
+    show_images()
 
 
 def open_tensorboard(log_dir):
@@ -88,15 +130,65 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
-def check_sizes():
-    pass
+def create_feature_csv(reg_config, ssl_model):
+    # Set device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Set to utilize tensor cores of GPU
+    torch.set_float32_matmul_precision('medium')
+
+    data = sslDataset(**reg_config["data_params"])
+    #train_dataloader = data.train_dataloader()
+    val_dataloader = data.val_dataloader()
 
 
-#open_tensorboard("/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/")
+    df_train = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
+    df_train['PopCount'] = None
+
+    df_val = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
+    df_val['PopCount'] = None
+
+    for param in ssl_model.parameters():
+        param.requires_grad = False
+
+    with torch.no_grad():
+        for i, data in enumerate(val_dataloader):
+            inputs, labels, name = data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            ssl_features = ssl_model(inputs)
+            df_train_tmp = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
+            df_train_tmp['PopCount'] = None
+            for j, feature in tqdm(enumerate(ssl_features)):
+                feature = feature.tolist()
+                feature.append(labels[j].item())
+                df_feature = pd.DataFrame([feature], columns=df_train.columns, index=[(i+1)*(j+1)])
+                df_train_tmp = pd.concat([df_train_tmp, df_feature], ignore_index=False)
+            df_train = pd.concat([df_train, df_train_tmp], ignore_index=False)
+
+    df_train.to_csv('/home/sam/Desktop/val_features_sen2spring_full.csv', index=False)
 
 
-# Specify the directory to search for .tiff images
-#directory = '/home/sam/Desktop/DLR/Data/Data_100GB/So2Sat_POP_Part1/train/'
+def save_data_as_jpg(reg_config, save_dir):
+    # Set to utilize tensor cores of GPU
+    torch.set_float32_matmul_precision('medium')
 
-# filter_images_by_mean(directory)
-# browse_images_with_mean(directory)
+    data = sslDataset(**reg_config["data_params"])
+    dataloader = data.train_dataloader()
+    # dataloader = data.val_dataloader()
+
+
+    df_train = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
+    df_train['PopCount'] = None
+
+    df_val = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
+    df_val['PopCount'] = None
+
+    with torch.no_grad():
+        for data in tqdm(dataloader):
+            inputs, labels, names = data
+
+            for i, input in enumerate(inputs):
+                image = torchvision.transforms.ToPILImage()(input)
+                image.save(os.path.join(save_dir, names[i] + '.jpg'), quality=100)

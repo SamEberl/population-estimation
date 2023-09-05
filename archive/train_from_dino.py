@@ -1,6 +1,8 @@
 from trainFuncs import *
 import tifffile
 import torchvision.transforms as T
+from logging_utils import logger
+import multiprocessing
 
 def load_image(img: str) -> torch.Tensor:
     """
@@ -19,7 +21,7 @@ def load_image(img: str) -> torch.Tensor:
     return transformed_img
 
 
-print('---Start Training---')
+logger.info('---Start Training---')
 reg_config = parse_yaml('configs/regBasicDINOv2.yaml')
 log_dir = reg_config['logging_params']['save_dir']
 
@@ -30,8 +32,8 @@ dinov2_vits14.to(device)
 
 file = '/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1/test/00331_204371_munich/sen2summer/Class_14/1kmN2775E4433_sen2summer.tif'
 embeddings = dinov2_vits14(load_image(file).to(device))
-print(embeddings.shape)
+logger.info(embeddings.shape)
 
 
-print('---Training Regression model---')
+logger.info('---Training Regression model---')
 train_reg_from_dino(reg_config, log_dir, dinov2_vits14)
