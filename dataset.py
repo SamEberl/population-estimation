@@ -88,7 +88,7 @@ class so2satDataset(Dataset):
                         print(f'Could not find file: {file_path}')
 
 
-class aeDataset():
+class sslDataset():
     """
     Args:
         data_dir: root directory of your dataset.
@@ -166,15 +166,15 @@ class aeDataset():
             collate_fn=self.custom_collate
         )
 
-    def test_dataloader(self) -> DataLoader:
-        return DataLoader(
-            self.val_dataset,
-            batch_size=144,
-            num_workers=self.num_workers,
-            shuffle=True,
-            pin_memory=self.pin_memory,
-            collate_fn=self.custom_collate
-        )
+    # def test_dataloader(self) -> DataLoader:
+    #     return DataLoader(
+    #         self.val_dataset,
+    #         batch_size=144,
+    #         num_workers=self.num_workers,
+    #         shuffle=True,
+    #         pin_memory=self.pin_memory,
+    #         collate_fn=self.custom_collate
+    #     )
 
 
     def custom_collate(self, batch):
