@@ -1,21 +1,15 @@
 import csv
 import numpy as np
 import torch
-from PIL import Image
-from torch.utils.data import Dataset, DataLoader
-from rasterio.enums import Resampling
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-from torchvision import transforms
-
-from logging_utils import logger
-
 import os
 import rasterio
 import math
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from logging_utils import logger
 
 
-class CustomDataset(Dataset):
+class so2satDataset(Dataset):
     def __init__(self,
                  data_dir,
                  split: str = "train",
@@ -29,10 +23,6 @@ class CustomDataset(Dataset):
 
         splits = ['train', 'valid', 'test']
 
-        # if split == 'all':
-        #     self.get_data(os.path.join(data_dir, splits[0]))
-        #     self.get_data(os.path.join(data_dir, splits[0]))
-        #     self.get_data(os.path.join(data_dir, splits[0]))
         if split not in splits:
             raise ValueError(f'split: "{split}" not in {splits}')
         else:
@@ -49,9 +39,8 @@ class CustomDataset(Dataset):
         datapoint_name = self.data[idx][2]
         try:
             with rasterio.open(file_path, 'r') as data:
-                # Read all bands/channels
                 #image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], :, :]
-                image_bands = data.read(out_shape=(data.count, 100, 100))[[3, 2, 1], :, :].astype(np.float16)
+                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
 
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
 
@@ -67,40 +56,12 @@ class CustomDataset(Dataset):
                 # reset empty parts back to 0
                 image_bands[mask_0] = 0
 
-                # pil_image = Image.fromarray((image_bands * 255).astype(np.uint8), mode="RGB")
-                # pil_image = Image.fromarray(image_bands)
                 tensor_data = torch.from_numpy(image_bands)
                 tensor_data = self.transform(tensor_data)
                 return tensor_data, label, datapoint_name
-                #return {'inputs': tensor_data, 'label': label, 'name': datapoint_name}
         except rasterio.RasterioIOError:
             print(f'Image not found at: {file_path}')
             return None, None, None
-            #return {'data': None, 'label': None, 'name': None}
-
-    # def __getitem__(self, idx):
-    #     try:
-    #         # Open the satellite data file
-    #         with rasterio.open(self.data[idx][0][0]) as lcz:
-    #             # Read all bands/channels
-    #             image_bands = lcz.read().astype(np.float32) / 35
-    #             # Convert the data to a PyTorch tensor
-    #             tensor_data = torch.from_numpy(image_bands)
-    #
-    #             with rasterio.open(self.data[idx][0][1]) as lu:
-    #                 # Read all bands/channels
-    #                 image_bands = lu.read().astype(np.float32)
-    #                 # Convert the data to a PyTorch tensor
-    #                 tensor_data = torch.cat((tensor_data, torch.from_numpy(image_bands)), dim=0)
-    #
-    #                 label = self.data[idx][1]
-    #
-    #                 return tensor_data, label
-    #     except rasterio.RasterioIOError:
-    #         # Handle the case where the image file cannot be opened
-    #         # Return None or a sentinel value to indicate the failure
-    #         return None, None
-
 
     def get_data(self):
         for city_folder in os.listdir(self.data_sub_dir):
@@ -121,52 +82,10 @@ class CustomDataset(Dataset):
                     modality = 'sen2spring'
                     file_name = datapoint_name + '_' + modality + '.tif'
                     file_path = os.path.join(self.data_sub_dir, city_folder, modality, Class_nbr, file_name)
-                    #print(f'Class {Class_nbr}')
                     if os.path.isfile(file_path):
                         self.data.append((file_path, label, datapoint_name))
                     else:
                         print(f'Could not find file: {file_path}')
-
-
-    def get_data_archive(self):
-        for city_folder in os.listdir(self.data_sub_dir):
-
-            # get list of all files in directory and its subdirectories
-            path_list = []
-            # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lcz')):
-            #     for file in files:
-            #         file_list.append(os.path.join(root, file))
-            # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/lu')):
-            #     for file in files:
-            #         file_list.append(os.path.join(root, file))
-            # for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/viirs')):
-            #     for file in files:
-            #         file_list.append(os.path.join(root, file))
-            for root, dirs, files in os.walk(os.path.join(self.data_sub_dir, f'{city_folder}/sen2spring')):
-                for file in files:
-                    path_list.append(os.path.join(root, file))
-
-            # Load the csv file that maps datapoint names to folder names
-            with open(os.path.join(self.data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    datapoint_name = row[0]
-                    label = row[2]
-
-                    # Filter the file list to include only files with the datapoint name
-                    for path in path_list:
-                        file_path = None
-                        basename = os.path.basename(path)
-                        if basename.startswith(datapoint_name) and basename.endswith('.tif'):
-                            print(f'basename: {basename}    datapoint: {datapoint_name}')
-                            print(path)
-                            file_path = path
-                            break
-                    #filtered_files = [f for f in path_list if datapoint_name in os.path.basename(f)]
-                    #print(filtered_files)
-
-                    if file_path != None:
-                        self.data.append((file_path, label, datapoint_name))
 
 
 class aeDataset():
@@ -215,13 +134,13 @@ class aeDataset():
                                              #transforms.Normalize((0.01, 0.01, 0.01), (1, 1, 1))
                                              ])
 
-        self.train_dataset = CustomDataset(
+        self.train_dataset = so2satDataset(
             self.data_dir,
             split='train',
             transform=train_transforms,
         )
 
-        self.val_dataset = CustomDataset(
+        self.val_dataset = so2satDataset(
             self.data_dir,
             split='test',
             transform=val_transforms,
