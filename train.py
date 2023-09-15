@@ -1,4 +1,4 @@
-from trainFuncs import *
+from training_loops.trainFuncs import *
 
 print('---Start Training---')
 
