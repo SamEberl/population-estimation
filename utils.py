@@ -13,7 +13,7 @@ import imageio.v2 as imageio
 import pandas as pd
 
 from tqdm import tqdm
-from dataset import sslDataset
+from ssl_dataset import sslDataset
 
 
 def display_input_output(model, input_tensor):

@@ -1,39 +1,36 @@
+import torch
 import torch.nn as nn
 from timm import create_model
-from losses import RMSELoss, RMSLELoss
+from .losses import RMSELoss, RMSLELoss
 
 
-# Define the student and teacher models
-class Student(nn.Module):
-    def __init__(self, model_name='resnet18', num_classes=10):
-        super(Student, self).__init__()
-        self.model = create_model(model_name, pretrained=True)
-        self.model.fc = nn.Linear(self.model.num_features, num_classes)
+class fixMatch(nn.Module):
+    def __init__(self,
+                 model_name='resnet18',
+                 in_channels=3,
+                 nbr_outputs=1,
+                 supervised_criterion='MSE',
+                 **kwargs):
+        super(fixMatch, self).__init__()
+        self.model = create_model(model_name, pretrained=True, num_classes=0, in_chans=in_channels)
+        self.fc = nn.Linear(self.model.num_features, nbr_outputs)
+
+        supervised_losses = {'L1': nn.L1Loss(),
+                             'MSE': nn.MSELoss(),
+                             'RMSE': RMSELoss(),
+                             'RMSLE': RMSLELoss()}
+        self.supervised_criterion = supervised_losses[supervised_criterion]
 
     def forward(self, x):
-        x = self.model(x)
-        return x
+        features = self.model(x)
+        prediction = self.fc(features).flatten()
+        prediction = torch.pow(2, prediction)
+        return prediction, features
 
-    def loss_function(self, predictions, labels):
-        # criterion = RMSLELoss()
-        criterion = RMSELoss()
-        # criterion = nn.MSELoss()
-        # criterion = nn.L1Loss()
-        loss = criterion(predictions, labels)
+    def loss_supervised(self, predictions, labels):
+        loss = self.supervised_criterion(predictions, labels)
         return loss
 
-
-class Teacher(nn.Module):
-    def __init__(self, model_name='resnet18', num_classes=10):
-        super(Teacher, self).__init__()
-        self.model = create_model(model_name, pretrained=True)
-        self.model.fc = nn.Linear(self.model.num_features, num_classes)
-
-        #self.ema = nn.Sequential()
-        #for name, module in self.model.named_children():
-        #    if name != 'head':
-        #        self.ema.add_module(name, module)
-
-    def forward(self, x):
-        x = self.model(x)
-        return x
+    def loss_unsupervised(self, student_features, teacher_features):
+        loss = 0
+        return loss
