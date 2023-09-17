@@ -1,5 +1,6 @@
 import random
 import albumentations as A
+from itertools import zip_longest
 from torch import optim
 from torch.utils.data import DataLoader
 from dataset import studentTeacherDataset
@@ -98,7 +99,8 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
     # Train the model
     for epoch in range(num_epochs):
-        for i, train_data in enumerate(train_dataloader):
+        total_val_loss = 0
+        for i, (train_data, val_data) in enumerate(zip_longest(train_dataloader, val_dataloader)):
             step_nbr = epoch * len(train_dataloader) + i
 
             train_loss = forward_pass(
@@ -123,25 +125,24 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                 print(f'Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
             scheduler.step()
 
-        total_val_loss = 0
-        for i, val_data in enumerate(val_dataloader):
-            step_nbr = epoch * len(val_dataloader) + i
+            if val_data is not None:
+                step_nbr = epoch * len(val_dataloader) + i
 
-            save_img = False
-            if step_nbr % (num_epochs * len(val_dataloader) / 10) == 0:
-                save_img = True
+                save_img = False
+                if step_nbr % (num_epochs * len(val_dataloader) / 10) == 0:
+                    save_img = True
 
-            with torch.no_grad():
-                val_loss = forward_pass(
-                    model=student_model,
-                    data=val_data,
-                    split='valid',
-                    device=device,
-                    writer=writer,
-                    supervised_loss_name=supervised_loss_name,
-                    step_nbr=step_nbr,
-                    save_img=save_img)
-                total_val_loss += val_loss
+                with torch.no_grad():
+                    val_loss = forward_pass(
+                        model=student_model,
+                        data=val_data,
+                        split='valid',
+                        device=device,
+                        writer=writer,
+                        supervised_loss_name=supervised_loss_name,
+                        step_nbr=step_nbr,
+                        save_img=save_img)
+                    total_val_loss += val_loss
 
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Val_Loss: {total_val_loss / len(val_dataloader):.3f}')
 
