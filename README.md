@@ -1,2 +1,2 @@
 # population-estimation
-Training different autoencoders to predict population from satellite images.
+Training different NN's to predict population from satellite images.
