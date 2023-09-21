@@ -6,7 +6,7 @@ model_params:
   nbr_outputs: 1
 
 data_params:
-  data_path: "/home/data/So2Sat_POP_Part1"
+  data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
   train_batch_size: 1024
   val_batch_size:  1024
   num_workers: 4
@@ -20,7 +20,7 @@ train_params:
   ema_alpha: 0.99
 
 logging_params:
-  save_dir: "/home/sameberl"
+  save_dir: "/home/sameberl/logs"
   # name: "convnextv2_atto.pth"
 
 student_transforms:
