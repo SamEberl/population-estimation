@@ -14,6 +14,7 @@ RUN pip install albumentations
 RUN pip install tensorboardX
 RUN pip install tifffile
 RUN pip install timm
+RUN pip install seaborn
 
 # Copy your training code and data into the container
 #COPY /home/sameberl/population-estimation /home/sameberl/population-estimation
