@@ -16,7 +16,7 @@ RUN pip install tifffile
 RUN pip install timm
 
 # Copy your training code and data into the container
-COPY /home/sameberl/population-estimation /home/sameberl/population-estimation
+#COPY /home/sameberl/population-estimation /home/sameberl/population-estimation
 
 # Specify the command to run when the container starts
 #CMD ["python", "train.py"]
