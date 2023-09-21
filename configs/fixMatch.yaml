@@ -1,16 +1,14 @@
 model_params:
   name: 'fixMatch'
-  model_name: 'convnextv2_atto.fcmae'  # choose from timm models
+  model_name: 'convnextv2_nano.fcmae'  # choose from timm models
   supervised_criterion: 'MSE'
   in_channels: 8
   nbr_outputs: 1
 
 data_params:
-  data_path: "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
-#  data_path: "/home/sam/Desktop/so2sat_test/tmp_train"
-#  data_path: "/home/sam/Desktop/so2sat_test/overfit_train"
-  train_batch_size: 256
-  val_batch_size:  256
+  data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
+  train_batch_size: 1024
+  val_batch_size:  1024
   num_workers: 4
 
 train_params:
@@ -22,7 +20,7 @@ train_params:
   ema_alpha: 0.99
 
 logging_params:
-  save_dir: "/home/sam/Desktop/logs/"
+  save_dir: "/home/sameberl/logs"
   # name: "convnextv2_atto.pth"
 
 student_transforms:
