@@ -20,7 +20,7 @@ train_params:
   ema_alpha: 0.99
 
 logging_params:
-  save_dir: "/home/sameberl/logs"
+  save_dir: "/home/sameberl/logs/"
   # name: "convnextv2_atto.pth"
 
 student_transforms:
