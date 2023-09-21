@@ -3,6 +3,9 @@ FROM pytorch/pytorch:latest
 
 RUN apt-get -y update
 
+# Expose the port TensorBoard will run on
+EXPOSE 8003
+
 # Install additional dependencies (e.g., if you need other libraries)
 RUN pip install numpy
 RUN pip install matplotlib
@@ -11,6 +14,7 @@ RUN pip install rasterio
 RUN pip install pandas
 RUN pip install tensorboard
 RUN pip install albumentations
+RUN pip install tensorboard
 RUN pip install tensorboardX
 RUN pip install tifffile
 RUN pip install timm
