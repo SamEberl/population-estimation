@@ -75,7 +75,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     data_ratio = len(train_dataset) / len(val_dataset)
 
     train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers)
-    val_dataloader = DataLoader(val_dataset, batch_size=(train_bs//data_ratio), shuffle=True, num_workers=num_workers)
+    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers)
 
     for param in teacher_model.model.parameters():
         param.requires_grad = False
