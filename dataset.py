@@ -76,6 +76,7 @@ class studentTeacherDataset(Dataset):
                     modality = 'sen2spring'
                     file_name = datapoint_name + '_' + modality + '.tif'
                     file_path = os.path.join(self.data_sub_dir, city_folder, modality, Class_nbr, file_name)
+                    print(file_path)
                     if os.path.isfile(file_path):
                         nbr_found += 1
                         self.data.append((file_path, label, datapoint_name))
