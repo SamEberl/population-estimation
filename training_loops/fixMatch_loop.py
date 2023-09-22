@@ -50,7 +50,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
     data_path = config["data_params"]["data_path"]
     train_bs = config["data_params"]["train_batch_size"]
-    val_bs = config["data_params"]["val_batch_size"]
+    #val_bs = config["data_params"]["val_batch_size"]
     num_workers = config["data_params"]["num_workers"]
 
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
