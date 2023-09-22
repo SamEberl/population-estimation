@@ -70,10 +70,10 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     teacher_transform = A.Compose(teacher_transfroms_list)
 
     train_dataset = studentTeacherDataset(data_path, split='train', student_transform=student_transform, teacher_transform=teacher_transform)
-    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers)
 
     val_dataset = studentTeacherDataset(data_path, split='test', student_transform=student_transform, teacher_transform=teacher_transform)
-    val_dataloader = DataLoader(val_dataset, batch_size=val_bs, shuffle=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=val_bs, shuffle=True, num_workers=num_workers)
 
     for param in teacher_model.model.parameters():
         param.requires_grad = False
