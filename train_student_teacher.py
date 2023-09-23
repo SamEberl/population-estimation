@@ -1,5 +1,6 @@
 from models import *
 from training_loops.fixMatch_loop import *
+import cProfile
 
 print('---Student Teacher Model---')
 
@@ -18,4 +19,4 @@ teacher_model = ssl_models[config['model_params']['name']](**config['model_param
 # teacher_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], config['logging_params']['name'])))
 
 print('---Training model---')
-train_fix_match(config, log_dir, student_model, teacher_model)
+cProfile.run("train_fix_match(config, log_dir, student_model, teacher_model)")
