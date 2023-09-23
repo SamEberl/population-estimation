@@ -29,10 +29,9 @@ def forward_pass(model,
 
     loss = model.loss_supervised(student_preds, labels)
 
-    with torch.no_grad():
-        writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', loss.item(), step_nbr)
-        loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-        writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
+    writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', loss.item(), step_nbr)
+    loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
     if save_img:
         sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
@@ -82,8 +81,8 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
     data_ratio = len(train_dataset) / len(val_dataset)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers)
-    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers)
+    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers, pin_memory=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers, pin_memory=True)
 
     for param in teacher_model.model.parameters():
         param.requires_grad = False
@@ -128,6 +127,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
             optimizer.zero_grad()
             train_loss.backward()
             optimizer.step()
+            scheduler.step()
 
             # Update teacher model using exponential moving average
             # for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
@@ -135,7 +135,6 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
             if i % 10 == 0:
                 print(f'\n Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
-            scheduler.step()
 
             val_data = next(val_generator)
             if val_data is not None:

@@ -92,17 +92,10 @@ class studentTeacherDataset(Dataset):
                 image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
                 # Set empty parts to mean to avoid skewing the normalization
-                mask_0 = (image_bands == 0)
-                image_bands[mask_0] = image_bands.mean()
+                image_bands[(image_bands == 0)] = image_bands.mean()
                 # normalize channelwise
-                image_bands[0, :, :] = (image_bands[0, :, :] - image_bands[0, :, :].min()) / (
-                            image_bands[0, :, :].max() - image_bands[0, :, :].min())
-                image_bands[1, :, :] = (image_bands[1, :, :] - image_bands[1, :, :].min()) / (
-                            image_bands[1, :, :].max() - image_bands[1, :, :].min())
-                image_bands[2, :, :] = (image_bands[2, :, :] - image_bands[2, :, :].min()) / (
-                            image_bands[2, :, :].max() - image_bands[2, :, :].min())
-                # reset empty parts back to 0
-                image_bands[mask_0] = 0
+                image_bands -= image_bands.min(axis=(1, 2), keepdims=True)
+                image_bands /= (image_bands.max(axis=(1, 2), keepdims=True) - image_bands.min(axis=(1, 2), keepdims=True))
                 #image_bands = torch.from_numpy(image_bands)
                 return image_bands
         except rasterio.RasterioIOError:
