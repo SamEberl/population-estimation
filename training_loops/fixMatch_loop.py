@@ -1,6 +1,5 @@
 import random
 import albumentations as A
-from itertools import zip_longest
 from torch import optim
 from torch.utils.data import DataLoader
 from dataset import studentTeacherDataset
@@ -42,6 +41,15 @@ def forward_pass(model,
                                            student_preds.cpu().flatten())
 
     return loss
+
+
+def batch_generator(dataloader):
+    dataloader_iter = iter(dataloader)
+    while True:
+        try:
+            yield next(dataloader_iter)
+        except StopIteration:
+            yield None
 
 
 def train_fix_match(config, log_dir, student_model, teacher_model):
@@ -101,8 +109,9 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
     # Train the model
     for epoch in range(num_epochs):
+        val_generator = batch_generator(val_dataloader)
         total_val_loss = 0
-        for i, (train_data, val_data) in enumerate(zip_longest(train_dataloader, val_dataloader)):
+        for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader) + i
 
             train_loss = forward_pass(
@@ -127,6 +136,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                 print(f'Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
             scheduler.step()
 
+            val_data = next(val_generator)
             if val_data is not None:
                 step_nbr = epoch * len(val_dataloader) + i
 
