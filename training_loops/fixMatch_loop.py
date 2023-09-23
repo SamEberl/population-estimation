@@ -106,6 +106,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     model_yaml_str = model_yaml_str.replace('false ', '<br>')
     writer.add_text('Model Specs', model_yaml_str, 0)
 
+    pbar = tqdm(total=config['train_params']['max_epochs'], ncols=120)
 
     # Train the model
     for epoch in range(num_epochs):
@@ -133,7 +134,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
             #     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
             if i % 10 == 0:
-                print(f'Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
+                print(f'\n Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
             scheduler.step()
 
             val_data = next(val_generator)
@@ -156,6 +157,9 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
+            pbar.set_description(f"Train Loss: {train_loss.item():.4f} | Val Loss: {val_loss.item():.4f}")
+            pbar.update(1)
+
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Val_Loss: {total_val_loss / len(val_dataloader):.3f}')
 
         # if epoch % 10 == 0:
@@ -165,6 +169,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
     # Close the SummaryWriter after training
     writer.close()
+    pbar.close()
 
     # TODO: give each model unique name
     torch.save(student_model.state_dict(),
