@@ -108,8 +108,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     pbar = tqdm(total=config['train_params']['max_epochs'], ncols=120)
 
     # Train the model
-    # for epoch in range(num_epochs):
-    for epoch in range(1):
+    for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
         total_val_loss = 0
         for i, train_data in enumerate(train_dataloader):
