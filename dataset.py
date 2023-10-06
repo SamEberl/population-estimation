@@ -13,9 +13,9 @@ class studentTeacherDataset(Dataset):
     def __init__(self,
                  data_dir,
                  split: str = "train",
-                 use_teacher = False,
-                 student_transform = None,
-                 teacher_transform = None):
+                 use_teacher=False,
+                 student_transform=None,
+                 teacher_transform=None):
         self.student_transform = student_transform
         self.teacher_transform = teacher_transform
         self.split = split
@@ -56,7 +56,7 @@ class studentTeacherDataset(Dataset):
             teacher_data = self.teacher_transform(image=data)
         else:
             teacher_data = None
-        return student_data, teacher_data, label, datapoint_name
+        return (student_data, teacher_data, label, datapoint_name)
 
 
     def get_data_paths(self):
