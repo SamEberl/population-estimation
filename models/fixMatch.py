@@ -16,8 +16,6 @@ class fixMatch(nn.Module):
         self.model = create_model(model_name, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc = nn.Linear(self.model.num_features, nbr_outputs)
 
-        print(f'drop_rate is set to: {drop_rate}')
-
         supervised_losses = {'L1': nn.L1Loss(),
                              'MSE': nn.MSELoss(),
                              'RMSE': RMSELoss(),
