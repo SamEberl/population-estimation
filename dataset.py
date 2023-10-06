@@ -55,8 +55,8 @@ class studentTeacherDataset(Dataset):
         if self.use_teacher == True:
             teacher_data = self.teacher_transform(image=data)
         else:
-            teacher_data = None
-        return (student_data, teacher_data, label, datapoint_name)
+            teacher_data = 0
+        return student_data, teacher_data, label, datapoint_name
 
 
     def get_data_paths(self):
