@@ -34,8 +34,8 @@ def forward_pass(model,
     writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
     if save_img:
-        sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
-        log_images_scores_to_tensorboard(writer, step_nbr, student_inputs[sample_nbr, :3, :, :])
+        #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
+        log_images_scores_to_tensorboard(writer, step_nbr, student_inputs[0, :3, :, :])
         log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
                                            student_preds.cpu().flatten())
 
