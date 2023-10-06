@@ -10,7 +10,9 @@ from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
-def forward_pass(model,
+def forward_pass(student_model,
+                 teacher_model,
+                 use_teacher,
                  data,
                  split,
                  device,
@@ -18,25 +20,31 @@ def forward_pass(model,
                  supervised_loss_name,
                  step_nbr,
                  save_img=False):
-    student_inputs, labels, datapoint_name = data
+    student_inputs, teacher_inputs, labels, datapoint_name = data
     student_inputs = student_inputs.to(device)
-    # teacher_inputs = teacher_transform(inputs).to(device)
     labels = labels.to(device)
-
     if split == 'train':
-        model.train()
+        student_model.train()
     else:
-        model.eval()
+        student_model.eval()
 
-    student_preds, student_features = model(student_inputs)
-    # with torch.no_grad():
-    #     teacher_outputs = teacher_model(teacher_inputs)
+    student_preds, student_features = student_model(student_inputs)
+    supervised_loss = student_model.loss_supervised(student_preds, labels)
 
-    loss = model.loss_supervised(student_preds, labels)
-
-    writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', loss.item(), step_nbr)
+    writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
     loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
     writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
+
+    unsupervised_loss = 0
+    if use_teacher and split == 'train':
+        teacher_inputs = teacher_inputs.to(device)
+        teacher_preds, teacher_features = teacher_model(teacher_inputs)
+        unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
+        #TODO scale unsupervised_loss to be similar to supervised_loss
+
+        writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
+
+    loss = supervised_loss + unsupervised_loss
 
     if save_img:
         #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
@@ -68,6 +76,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
     supervised_loss_name = config['model_params']['supervised_criterion']
+    use_teacher = config['train_params']['use_teacher']
 
     student_transforms_list = []
     teacher_transfroms_list = []
@@ -81,14 +90,18 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     student_transform = A.Compose(student_transforms_list)
     teacher_transform = A.Compose(teacher_transfroms_list)
 
-    train_dataset = studentTeacherDataset(data_path, split='train', student_transform=student_transform, teacher_transform=teacher_transform)
-    val_dataset = studentTeacherDataset(data_path, split='test', student_transform=student_transform, teacher_transform=teacher_transform)
+    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
+    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
 
+    # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
 
     train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers, pin_memory=True)
     val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers, pin_memory=True)
 
+    # Remove dropout from teacher
+    teacher_model.eval()
+    # Make sure no grad is calculated for teacher
     for param in teacher_model.model.parameters():
         param.requires_grad = False
 
@@ -120,7 +133,9 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
             step_nbr = epoch * len(train_dataloader) + i
 
             train_loss = forward_pass(
-                model=student_model,
+                student_model=student_model,
+                teacher_model=teacher_model,
+                use_teacher=use_teacher,
                 data=train_data,
                 split='train',
                 device=device,
@@ -151,7 +166,9 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
 
                 with torch.no_grad():
                     val_loss = forward_pass(
-                        model=student_model,
+                        student_model=student_model,
+                        teacher_model=None,
+                        use_teacher=False,
                         data=val_data,
                         split='valid',
                         device=device,

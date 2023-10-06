@@ -8,15 +8,14 @@ import math
 from torch.utils.data import Dataset
 from logging_utils import logger
 
-import albumentations as A
-
 
 class studentTeacherDataset(Dataset):
     def __init__(self,
                  data_dir,
                  split: str = "train",
-                 student_transform=None,
-                 teacher_transform=None):
+                 use_teacher = False,
+                 student_transform = None,
+                 teacher_transform = None):
         self.student_transform = student_transform
         self.teacher_transform = teacher_transform
         self.split = split
@@ -24,6 +23,7 @@ class studentTeacherDataset(Dataset):
         self.data = []
         self.clip_min = 0
         self.clip_max = 4000
+        self.use_teacher = use_teacher
 
         splits = ['train', 'valid', 'test']
         if split not in splits:
@@ -48,12 +48,15 @@ class studentTeacherDataset(Dataset):
 
         # tensor_data = torch.cat((sen2spring_rgb, lu_tensor, viirs_tensor), dim=0)
         # data = np.concatenate((sen2spring_rgb, lu, viirs))
-        #transformed_data = self.student_transform(image=data)["image"]
+        # transformed_data = self.student_transform(image=data)["image"]
         # print(f'tens: {tensor_data.shape}')
 
         student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
-        #teacher_data = self.teacher_transform(image=data)
-        return student_data, label, datapoint_name
+        if self.use_teacher == True:
+            teacher_data = self.teacher_transform(image=data)
+        else:
+            teacher_data = None
+        return student_data, teacher_data, label, datapoint_name
 
 
     def get_data_paths(self):
