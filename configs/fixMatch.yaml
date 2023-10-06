@@ -14,10 +14,11 @@ data_params:
 train_params:
   LR: 0.00005
   max_epochs: 50
-  L2_reg: 0.005
+  L2_reg: 0.01
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
+  drop_rate: 0.3
 
 logging_params:
   save_dir: "/home/sameberl/logs/"

@@ -23,6 +23,11 @@ def forward_pass(model,
     # teacher_inputs = teacher_transform(inputs).to(device)
     labels = labels.to(device)
 
+    if split == 'train':
+        model.train()
+    else:
+        model.eval()
+
     student_preds, student_features = model(student_inputs)
     # with torch.no_grad():
     #     teacher_outputs = teacher_model(teacher_inputs)
