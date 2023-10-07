@@ -15,10 +15,11 @@ if torch.cuda.is_available():
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
 teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
-
 # Load previous checkpoint
 # student_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], config['logging_params']['name'])))
 # teacher_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], config['logging_params']['name'])))
+# Make sure no grad is calculated for teacher & remove things like dropout
+teacher_model.eval()
 
 log_dir = config['save_dirs']['log_save_dir']
 current_datetime = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")

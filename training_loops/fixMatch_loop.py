@@ -110,12 +110,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
-    supervised_loss_name = config['model_params']['supervised_criterion']
     use_teacher = config['train_params']['use_teacher']
-    hparam_search = config['hparam_search']['active']
-
-    # Make sure no grad is calculated for teacher & remove things like dropout
-    teacher_model.eval()
 
     optimizer = optim.Adam(student_model.parameters(),
                            lr=config['train_params']['LR'],
@@ -198,11 +193,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             pbar.update(1)
 
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
-
-        # if epoch % 10 == 0:
-        #     torch.save(reg_model.state_dict(),
-        #                os.path.join(reg_config['save_dirs']['log_save_dir'],
-        #                             'ep_' + str(epoch) + '_' + reg_config['save_dirs']['name']))
 
     # Close the SummaryWriter after training
     writer.close()
