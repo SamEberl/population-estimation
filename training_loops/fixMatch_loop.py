@@ -65,11 +65,12 @@ def batch_generator(dataloader):
             yield None
 
 
-def train_fix_match(config, log_dir, student_model, teacher_model):
-    current_datetime = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    print(f'starting training at {current_datetime}')
+def train_fix_match(config, writer, student_model, teacher_model):
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    student_model = student_model.to(device)
+    teacher_model = teacher_model.to(device)
 
     data_path = config["data_params"]["data_path"]
     train_bs = config["data_params"]["train_batch_size"]
@@ -118,10 +119,6 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                            betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                            weight_decay=config['train_params']['L2_reg'] * 2)
     scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
-
-    # Create a SummaryWriter for TensorBoard
-    writer = SummaryWriter(
-        logdir=log_dir + config['model_params']['name'] + '_' + datetime.now().strftime("%Y%m%d_%H%M%S"))
 
     print(student_model.model.default_cfg)
     param_yaml_str = yaml.dump(config, default_flow_style=False)
@@ -186,7 +183,7 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
-            pbar.set_description(f"{i} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
+            pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
 
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
@@ -199,12 +196,3 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     # Close the SummaryWriter after training
     writer.close()
     pbar.close()
-
-    # TODO: give each model unique name
-    save_path = os.path.join(config['logging_params']['save_dir'],
-                             f"{config['model_params']['model_name']}_{current_datetime}.pt")
-    print(f'saving model under {save_path}')
-    torch.save(student_model.state_dict(), save_path)
-
-
-
