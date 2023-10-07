@@ -182,10 +182,12 @@ def train_fix_match(config, writer, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
-                if i % config['hparam_search']['nbr_batches'] == 0:
+                if i+1 % config['hparam_search']['nbr_batches'] == 0:
                     hparam_name = config['hparam_search']['hparam_name']
-                    writer.add_scalar(f'Search Hparam: {hparam_name} | Train-Loss', total_train_loss/i, config['train_params']['LR'])
-                    writer.add_scalar(f'Search Hparam: {hparam_name} | Train-Loss', total_val_loss/i, config['train_params']['LR'])
+                    writer.add_scalar(f'Search Hparam: {hparam_name} | Train-Loss', total_train_loss/i+1, config['train_params']['LR'])
+                    writer.add_scalar(f'Search Hparam: {hparam_name} | Val-Loss', total_val_loss/i+1, config['train_params']['LR'])
+                    print(f"Search Hparam: {hparam_name} | Train-Loss: {total_train_loss/i+1} | Hparam: {config['train_params']['LR']}")
+                    print(f"Search Hparam: {hparam_name} | Val-Loss: {total_val_loss/i+1} | Hparam: {config['train_params']['LR']}")
                     return
 
             pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
