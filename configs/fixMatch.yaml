@@ -4,7 +4,7 @@ model_params:
   supervised_criterion: 'MSE'
   in_channels: 8
   nbr_outputs: 1
-  drop_rate: 0.3
+  drop_rate: 0.4
 
 data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
@@ -13,9 +13,9 @@ data_params:
   num_workers: 16
 
 train_params:
-  LR: 0.00005
-  max_epochs: 50
-  L2_reg: 0.01
+  LR: 0.00001
+  max_epochs: 1
+  L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99

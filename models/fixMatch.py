@@ -15,6 +15,7 @@ class fixMatch(nn.Module):
         super(fixMatch, self).__init__()
         self.model = create_model(model_name, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc = nn.Linear(self.model.num_features, nbr_outputs)
+        self.unsupervised_factor = 1_000_000 / self.model.num_features
 
         supervised_losses = {'L1': nn.L1Loss(),
                              'MSE': nn.MSELoss(),
@@ -35,5 +36,5 @@ class fixMatch(nn.Module):
         return loss
 
     def loss_unsupervised(self, student_features, teacher_features):
-        loss = 0
+        loss = 0 * self.unsupervised_factor
         return loss

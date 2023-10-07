@@ -1,4 +1,5 @@
 import random
+import datetime
 import albumentations as A
 from torch import optim
 from torch.utils.data import DataLoader
@@ -65,6 +66,8 @@ def batch_generator(dataloader):
 
 
 def train_fix_match(config, log_dir, student_model, teacher_model):
+    current_datetime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    print(f'starting training at {current_datetime}')
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -193,8 +196,10 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     pbar.close()
 
     # TODO: give each model unique name
-    torch.save(student_model.state_dict(),
-               os.path.join(config['logging_params']['save_dir'], config['model_params']['model_name']))
+    save_path = os.path.join(config['logging_params']['save_dir'],
+                             f"{config['model_params']['model_name']}_{current_datetime}.pt")
+    print(f'saving model under {save_path}')
+    torch.save(student_model.state_dict(), save_path)
 
 
 
