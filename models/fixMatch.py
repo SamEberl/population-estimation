@@ -25,8 +25,6 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
-        print(f'features: {features}')
-        print(f'shape: {features.shape}')
         prediction = self.fc(features).flatten()
         prediction = torch.pow(2, prediction)
         return prediction, features
