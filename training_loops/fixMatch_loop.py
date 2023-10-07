@@ -161,8 +161,8 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
             # for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
             #     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
-            if i % 10 == 0:
-                print(f'\n Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
+            # if i % 10 == 0:
+            #     print(f'\n Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
 
             val_data = next(val_generator)
             if val_data is not None:
@@ -186,10 +186,10 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
-            pbar.set_description(f"Train Loss: {train_loss.item():.4f} | Val Loss: {val_loss.item():.4f}")
+            pbar.set_description(f"{i} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
 
-        print(f'Epoch: [{epoch + 1}/{num_epochs}] Val_Loss: {total_val_loss / len(val_dataloader):.3f}')
+        print(f'Epoch: [{epoch + 1}/{num_epochs}] Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
 
         # if epoch % 10 == 0:
         #     torch.save(reg_model.state_dict(),
