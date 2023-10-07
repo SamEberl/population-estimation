@@ -26,9 +26,9 @@ hparam_search:
   active: True
   hparam_name: 'LR'
   lowest: 0.000001
-  highest: 0.001
-  nbr_values: 10  # Evaluates this many values by splitting the range into equal parts
-  nbr_batches: 10 # Number of batches after which the evaluation is done
+  highest: 0.01
+  nbr_values: 6  # Evaluates this many values by splitting the range into equal parts
+  nbr_batches: 15 # Number of batches after which the evaluation is done
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
