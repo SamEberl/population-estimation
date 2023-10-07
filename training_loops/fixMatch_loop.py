@@ -103,12 +103,12 @@ def get_dataloader(config, student_transform, teacher_transform):
     data_ratio = len(train_dataset) / len(val_dataset)
 
     shuffle = True
-    # train_sampler = None
-    # val_sampler = None
-    # if config['hparam_search']['active']:
-    #     shuffle = True
-    #     train_sampler = SequentialSampler(train_dataset)
-    #     val_sampler = SequentialSampler(val_dataset)
+    train_sampler = None
+    val_sampler = None
+    if config['hparam_search']['active']:
+        shuffle = False
+        train_sampler = SequentialSampler(train_dataset)
+        val_sampler = SequentialSampler(val_dataset)
 
     train_dataloader = DataLoader(train_dataset,
                                   batch_size=train_bs,
