@@ -186,8 +186,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
                 if config['hparam_search']['active'] and ((i+1) % config['hparam_search']['nbr_batches']) == 0:
                     hparam_name = config['hparam_search']['hparam_name']
-                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Train-Loss', (total_train_loss/i+1, config['train_params']['LR']))
-                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', (total_val_loss/i+1, config['train_params']['LR']))
+                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Train-Loss', total_train_loss/i+1, config['train_params']['LR'])
+                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', total_val_loss/i+1, config['train_params']['LR'])
                     print(f"Search Hparam: {hparam_name} | Train-Loss: {total_train_loss/i+1} | Hparam: {config['train_params']['LR']}")
                     print(f"Search Hparam: {hparam_name} | Val-Loss: {total_val_loss/i+1} | Hparam: {config['train_params']['LR']}")
                     return
