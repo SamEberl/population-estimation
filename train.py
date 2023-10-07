@@ -33,7 +33,9 @@ if config['hparam_search']['active']:
     lowest = config['hparam_search']['lowest']
     highest = config['hparam_search']['highest']
     param_list = np.linspace(lowest, highest, n)
+    print(param_list)
     decimal_places = count_decimal_places(lowest) + 1
+    print(decimal_places)
     rounded_param_list = [round(value, decimal_places) for value in param_list]
     for i in range(n):
         student_model_temp = student_model
