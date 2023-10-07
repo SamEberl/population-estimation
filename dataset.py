@@ -85,7 +85,7 @@ class studentTeacherDataset(Dataset):
                     else:
                         nbr_not_found += 1
                         # print(f'Could not find file: {file_path}')
-        print(f'In: {self.data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
+        # print(f'In: {self.data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
 
 
     def generate_rgb_img(self, file_path):
