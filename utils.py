@@ -231,11 +231,11 @@ def count_decimal_places(number):
 
     # Check if there is a decimal point in the string
     if '.' in number_str:
-        # Split the string into integer and decimal parts
-        integer_part, decimal_part = number_str.split('.')
+        # Find the position of the decimal point
+        decimal_index = number_str.index('.')
 
-        # Count the number of characters in the decimal part
-        return len(decimal_part)
+        # Count the number of digits after the decimal point
+        return len(number_str) - decimal_index - 1
     else:
         # If there is no decimal point, return 0
         return 0
