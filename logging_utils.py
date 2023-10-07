@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def log_images_scores_to_tensorboard(writer, step_nbr, input):
     # Log input image as a grid to TensorBoard
-    writer.add_images(f'Images_Panel', input, global_step=step_nbr, dataformats='CHW')
+    writer.add_images(f'Panel - Images', input, global_step=step_nbr, dataformats='CHW')
 
 # def log_regression_plot_to_tensorboard(writer, step_nbr, labels, predictions):
 #     fig, ax = plt.subplots()
@@ -38,7 +38,7 @@ def log_regression_plot_to_tensorboard(writer, step_nbr, labels, predictions):
     ax.set_ylabel('Predicted Score')
     ax.set_title(f'Logarithmic Regression Plot - Epoch {step_nbr}')
 
-    writer.add_figure('Logarithmic_Regression_Plot', fig, global_step=step_nbr)
+    writer.add_figure('Panel - Logarithmic_Regression_Plot', fig, global_step=step_nbr)
     plt.close()
 
 

@@ -1,16 +1,46 @@
-from training_loops.trainFuncs import *
+from models import *
+from training_loops.fixMatch_loop import *
 
-print('---Start Training---')
+print('--- Loading model ---')
 
-ae_config = parse_yaml('configs/aeResNet.yaml')
-reg_config = parse_yaml('configs/regBasic.yaml')
+config = parse_yaml('configs/fixMatch.yaml')
 
-log_dir = ae_config['logging_params']['save_dir']
+seed = config['train_params']['seed']
+np.random.seed(seed)
+torch.manual_seed(seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-ssl_model = ssl_models[ae_config['model_params']['name']](**ae_config['model_params']).to(device)
-model_path = os.path.join(ae_config['logging_params']['save_dir'], ae_config['logging_params']['name'])
-ssl_model.load_state_dict(torch.load(model_path))
+# Create model
+student_model = ssl_models[config['model_params']['architecture']](**config['model_params'])
+teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params'])
 
-print('---Training Regression model---')
-train_reg(reg_config, log_dir, ssl_model)
+# Load previous checkpoint
+# student_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], config['logging_params']['name'])))
+# teacher_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], config['logging_params']['name'])))
+
+log_dir = config['save_dirs']['log_save_dir']
+current_datetime = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
+print(f'--- Start training at {current_datetime} ---')
+
+# Create a SummaryWriter for TensorBoard
+writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
+
+if config['hparam_search']['active']:
+    hparam_name = config['hparam_search']['hparam_name']
+    n = config['hparam_search']['nbr_values']
+    lowest = config['hparam_search']['lowest']
+    highest = config['hparam_search']['highest']
+    param_list = np.linspace(lowest, highest, n)
+    for i in range(n):
+        student_model_temp = student_model
+        teacher_model_temp = teacher_model
+        config['train_params'][hparam_name] = param_list[i]
+        train_fix_match(config, writer, student_model_temp, teacher_model_temp)
+else:
+    train_fix_match(config, writer, student_model, teacher_model)
+
+    save_path = os.path.join(config['save_dirs']['model_save_dir'],
+                             f"{config['model_params']['pretrained_weights']}_{current_datetime}.pt")
+    print(f'Saving model under {save_path}')
+    torch.save(student_model.state_dict(), save_path)

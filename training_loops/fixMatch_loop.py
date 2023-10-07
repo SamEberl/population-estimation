@@ -49,7 +49,7 @@ def forward_pass(student_model,
 
     if save_img:
         #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
-        log_images_scores_to_tensorboard(writer, step_nbr, student_inputs[0, :3, :, :])
+        writer.add_images(f'Panel - Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
         log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
                                            student_preds.cpu().flatten())
 
@@ -133,6 +133,7 @@ def train_fix_match(config, writer, student_model, teacher_model):
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
+        total_train_loss = 0
         total_val_loss = 0
         for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader) + i
@@ -147,6 +148,7 @@ def train_fix_match(config, writer, student_model, teacher_model):
                 writer=writer,
                 supervised_loss_name=supervised_loss_name,
                 step_nbr=step_nbr)
+            total_train_loss += total_train_loss
 
             # Backward pass and optimization
             optimizer.zero_grad()
@@ -157,9 +159,6 @@ def train_fix_match(config, writer, student_model, teacher_model):
             # Update teacher model using exponential moving average
             # for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
             #     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
-
-            # if i % 10 == 0:
-            #     print(f'\n Epoch: [{epoch + 1}/{num_epochs}] - {i} - Train_Loss: {train_loss.item():.3f}')
 
             val_data = next(val_generator)
             if val_data is not None:
@@ -183,6 +182,12 @@ def train_fix_match(config, writer, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
+                if i % config['hparam_search']['nbr_batches'] == 0:
+                    hparam_name = config['hparam_search']['hparam_name']
+                    writer.add_scalar(f'Search Hparam: {hparam_name} | Train-Loss', total_train_loss/i, config['train_params']['LR'])
+                    writer.add_scalar(f'Search Hparam: {hparam_name} | Train-Loss', total_val_loss/i, config['train_params']['LR'])
+                    return
+
             pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
 
@@ -190,8 +195,8 @@ def train_fix_match(config, writer, student_model, teacher_model):
 
         # if epoch % 10 == 0:
         #     torch.save(reg_model.state_dict(),
-        #                os.path.join(reg_config['logging_params']['save_dir'],
-        #                             'ep_' + str(epoch) + '_' + reg_config['logging_params']['name']))
+        #                os.path.join(reg_config['save_dirs']['log_save_dir'],
+        #                             'ep_' + str(epoch) + '_' + reg_config['save_dirs']['name']))
 
     # Close the SummaryWriter after training
     writer.close()

@@ -6,14 +6,14 @@ from .losses import RMSELoss, RMSLELoss
 
 class fixMatch(nn.Module):
     def __init__(self,
-                 model_name='resnet18',
+                 pretrained_weights='resnet18',
                  in_channels=3,
                  nbr_outputs=1,
                  supervised_criterion='MSE',
                  drop_rate=0,
                  **kwargs):
         super(fixMatch, self).__init__()
-        self.model = create_model(model_name, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
+        self.model = create_model(pretrained_weights, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc = nn.Linear(self.model.num_features, nbr_outputs)
         self.unsupervised_factor = 1_000_000 / self.model.num_features
 
