@@ -45,6 +45,8 @@ if config['hparam_search']['active']:
     param_list = np.geomspace(lowest, highest, n)
     decimal_places = count_decimal_places(lowest) + 1
     rounded_param_list = [round(value, decimal_places) for value in param_list]
+    rounded_param_list = [5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05,
+                          5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05]
     print(f'param_list: {rounded_param_list}')
     for i in range(n):
         student_model_temp = student_model
