@@ -93,6 +93,7 @@ def get_dataloader(config, student_transform, teacher_transform):
     #val_bs = config["data_params"]["val_batch_size"]
     num_workers = config["data_params"]["num_workers"]
     use_teacher = config['train_params']['use_teacher']
+    seed = config['train_params']['seed']
 
     train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
     val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
@@ -100,8 +101,10 @@ def get_dataloader(config, student_transform, teacher_transform):
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers, pin_memory=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers, pin_memory=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers,
+                                  pin_memory=True, worker_init_fn=seed)
+    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers,
+                                pin_memory=True, worker_init_fn=seed)
 
     return train_dataloader, val_dataloader
 
