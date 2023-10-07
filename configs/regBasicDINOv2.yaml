@@ -5,21 +5,24 @@ model_params:
 
 
 data_params:
-  data_path: "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1/tmp_train"
+  data_path: "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
+#  data_path: "/home/sam/Desktop/test_imgs"
 #  data_path: "/home/sam/Desktop/DLR/Data/Data_testing/AE"
-  train_batch_size: 512
-  val_batch_size:  512
+  train_batch_size: 1024
+  val_batch_size:  1024
   num_workers: 4
 
 
 train_params:
-  LR: 0.005
-  max_epochs: 10
-  L2_reg: 0.001
+#  LR: 0.005
+  LR: 0.003
+  max_epochs: 5
+#  L2_reg: 0.001
+  L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
 
 logging_params:
-  save_dir: "/home/sam/Desktop/DLR/Data/Data_100GB/trained_models/"
+  save_dir: "/home/sam/Desktop/logs/"
   name: "regBasicDINOv2.pth"
 

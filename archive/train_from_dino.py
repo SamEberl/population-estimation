@@ -1,8 +1,8 @@
-from trainFuncs import *
+from training_loops.trainFuncs import *
 import tifffile
 import torchvision.transforms as T
 from logging_utils import logger
-import multiprocessing
+
 
 def load_image(img: str) -> torch.Tensor:
     """
@@ -22,7 +22,7 @@ def load_image(img: str) -> torch.Tensor:
 
 
 logger.info('---Start Training---')
-reg_config = parse_yaml('configs/regBasicDINOv2.yaml')
+reg_config = parse_yaml('../configs/regBasicDINOv2.yaml')
 log_dir = reg_config['logging_params']['save_dir']
 
 
