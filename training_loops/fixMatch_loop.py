@@ -13,18 +13,14 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 def forward_pass(student_model,
                  teacher_model,
-                 use_teacher,
-                 data,
+                 student_inputs,
+                 teacher_inputs,
+                 labels,
+                 config,
                  split,
-                 device,
                  writer,
-                 supervised_loss_name,
                  step_nbr,
-                 hparam_search,
                  save_img=False):
-    student_inputs, teacher_inputs, labels, datapoint_name = data
-    student_inputs = student_inputs.to(device)
-    labels = labels.to(device)
     if split == 'train':
         student_model.train()
     else:
@@ -33,14 +29,15 @@ def forward_pass(student_model,
     student_preds, student_features = student_model(student_inputs)
     supervised_loss = student_model.loss_supervised(student_preds, labels)
 
+    hparam_search = config['hparam_search']['active']
     if not hparam_search:
+        supervised_loss_name = config['model_params']['supervised_criterion']
         writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
         loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
         writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
     unsupervised_loss = 0
-    if use_teacher and split == 'train':
-        teacher_inputs = teacher_inputs.to(device)
+    if split == 'train' and config['train_params']['use_teacher']:
         teacher_preds, teacher_features = teacher_model(teacher_inputs)
         unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
         #TODO scale unsupervised_loss to be similar to supervised_loss
@@ -138,16 +135,21 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader) + i
 
+            student_inputs, teacher_inputs, labels, datapoint_name = train_data
+            student_inputs = student_inputs.to(device)
+            if use_teacher:
+                teacher_inputs = teacher_inputs.to(device)
+            labels = labels.to(device)
+
             train_loss = forward_pass(
                 student_model=student_model,
                 teacher_model=teacher_model,
-                use_teacher=use_teacher,
-                data=train_data,
+                student_inputs=student_inputs,
+                teacher_inputs=teacher_inputs,
+                labels=labels,
+                config=config,
                 split='train',
-                device=device,
                 writer=writer,
-                supervised_loss_name=supervised_loss_name,
-                hparam_search=hparam_search,
                 step_nbr=step_nbr)
             total_train_loss += train_loss
 
@@ -169,19 +171,21 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 if step_nbr % (num_epochs * len(val_dataloader) / 10) == 0:
                     save_img = True
 
+                student_inputs, teacher_inputs, labels, datapoint_name = val_data
+                student_inputs = student_inputs.to(device)
+                labels = labels.to(device)
+
                 with torch.no_grad():
                     val_loss = forward_pass(
-                        student_model=student_model,
-                        teacher_model=None,
-                        use_teacher=False,
-                        data=val_data,
-                        split='valid',
-                        device=device,
-                        writer=writer,
-                        supervised_loss_name=supervised_loss_name,
-                        step_nbr=step_nbr,
-                        hparam_search=hparam_search,
-                        save_img=save_img)
+                            student_model=student_model,
+                            teacher_model=teacher_model,
+                            student_inputs=student_inputs,
+                            teacher_inputs=teacher_inputs,
+                            labels=labels,
+                            config=config,
+                            split='valid',
+                            writer=writer,
+                            step_nbr=step_nbr)
                     total_val_loss += val_loss
 
                 if config['hparam_search']['active'] and ((i+1) % config['hparam_search']['nbr_batches']) == 0:
