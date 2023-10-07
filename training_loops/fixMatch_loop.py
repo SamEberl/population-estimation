@@ -148,7 +148,7 @@ def train_fix_match(config, writer, student_model, teacher_model):
                 writer=writer,
                 supervised_loss_name=supervised_loss_name,
                 step_nbr=step_nbr)
-            total_train_loss += total_train_loss
+            total_train_loss += train_loss
 
             # Backward pass and optimization
             optimizer.zero_grad()
@@ -183,7 +183,6 @@ def train_fix_match(config, writer, student_model, teacher_model):
                     total_val_loss += val_loss
 
                 print(config['hparam_search']['nbr_batches'])
-                print(i+1 % config['hparam_search']['nbr_batches'] == 0)
                 if ((i+1) % config['hparam_search']['nbr_batches']) == 0:
                     hparam_name = config['hparam_search']['hparam_name']
                     writer.add_scalar(f'Hparam-{hparam_name}-Train-Loss', total_train_loss/i+1, config['train_params']['LR'])
