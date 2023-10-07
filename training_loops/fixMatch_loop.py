@@ -116,14 +116,14 @@ def get_dataloader(config, student_transform, teacher_transform):
                                   sampler=train_sampler,
                                   num_workers=num_workers,
                                   pin_memory=True,
-                                  worker_init_fn=torch.manual_seed(seed))
+                                  )
     val_dataloader = DataLoader(val_dataset,
                                 batch_size=int(train_bs//data_ratio),
                                 shuffle=shuffle,
                                 sampler=val_sampler,
                                 num_workers=num_workers,
                                 pin_memory=True,
-                                worker_init_fn=torch.manual_seed(seed))
+                                )
 
     return train_dataloader, val_dataloader
 
