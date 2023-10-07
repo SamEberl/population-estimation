@@ -1,3 +1,4 @@
+import copy
 from models import *
 from training_loops.fixMatch_loop import *
 
@@ -49,8 +50,8 @@ if config['hparam_search']['active']:
                           5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05, 5e-05]
     print(f'param_list: {rounded_param_list}')
     for i in range(n):
-        student_model_temp = student_model
-        teacher_model_temp = teacher_model
+        student_model_temp = copy.deepcopy(student_model)
+        teacher_model_temp = copy.deepcopy(teacher_model)
         config['train_params'][hparam_name] = rounded_param_list[i]
         train_fix_match(config, writer, student_model_temp, teacher_model_temp, train_dataloader, val_dataloader)
 else:
