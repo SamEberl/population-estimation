@@ -9,6 +9,7 @@ from utils import *
 from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.utils.data.sampler import SequentialSampler
 
 
 def forward_pass(student_model,
@@ -101,10 +102,28 @@ def get_dataloader(config, student_transform, teacher_transform):
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
 
-    train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers,
-                                  pin_memory=True, worker_init_fn=seed)
-    val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers,
-                                pin_memory=True, worker_init_fn=seed)
+    shuffle = True
+    train_sampler = None
+    val_sampler = None
+    if config['hparam_search']['active']:
+        shuffle = False
+        train_sampler = SequentialSampler(train_dataset)
+        val_sampler = SequentialSampler(val_dataset)
+
+    train_dataloader = DataLoader(train_dataset,
+                                  batch_size=train_bs,
+                                  shuffle=shuffle,
+                                  sampler=train_sampler,
+                                  num_workers=num_workers,
+                                  pin_memory=True,
+                                  worker_init_fn=torch.manual_seed(seed))
+    val_dataloader = DataLoader(val_dataset,
+                                batch_size=int(train_bs//data_ratio),
+                                shuffle=shuffle,
+                                sampler=val_sampler,
+                                num_workers=num_workers,
+                                pin_memory=True,
+                                worker_init_fn=torch.manual_seed(seed))
 
     return train_dataloader, val_dataloader
 
