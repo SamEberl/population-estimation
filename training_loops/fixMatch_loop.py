@@ -66,7 +66,7 @@ def batch_generator(dataloader):
 
 
 def train_fix_match(config, log_dir, student_model, teacher_model):
-    current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
+    current_datetime = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     print(f'starting training at {current_datetime}')
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -82,16 +82,21 @@ def train_fix_match(config, log_dir, student_model, teacher_model):
     use_teacher = config['train_params']['use_teacher']
 
     student_transforms_list = []
-    teacher_transfroms_list = []
     # Loop through the dictionary and add augmentations to the list
-    for student_params, teacher_params in zip(config['student_transforms'], config['teacher_transforms']):
+    for student_params in config['student_transforms']:
         student_aug_fn = getattr(A, list(student_params.keys())[0])(**list(student_params.values())[0])
         student_transforms_list.append(student_aug_fn)
-        teacher_aug_fn = getattr(A, list(teacher_params.keys())[0])(**list(teacher_params.values())[0])
-        teacher_transfroms_list.append(teacher_aug_fn)
     # Create an augmentation pipeline using the list of augmentation functions
     student_transform = A.Compose(student_transforms_list)
-    teacher_transform = A.Compose(teacher_transfroms_list)
+
+    if use_teacher:
+        teacher_transfroms_list = []
+        # Loop through the dictionary and add augmentations to the list
+        for teacher_params in config['teacher_transforms']:
+            teacher_aug_fn = getattr(A, list(teacher_params.keys())[0])(**list(teacher_params.values())[0])
+            teacher_transfroms_list.append(teacher_aug_fn)
+        # Create an augmentation pipeline using the list of augmentation functions
+        teacher_transform = A.Compose(teacher_transfroms_list)
 
     train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
     val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
