@@ -65,23 +65,7 @@ def batch_generator(dataloader):
             yield None
 
 
-def train_fix_match(config, writer, student_model, teacher_model):
-    # Set device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    student_model = student_model.to(device)
-    teacher_model = teacher_model.to(device)
-
-    data_path = config["data_params"]["data_path"]
-    train_bs = config["data_params"]["train_batch_size"]
-    #val_bs = config["data_params"]["val_batch_size"]
-    num_workers = config["data_params"]["num_workers"]
-
-    ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
-    num_epochs = config['train_params']['max_epochs']
-    supervised_loss_name = config['model_params']['supervised_criterion']
-    use_teacher = config['train_params']['use_teacher']
-
+def get_transforms(config):
     student_transforms_list = []
     # Loop through the dictionary and add augmentations to the list
     for student_params in config['student_transforms']:
@@ -90,6 +74,7 @@ def train_fix_match(config, writer, student_model, teacher_model):
     # Create an augmentation pipeline using the list of augmentation functions
     student_transform = A.Compose(student_transforms_list)
 
+    use_teacher = config['train_params']['use_teacher']
     teacher_transfroms_list = []
     if use_teacher:
         # Loop through the dictionary and add augmentations to the list
@@ -98,6 +83,16 @@ def train_fix_match(config, writer, student_model, teacher_model):
             teacher_transfroms_list.append(teacher_aug_fn)
         # Create an augmentation pipeline using the list of augmentation functions
     teacher_transform = A.Compose(teacher_transfroms_list)
+
+    return student_transform, teacher_transform
+
+
+def get_dataloader(config, student_transform, teacher_transform):
+    data_path = config["data_params"]["data_path"]
+    train_bs = config["data_params"]["train_batch_size"]
+    #val_bs = config["data_params"]["val_batch_size"]
+    num_workers = config["data_params"]["num_workers"]
+    use_teacher = config['train_params']['use_teacher']
 
     train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
     val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, student_transform=student_transform, teacher_transform=teacher_transform)
@@ -108,11 +103,18 @@ def train_fix_match(config, writer, student_model, teacher_model):
     train_dataloader = DataLoader(train_dataset, batch_size=train_bs, shuffle=True, num_workers=num_workers, pin_memory=True)
     val_dataloader = DataLoader(val_dataset, batch_size=int(train_bs//data_ratio), shuffle=True, num_workers=num_workers, pin_memory=True)
 
-    # Remove dropout from teacher
+    return train_dataloader, val_dataloader
+
+
+def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader):
+    # Get params from config
+    ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
+    num_epochs = config['train_params']['max_epochs']
+    supervised_loss_name = config['model_params']['supervised_criterion']
+    use_teacher = config['train_params']['use_teacher']
+
+    # Make sure no grad is calculated for teacher & remove things like dropout
     teacher_model.eval()
-    # Make sure no grad is calculated for teacher
-    for param in teacher_model.model.parameters():
-        param.requires_grad = False
 
     optimizer = optim.Adam(student_model.parameters(),
                            lr=config['train_params']['LR'],
@@ -120,15 +122,9 @@ def train_fix_match(config, writer, student_model, teacher_model):
                            weight_decay=config['train_params']['L2_reg'] * 2)
     scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
 
-    print(student_model.model.default_cfg)
-    param_yaml_str = yaml.dump(config, default_flow_style=False)
-    param_yaml_str = param_yaml_str.replace('\n', '<br>')
-    writer.add_text('Parameters', param_yaml_str, 0)
-    model_yaml_str = yaml.dump(student_model.model.default_cfg, default_flow_style=False)
-    model_yaml_str = model_yaml_str.replace('false ', '<br>')
-    writer.add_text('Model Specs', model_yaml_str, 0)
-
     pbar = tqdm(total=config['train_params']['max_epochs'], ncols=120)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Train the model
     for epoch in range(num_epochs):
@@ -182,7 +178,7 @@ def train_fix_match(config, writer, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
-                if ((i+1) % config['hparam_search']['nbr_batches']) == 0:
+                if config['hparam_search']['active'] and ((i+1) % config['hparam_search']['nbr_batches']) == 0:
                     hparam_name = config['hparam_search']['hparam_name']
                     writer.add_scalar(f'Hparam-{hparam_name}-Train-Loss', total_train_loss/i+1, config['train_params']['LR'])
                     writer.add_scalar(f'Hparam-{hparam_name}-Val-Loss', total_val_loss/i+1, config['train_params']['LR'])
