@@ -40,8 +40,8 @@ train_dataloader, val_dataloader = get_dataloader(config, student_transform, tea
 if config['hparam_search']['active']:
     hparam_name = config['hparam_search']['hparam_name']
     n = config['hparam_search']['nbr_values']
-    lowest = config['hparam_search']['lowest']
-    highest = config['hparam_search']['highest']
+    lowest = np.log10(config['hparam_search']['lowest'])
+    highest = np.log10(config['hparam_search']['highest'])
     param_list = np.logspace(lowest, highest, n)
     decimal_places = count_decimal_places(lowest) + 1
     rounded_param_list = [round(value, decimal_places) for value in param_list]
