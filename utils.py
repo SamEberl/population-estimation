@@ -233,24 +233,11 @@ def count_decimal_places(number):
     if '.' in number_str:
         # Find the position of the decimal point
         decimal_index = number_str.index('.')
-
-        # Count the number of digits after the decimal point
         return len(number_str) - decimal_index - 1
-    elif 'e' in number_str:
+    elif 'e-' in number_str:
         # Split the string at 'e'
-        parts = number_str.split('e')
-
-        # If there are two parts and the second part starts with a '-' (indicating a negative exponent),
-        # count the number of zeros after the decimal point in the first part
-        if len(parts) == 2 and parts[1].startswith('-'):
-            decimal_part = parts[0].split('.')[1] if '.' in parts[0] else ''
-            return len(decimal_part)
+        parts = number_str.split('-')
+        return int(parts[1])
     else:
         # If there is no decimal point, return 0
         return 0
-
-
-nbr = float('1e-06')
-print(nbr)
-count = count_decimal_places(nbr)
-print(count)
