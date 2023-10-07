@@ -23,7 +23,7 @@ train_params:
   seed: 42
 
 hparam_search:
-  active: False
+  active: True
   hparam_name: 'LR'
   lowest: 0.000001
   highest: 0.001
