@@ -182,7 +182,6 @@ def train_fix_match(config, writer, student_model, teacher_model):
                         save_img=save_img)
                     total_val_loss += val_loss
 
-                print(config['hparam_search']['nbr_batches'])
                 if ((i+1) % config['hparam_search']['nbr_batches']) == 0:
                     hparam_name = config['hparam_search']['hparam_name']
                     writer.add_scalar(f'Hparam-{hparam_name}-Train-Loss', total_train_loss/i+1, config['train_params']['LR'])
