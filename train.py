@@ -30,8 +30,8 @@ if config['hparam_search']['active']:
     print(f'ACTIVE!')
     hparam_name = config['hparam_search']['hparam_name']
     n = config['hparam_search']['nbr_values']
-    lowest = float(config['hparam_search']['lowest'])
-    highest = float(config['hparam_search']['highest'])
+    lowest = config['hparam_search']['lowest']
+    highest = config['hparam_search']['highest']
     param_list = np.linspace(lowest, highest, n)
     print(f'lowest: {lowest}')
     print(param_list)
