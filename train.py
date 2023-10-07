@@ -27,15 +27,18 @@ print(f'--- Start training at {current_datetime} ---')
 writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
 
 if config['hparam_search']['active']:
+    print(f'ACTIVE!')
     hparam_name = config['hparam_search']['hparam_name']
     n = config['hparam_search']['nbr_values']
     lowest = config['hparam_search']['lowest']
     highest = config['hparam_search']['highest']
     param_list = np.linspace(lowest, highest, n)
+    decimal_places = count_decimal_places(lowest) + 1
+    rounded_param_list = [round(value, decimal_places) for value in param_list]
     for i in range(n):
         student_model_temp = student_model
         teacher_model_temp = teacher_model
-        config['train_params'][hparam_name] = param_list[i]
+        config['train_params'][hparam_name] = rounded_param_list[i]
         train_fix_match(config, writer, student_model_temp, teacher_model_temp)
 else:
     train_fix_match(config, writer, student_model, teacher_model)

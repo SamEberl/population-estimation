@@ -224,3 +224,19 @@ def get_img_stats():
     print("\nStandard deviation of each channel (RGB):")
     print(channel_stddevs)
 
+
+def count_decimal_places(number):
+    # Convert the float to a string
+    number_str = str(number)
+
+    # Check if there is a decimal point in the string
+    if '.' in number_str:
+        # Split the string into integer and decimal parts
+        integer_part, decimal_part = number_str.split('.')
+
+        # Count the number of characters in the decimal part
+        return len(decimal_part)
+    else:
+        # If there is no decimal point, return 0
+        return 0
+
