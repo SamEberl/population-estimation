@@ -102,7 +102,7 @@ def get_dataloader(config, student_transform, teacher_transform):
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
 
-    shuffle = True
+    shuffle = False
     # train_sampler = None
     # val_sampler = None
     # if config['hparam_search']['active']:
