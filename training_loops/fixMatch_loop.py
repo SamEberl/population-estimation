@@ -66,7 +66,7 @@ def batch_generator(dataloader):
 
 
 def train_fix_match(config, log_dir, student_model, teacher_model):
-    current_datetime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
     print(f'starting training at {current_datetime}')
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
