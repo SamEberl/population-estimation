@@ -39,6 +39,8 @@ if config['hparam_search']['active']:
         student_model_temp = student_model
         teacher_model_temp = teacher_model
         config['train_params'][hparam_name] = rounded_param_list[i]
+        print('rounded param list')
+        print(rounded_param_list)
         print('hparam value: ')
         print(config['train_params'][hparam_name])
         train_fix_match(config, writer, student_model_temp, teacher_model_temp)
