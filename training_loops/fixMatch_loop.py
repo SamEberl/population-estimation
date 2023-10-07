@@ -20,6 +20,7 @@ def forward_pass(student_model,
                  writer,
                  supervised_loss_name,
                  step_nbr,
+                 hparam_search,
                  save_img=False):
     student_inputs, teacher_inputs, labels, datapoint_name = data
     student_inputs = student_inputs.to(device)
@@ -32,9 +33,10 @@ def forward_pass(student_model,
     student_preds, student_features = student_model(student_inputs)
     supervised_loss = student_model.loss_supervised(student_preds, labels)
 
-    writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
-    loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-    writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
+    if not hparam_search:
+        writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
+        loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+        writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
     unsupervised_loss = 0
     if use_teacher and split == 'train':
@@ -43,7 +45,8 @@ def forward_pass(student_model,
         unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
         #TODO scale unsupervised_loss to be similar to supervised_loss
 
-        writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
+        if not hparam_search:
+            writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
 
     loss = supervised_loss + unsupervised_loss
 
@@ -112,6 +115,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     num_epochs = config['train_params']['max_epochs']
     supervised_loss_name = config['model_params']['supervised_criterion']
     use_teacher = config['train_params']['use_teacher']
+    hparam_search = config['hparam_search']['active']
 
     # Make sure no grad is calculated for teacher & remove things like dropout
     teacher_model.eval()
@@ -143,6 +147,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 device=device,
                 writer=writer,
                 supervised_loss_name=supervised_loss_name,
+                hparam_search=hparam_search,
                 step_nbr=step_nbr)
             total_train_loss += train_loss
 
@@ -175,6 +180,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                         writer=writer,
                         supervised_loss_name=supervised_loss_name,
                         step_nbr=step_nbr,
+                        hparam_search=hparam_search,
                         save_img=save_img)
                     total_val_loss += val_loss
 
