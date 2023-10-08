@@ -102,7 +102,7 @@ def get_dataloader(config, student_transform, teacher_transform):
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
 
-    shuffle = False
+    shuffle = True
     # train_sampler = None
     # val_sampler = None
     # if config['hparam_search']['active']:
@@ -140,10 +140,12 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                            weight_decay=config['train_params']['L2_reg'] * 2)
     scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
 
-    pbar = tqdm(total=config['train_params']['max_epochs'], ncols=120)
+    pbar = tqdm(total=config['train_params']['max_epochs'], ncols=140)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    total_train_loss = 0
+    total_val_loss = 0
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
@@ -219,3 +221,5 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Close the SummaryWriter after training
     writer.close()
     pbar.close()
+
+    return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))

@@ -28,17 +28,6 @@ print(f'--- Start training at {current_datetime} ---')
 
 # Create a SummaryWriter for TensorBoard
 writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
-
-writer.add_hparams({
-    'in_channels': config['model_params']['in_channels'],
-    'drop_rate': config['model_params']['drop_rate'],
-    'train_batch_size': config['data_params']['train_batch_size'],
-    'LR': config['train_params']['LR'],
-    'L2_reg': config['train_params']['L2_reg'],
-    'beta1': config['train_params']['beta1'],
-    'beta2': config['train_params']['beta2'],
-    'ema_alpha': config['train_params']['ema_alpha']}, {})
-
 param_yaml_str = yaml.dump(config, default_flow_style=False)
 param_yaml_str = param_yaml_str.replace('\n', '<br>')
 writer.add_text('Parameters', param_yaml_str, 0)
@@ -66,9 +55,21 @@ if config['hparam_search']['active']:
         config['train_params'][hparam_name] = rounded_param_list[i]
         train_fix_match(config, writer, student_model_temp, teacher_model_temp, train_dataloader, val_dataloader)
 else:
-    train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader)
+    train_loss, val_loss = train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader)
 
     save_path = os.path.join(config['save_dirs']['model_save_dir'],
                              f"{config['model_params']['pretrained_weights']}_{current_datetime}.pt")
     print(f'Saving model under {save_path}')
     torch.save(student_model.state_dict(), save_path)
+
+    writer.add_hparams({
+        'in_channels': config['model_params']['in_channels'],
+        'drop_rate': config['model_params']['drop_rate'],
+        'train_batch_size': config['data_params']['train_batch_size'],
+        'LR': config['train_params']['LR'],
+        'L2_reg': config['train_params']['L2_reg'],
+        'beta1': config['train_params']['beta1'],
+        'beta2': config['train_params']['beta2'],
+        'ema_alpha': config['train_params']['ema_alpha']},
+        {'train_loss': train_loss,
+         'val_loss': val_loss})
