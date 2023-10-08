@@ -28,24 +28,23 @@ print(f'--- Start training at {current_datetime} ---')
 
 # Create a SummaryWriter for TensorBoard
 writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
-writer.add_hparams(config['model_params'], {})
-writer.add_hparams(config['data_params'], {})
-writer.add_hparams(config['train_params'], {})
-writer.add_hparams(config['hparam_search'], {})
-writer.add_hparams(config['save_dirs'], {})
-writer.add_hparams(config['student_transforms'], {})
-writer.add_hparams(config['teacher_transforms'], {})
 
-writer.add_hparams(student_model.model.default_cfg, {})
+writer.add_hparams({
+    'in_channels': config['model_params']['in_channels'],
+    'drop_rate': config['model_params']['drop_rate'],
+    'train_batch_size': config['data_params']['train_batch_size'],
+    'LR': config['train_params']['LR'],
+    'L2_reg': config['train_params']['L2_reg'],
+    'beta1': config['train_params']['beta1'],
+    'beta2': config['train_params']['beta2'],
+    'ema_alpha': config['train_params']['ema_alpha']}, {})
 
-# print(f'config: {config} \n\n')
-# param_yaml_str = yaml.dump(config, default_flow_style=False)
-# print(f'yaml_string: {param_yaml_str}')
-# param_yaml_str = param_yaml_str.replace('\n', '<br>')
-# writer.add_text('Parameters', param_yaml_str, 0)
-# model_yaml_str = yaml.dump(student_model.model.default_cfg, default_flow_style=False)
-# model_yaml_str = model_yaml_str.replace('false ', '<br>')
-# writer.add_text('Model Specs', model_yaml_str, 0)
+param_yaml_str = yaml.dump(config, default_flow_style=False)
+param_yaml_str = param_yaml_str.replace('\n', '<br>')
+writer.add_text('Parameters', param_yaml_str, 0)
+model_yaml_str = yaml.dump(student_model.model.default_cfg, default_flow_style=False)
+model_yaml_str = model_yaml_str.replace('false ', '<br>')
+writer.add_text('Model Specs', model_yaml_str, 0)
 
 student_transform, teacher_transform = get_transforms(config)
 train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
