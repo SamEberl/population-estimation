@@ -28,8 +28,12 @@ print(f'--- Start training at {current_datetime} ---')
 
 # Create a SummaryWriter for TensorBoard
 writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
+print(f'config: {config} \n\n')
 param_yaml_str = yaml.dump(config, default_flow_style=False)
+print(f'yaml_string: {param_yaml_str}')
 param_yaml_str = param_yaml_str.replace('\n', '<br>')
+
+exit()
 writer.add_text('Parameters', param_yaml_str, 0)
 model_yaml_str = yaml.dump(student_model.model.default_cfg, default_flow_style=False)
 model_yaml_str = model_yaml_str.replace('false ', '<br>')
