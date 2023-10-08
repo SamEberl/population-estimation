@@ -1,6 +1,6 @@
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
+  pretrained_weights: 'convnextv2_nano.fcmae'  # choose from timm models
   supervised_criterion: 'MSE'
   in_channels: 8
   nbr_outputs: 1
@@ -23,7 +23,7 @@ train_params:
   seed: 42
 
 hparam_search:
-  active: True
+  active: False
   hparam_name: 'LR'
   lowest: 0.0000001
   highest: 0.01
