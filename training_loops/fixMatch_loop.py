@@ -215,11 +215,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
             pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
-
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
-
-    # Close the SummaryWriter after training
-    writer.close()
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
