@@ -17,8 +17,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
 teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
 # Load previous checkpoint
-student_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt')))
-teacher_model.load_state_dict(torch.load(os.path.join(config['logging_params']['save_dir'], 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt')))
+student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt')))
+teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt')))
 # Make sure no grad is calculated for teacher & remove things like dropout
 teacher_model.eval()
 
