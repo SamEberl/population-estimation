@@ -66,6 +66,7 @@ else:
 
     writer.add_hparams({
         'in_channels': config['model_params']['in_channels'],
+        'retrain': config['model_params']['retrain'],
         'drop_rate': config['model_params']['drop_rate'],
         'train_batch_size': config['data_params']['train_batch_size'],
         'LR': config['train_params']['LR'],
