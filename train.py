@@ -75,7 +75,7 @@ else:
         'beta2': config['train_params']['beta2'],
         'ema_alpha': config['train_params']['ema_alpha']},
         {'train_loss': train_loss,
-         'val_loss': val_loss})
+         'val_loss': val_loss}, name='')
 
 # Close the SummaryWriter after training
 writer.close()
