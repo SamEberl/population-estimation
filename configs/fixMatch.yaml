@@ -6,7 +6,7 @@ model_params:
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
   in_channels: 8
   nbr_outputs: 1
-  drop_rate: 0.2
+  drop_rate: 0.1
 
 data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
@@ -15,9 +15,9 @@ data_params:
   num_workers: 32
 
 train_params:
-  LR: 0.0001
+  LR: 0.00005
   max_epochs: 150
-  L2_reg: 0.001
+  L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
