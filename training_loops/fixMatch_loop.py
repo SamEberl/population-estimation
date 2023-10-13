@@ -27,8 +27,8 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
-    student_preds, student_features = student_model(student_inputs)
-    supervised_loss = student_model.loss_supervised(student_preds, labels)
+    student_preds, student_log_var, student_features = student_model(student_inputs)
+    supervised_loss = student_model.loss_supervised(student_preds, student_log_var, labels)
 
     hparam_search = config['hparam_search']['active']
     if not hparam_search:
