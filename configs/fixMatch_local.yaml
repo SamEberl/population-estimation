@@ -1,0 +1,53 @@
+model_params:
+  architecture: 'fixMatch'
+  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
+  supervised_criterion: 'MSE'
+  retrain: False
+  retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
+  in_channels: 8
+  nbr_outputs: 1
+  drop_rate: 0.1
+
+data_params:
+  data_path: "/home/sam/Desktop/so2sat_test/tmp_train"
+  train_batch_size: 64
+  #val_batch_size:  1024
+  num_workers: 32
+
+train_params:
+  LR: 0.00005
+  max_epochs: 15
+  L2_reg: 0.005
+  beta1: 0.9
+  beta2: 0.999
+  ema_alpha: 0.99
+  use_teacher: False
+  seed: 42
+
+hparam_search:
+  active: False
+  hparam_name: 'LR'
+  lowest: 0.0000001
+  highest: 0.01
+  nbr_values: 5  # Evaluates this many values by splitting the range into equal parts
+  nbr_batches: 5 # Number of batches after which the evaluation is done
+
+save_dirs:
+  log_save_dir: "/home/sam/Desktop/logs"
+  model_save_dir: "/home/sam/Desktop/logs/models"
+
+student_transforms:
+  - HorizontalFlip:
+      p: 0.5
+  - VerticalFlip:
+      p: 0.5
+  - RandomRotate90:
+      p: 0.5
+
+teacher_transforms:
+  - HorizontalFlip:
+      p: 0.5
+  - VerticalFlip:
+      p: 0.5
+  - RandomRotate90:
+      p: 0.5
