@@ -4,7 +4,8 @@ from training_loops.fixMatch_loop import *
 
 print('--- Loading model ---')
 
-config = parse_yaml('configs/fixMatch_local.yaml')
+config = parse_yaml('configs/fixMatch.yaml')
+#config = parse_yaml('configs/fixMatch_local.yaml')
 
 seed = config['train_params']['seed']
 np.random.seed(seed)
