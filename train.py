@@ -64,18 +64,18 @@ else:
     print(f'Saving model under {save_path}')
     torch.save(student_model.state_dict(), save_path)
 
-    writer.add_hparams({
-        'in_channels': config['model_params']['in_channels'],
-        'retrain': config['model_params']['retrain'],
-        'drop_rate': config['model_params']['drop_rate'],
-        'train_batch_size': config['data_params']['train_batch_size'],
-        'LR': config['train_params']['LR'],
-        'L2_reg': config['train_params']['L2_reg'],
-        'beta1': config['train_params']['beta1'],
-        'beta2': config['train_params']['beta2'],
-        'ema_alpha': config['train_params']['ema_alpha']},
-        {'train_loss': train_loss,
-         'val_loss': val_loss}, name='')
+    # writer.add_hparams({
+    #     'in_channels': config['model_params']['in_channels'],
+    #     'retrain': config['model_params']['retrain'],
+    #     'drop_rate': config['model_params']['drop_rate'],
+    #     'train_batch_size': config['data_params']['train_batch_size'],
+    #     'LR': config['train_params']['LR'],
+    #     'L2_reg': config['train_params']['L2_reg'],
+    #     'beta1': config['train_params']['beta1'],
+    #     'beta2': config['train_params']['beta2'],
+    #     'ema_alpha': config['train_params']['ema_alpha']},
+    #     {'train_loss': train_loss,
+    #      'val_loss': val_loss}, name='')
 
 # Close the SummaryWriter after training
 writer.close()
