@@ -40,11 +40,11 @@ class studentTeacherDataset(Dataset):
         label = torch.tensor(float(self.data[idx][1]))
         datapoint_name = self.data[idx][2]
 
-        data = np.empty((8, 100, 100), dtype=np.float32)
+        data = np.empty((7, 100, 100), dtype=np.float32)
 
         data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
         data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        data[7, :, :] = self.generate_viirs(file_path)  # viirs
+        # data[7, :, :] = self.generate_viirs(file_path)  # viirs
 
         # tensor_data = torch.cat((sen2spring_rgb, lu_tensor, viirs_tensor), dim=0)
         # data = np.concatenate((sen2spring_rgb, lu, viirs))
