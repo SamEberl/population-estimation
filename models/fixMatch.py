@@ -34,7 +34,7 @@ class fixMatch(nn.Module):
 
     def loss_supervised(self, predictions, log_var, labels):
         loss = self.supervised_criterion(predictions, labels)
-        loss = torch.sum(0.5 * torch.exp(-log_var) * loss + (1/2 * log_var)) / predictions.numel()
+        # loss = torch.sum(0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)) / predictions.numel()
         return loss
 
     def loss_unsupervised(self, student_features, teacher_features):
