@@ -41,37 +41,24 @@ def forward_pass(student_model,
     teacher_loss = 0
     unsupervised_loss = 0
     if split == 'train' and config['train_params']['use_teacher']:
-        n = 10  # TODO: Put n into config
-        # Get n preds (using dropout / augmentation)
-        n_teacher_preds = {}
-        for i in range(n):
-            teacher_preds, teacher_features = teacher_model(teacher_inputs)
-            n_teacher_preds[i] = (teacher_preds, teacher_features)
+        num_samples = 10  # TODO: Put n into config
 
-        # Get mean
-        sum_preds = 0
-        for teacher_preds in n_teacher_preds.values():
-            sum_preds += teacher_preds[0]
-        teacher_mean = sum_preds / n
+        # Ensure dropout is active during evaluation
+        teacher_model.train()
 
-        device = next(teacher_model.parameters()).device
+        # Store all predictions
+        n_teacher_preds = []
 
-        # Get variance & pred closest to mean
-        batch_size = config["data_params"]["train_batch_size"]
-        sum_mse = torch.zeros(batch_size, device=device)
-        closest = torch.full((batch_size,), torch.inf, device=device)
-        closest_idx = torch.zeros(batch_size, dtype=torch.long, device=device)
+        with torch.no_grad():  # Ensure no gradients are computed
+            for _ in range(num_samples):
+                teacher_preds, teacher_features = teacher_model(teacher_inputs)
+                n_teacher_preds.append(teacher_preds)
 
-        for i, teacher_preds in enumerate(n_teacher_preds):
-            mse = (teacher_preds - teacher_mean) ** 2
-            sum_mse += mse
-            mask = mse < closest
-            closest[mask] = mse[mask]
-            closest_idx[mask] = i
+        n_teacher_preds = torch.stack(n_teacher_preds)
 
-        teacher_var = sum_mse / (n - 1)
-
-        teacher_preds, teacher_features = n_teacher_preds[closest_idx]
+        # Compute mean and variance
+        teacher_mean = n_teacher_preds.mean(dim=0)
+        teacher_var = n_teacher_preds.var(dim=0)
 
         teacher_loss = teacher_model.loss_supervised(teacher_preds, labels)
 
