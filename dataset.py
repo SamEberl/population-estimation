@@ -53,7 +53,7 @@ class studentTeacherDataset(Dataset):
 
         student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
         if self.use_teacher == True:
-            teacher_data = self.teacher_transform(image=data)
+            teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
         else:
             teacher_data = 0
         return student_data, teacher_data, label, datapoint_name

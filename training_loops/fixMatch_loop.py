@@ -9,7 +9,8 @@ from utils import *
 from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from torch.utils.data.sampler import SequentialSampler
+
+import matplotlib.pyplot as plt
 
 
 def forward_pass(student_model,
@@ -27,8 +28,88 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
-    student_preds, student_log_var, student_features = student_model(student_inputs)
-    supervised_loss = student_model.loss_supervised(student_preds, student_log_var, labels)
+    student_preds, student_features = student_model(student_inputs)
+
+    # If label -> Calc loss on pred closest to mean
+    label = True  # TODO: pass on whether label is present
+    supervised_loss = 0
+    if label:
+        supervised_loss = student_model.loss_supervised(student_preds, labels)
+
+    teacher_mean = 0
+    teacher_var = 0
+    teacher_loss = 0
+    unsupervised_loss = 0
+    if split == 'train' and config['train_params']['use_teacher']:
+        n = 10  # TODO: Put n into config
+        # Get n preds (using dropout / augmentation)
+        n_teacher_preds = {}
+        for i in range(n):
+            teacher_preds, teacher_features = teacher_model(teacher_inputs)
+            n_teacher_preds[i] = (teacher_preds, teacher_features)
+
+        # Get mean
+        sum_preds = 0
+        for teacher_preds in n_teacher_preds.values():
+            sum_preds += teacher_preds[0]
+        teacher_mean = sum_preds / n
+
+        device = next(teacher_model.parameters()).device
+
+        # Get variance & pred closest to mean
+        batch_size = config["data_params"]["train_batch_size"]
+        sum_mse = torch.zeros(batch_size, device=device)
+        closest = torch.full((batch_size,), torch.inf, device=device)
+        closest_idx = torch.zeros(batch_size, dtype=torch.long, device=device)
+
+        for i, teacher_preds in enumerate(n_teacher_preds):
+            mse = (teacher_preds - teacher_mean) ** 2
+            sum_mse += mse
+            mask = mse < closest
+            closest[mask] = mse[mask]
+            closest_idx[mask] = i
+
+        teacher_var = sum_mse / (n - 1)
+
+        teacher_preds, teacher_features = n_teacher_preds[closest_idx]
+
+        teacher_loss = teacher_model.loss_supervised(teacher_preds, labels)
+
+        # If mean & var below threshold -> Calc consistency loss on features
+        # if check: # TODO: compare mean and var to a threshold
+        #     teacher_preds, teacher_features = teacher_model(teacher_inputs)
+        #     unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
+        #     # TODO: scale unsupervised_loss to be similar to supervised_loss
+        #     writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
+
+    loss = supervised_loss + unsupervised_loss
+
+    # if save_img:
+    #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
+    #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
+    #     log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
+    #                                        student_preds.cpu().flatten())
+
+    return loss, (teacher_mean, teacher_var, teacher_loss)
+
+
+def forward_pass_archive(student_model,
+                 teacher_model,
+                 student_inputs,
+                 teacher_inputs,
+                 labels,
+                 config,
+                 split,
+                 writer,
+                 step_nbr,
+                 save_img=False):
+    if split == 'train':
+        student_model.train()
+    else:
+        student_model.eval()
+
+    student_preds, student_features = student_model(student_inputs)
+    supervised_loss = student_model.loss_supervised(student_preds, labels)
 
     hparam_search = config['hparam_search']['active']
     if not hparam_search:
@@ -75,9 +156,8 @@ def get_transforms(config):
     # Create an augmentation pipeline using the list of augmentation functions
     student_transform = A.Compose(student_transforms_list)
 
-    use_teacher = config['train_params']['use_teacher']
     teacher_transfroms_list = []
-    if use_teacher:
+    if config['train_params']['use_teacher']:
         # Loop through the dictionary and add augmentations to the list
         for teacher_params in config['teacher_transforms']:
             teacher_aug_fn = getattr(A, list(teacher_params.keys())[0])(**list(teacher_params.values())[0])
@@ -146,11 +226,15 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     total_train_loss = 0
     total_val_loss = 0
+    teacher_mean = {}
+    teacher_var = {}
+    teacher_loss = {}
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
+        config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
         for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader) + i
 
@@ -160,7 +244,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_inputs = teacher_inputs.to(device)
             labels = labels.to(device)
 
-            train_loss = forward_pass(
+            train_loss, teacher_stats = forward_pass(
                 student_model=student_model,
                 teacher_model=teacher_model,
                 student_inputs=student_inputs,
@@ -170,6 +254,11 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 split='train',
                 writer=writer,
                 step_nbr=step_nbr)
+
+            teacher_mean[i] = teacher_stats[0]
+            teacher_var[i] = teacher_stats[1]
+            teacher_loss[i] = teacher_stats[2]
+
             total_train_loss += train_loss
 
             # Backward pass and optimization
@@ -195,7 +284,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 labels = labels.to(device)
 
                 with torch.no_grad():
-                    val_loss = forward_pass(
+                    val_loss, teacher_stats = forward_pass(
                             student_model=student_model,
                             teacher_model=teacher_model,
                             student_inputs=student_inputs,
@@ -217,5 +306,23 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             pbar.update(1)
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
     pbar.close()
+
+    # Plot for mean vs. loss
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)  # 1 row, 2 columns, 1st plot
+    plt.scatter(teacher_mean.values(), teacher_loss.values(), color='blue')
+    plt.title("Mean vs. Loss")
+    plt.xlabel("Mean")
+    plt.ylabel("Loss")
+
+    # Plot for var vs. loss
+    plt.subplot(1, 2, 2)  # 1 row, 2 columns, 2nd plot
+    plt.scatter(teacher_var.values(), teacher_loss.values(), color='red')
+    plt.title("Var vs. Loss")
+    plt.xlabel("Var")
+    plt.ylabel("Loss")
+
+    plt.tight_layout()
+    plt.savefig('/home/sam/Desktop/logs/figs/test1.png')
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))

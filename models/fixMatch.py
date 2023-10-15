@@ -28,11 +28,10 @@ class fixMatch(nn.Module):
         features = self.model(x)
         prediction = self.fc_preds(features).flatten()
         prediction = torch.pow(2, prediction)
+        # log_var = self.fc_log_var(features).flatten()
+        return prediction, features
 
-        log_var = self.fc_log_var(features).flatten()
-        return prediction, log_var, features
-
-    def loss_supervised(self, predictions, log_var, labels):
+    def loss_supervised(self, predictions, labels):
         loss = self.supervised_criterion(predictions, labels)
         # loss = torch.sum(0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)) / predictions.numel()
         return loss

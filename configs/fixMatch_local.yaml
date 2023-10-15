@@ -6,11 +6,11 @@ model_params:
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
   in_channels: 7
   nbr_outputs: 1
-  drop_rate: 0.1
+  drop_rate: 0.2
 
 data_params:
   data_path: "/home/sam/Desktop/so2sat_test/tmp_train"
-  train_batch_size: 64
+  train_batch_size: 16
   #val_batch_size:  1024
   num_workers: 6
 
@@ -21,7 +21,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
-  use_teacher: False
+  use_teacher: True
   seed: 42
 
 hparam_search:
