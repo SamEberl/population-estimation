@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from timm import create_model
-from .losses import RMSELoss, RMSLELoss
+from .losses import *
 
 
 class fixMatch(nn.Module):
@@ -21,19 +21,26 @@ class fixMatch(nn.Module):
         supervised_losses = {'L1': nn.L1Loss(),
                              'MSE': nn.MSELoss(),
                              'RMSE': RMSELoss(),
-                             'RMSLE': RMSLELoss()}
+                             'RMSLE': RMSLELoss(),
+                             'Aleatoric': AleatoricLoss(),
+                             'LinUncertainty': LinUncertaintyLoss(),
+                             'SquaredUncertainty': SquaredUncertaintyLoss()}
+
         self.supervised_criterion = supervised_losses[supervised_criterion]
 
     def forward(self, x):
         features = self.model(x)
         prediction = self.fc_preds(features).flatten()
         prediction = torch.pow(2, prediction)
-        # log_var = self.fc_log_var(features).flatten()
-        return prediction, features
+        log_var = self.fc_log_var(features).flatten()
+        return prediction, features, log_var
 
     def loss_supervised(self, predictions, labels):
         loss = self.supervised_criterion(predictions, labels)
-        # loss = torch.sum(0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)) / predictions.numel()
+        return loss
+
+    def loss_supervised_w_uncertainty(self, predictions, labels, log_var):
+        loss = self.supervised_criterion(predictions, labels, log_var)
         return loss
 
     def loss_unsupervised(self, student_features, teacher_features):

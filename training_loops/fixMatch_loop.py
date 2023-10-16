@@ -28,20 +28,27 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
-    student_preds, student_features = student_model(student_inputs)
+    student_preds, student_features, student_log_var = student_model(student_inputs)
 
     # If label -> Calc loss on pred closest to mean
     label = True  # TODO: pass on whether label is present
     supervised_loss = 0
     if label:
-        supervised_loss = student_model.loss_supervised(student_preds, labels)
+        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_log_var)
+
+        hparam_search = config['hparam_search']['active']
+        if not hparam_search:
+            supervised_loss_name = config['model_params']['supervised_criterion']
+            writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
+            loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+            writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
     teacher_mean = 0
     teacher_var = 0
     teacher_loss = 0
     unsupervised_loss = 0
     if split == 'train' and config['train_params']['use_teacher']:
-        num_samples = 10  # TODO: Put n into config
+        num_samples = 30  # TODO: Put n into config
 
         # Ensure dropout is active during evaluation
         teacher_model.train()
@@ -51,7 +58,7 @@ def forward_pass(student_model,
 
         with torch.no_grad():  # Ensure no gradients are computed
             for _ in range(num_samples):
-                teacher_preds, teacher_features = teacher_model(teacher_inputs)
+                teacher_preds, teacher_features, teacher_log_var = teacher_model(teacher_inputs)
                 n_teacher_preds.append(teacher_preds)
 
         n_teacher_preds = torch.stack(n_teacher_preds)
@@ -59,8 +66,7 @@ def forward_pass(student_model,
         # Compute mean and variance
         teacher_mean = n_teacher_preds.mean(dim=0)
         teacher_var = n_teacher_preds.var(dim=0)
-
-        teacher_loss = teacher_model.loss_supervised(teacher_preds, labels)
+        teacher_loss = (teacher_mean - labels)**2
 
         # If mean & var below threshold -> Calc consistency loss on features
         # if check: # TODO: compare mean and var to a threshold
@@ -213,15 +219,16 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     total_train_loss = 0
     total_val_loss = 0
-    teacher_mean = {}
-    teacher_var = {}
-    teacher_loss = {}
+    teacher_mean = []
+    teacher_var = []
+    teacher_loss = []
+    teacher_aleatoric = []
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
-        config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
+        #config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
         for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader) + i
 
@@ -242,9 +249,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 writer=writer,
                 step_nbr=step_nbr)
 
-            teacher_mean[i] = teacher_stats[0]
-            teacher_var[i] = teacher_stats[1]
-            teacher_loss[i] = teacher_stats[2]
+            if config['train_params']['use_teacher']:
+                teacher_mean.append(teacher_stats[0])
+                teacher_var.append(teacher_stats[1])
+                teacher_loss.append(teacher_stats[2])
 
             total_train_loss += train_loss
 
@@ -255,8 +263,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             scheduler.step()
 
             # Update teacher model using exponential moving average
-            # for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-            #     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
+            for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
+                teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
             val_data = next(val_generator)
             if val_data is not None:
@@ -294,22 +302,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
     pbar.close()
 
-    # Plot for mean vs. loss
-    plt.figure(figsize=(10, 4))
-    plt.subplot(1, 2, 1)  # 1 row, 2 columns, 1st plot
-    plt.scatter(teacher_mean.values(), teacher_loss.values(), color='blue')
-    plt.title("Mean vs. Loss")
-    plt.xlabel("Mean")
-    plt.ylabel("Loss")
-
-    # Plot for var vs. loss
-    plt.subplot(1, 2, 2)  # 1 row, 2 columns, 2nd plot
-    plt.scatter(teacher_var.values(), teacher_loss.values(), color='red')
-    plt.title("Var vs. Loss")
-    plt.xlabel("Var")
-    plt.ylabel("Loss")
-
-    plt.tight_layout()
-    plt.savefig('/home/sam/Desktop/logs/figs/test1.png')
+    # plot_uncertainty(teacher_mean, teacher_var, teacher_loss)
+    # plot_uncertainty_histograms(teacher_mean, teacher_var)
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
