@@ -28,13 +28,13 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
-    student_preds, student_features, student_log_var = student_model(student_inputs)
+    student_preds, student_features, uncertainty = student_model(student_inputs)
 
     # If label -> Calc loss on pred closest to mean
     label = True  # TODO: pass on whether label is present
     supervised_loss = 0
     if label:
-        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_log_var)
+        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, uncertainty)
 
         hparam_search = config['hparam_search']['active']
         if not hparam_search:
@@ -83,7 +83,7 @@ def forward_pass(student_model,
     #     log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
     #                                        student_preds.cpu().flatten())
 
-    return loss, (teacher_mean, teacher_var, teacher_loss)
+    return loss, (teacher_mean, teacher_var, teacher_loss), uncertainty
 
 
 def forward_pass_archive(student_model,
@@ -222,7 +222,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     teacher_mean = []
     teacher_var = []
     teacher_loss = []
-    teacher_aleatoric = []
+    actual_label = []
+    uncertainties = []
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
@@ -238,7 +239,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_inputs = teacher_inputs.to(device)
             labels = labels.to(device)
 
-            train_loss, teacher_stats = forward_pass(
+            train_loss, teacher_stats, uncertainty = forward_pass(
                 student_model=student_model,
                 teacher_model=teacher_model,
                 student_inputs=student_inputs,
@@ -253,6 +254,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_mean.append(teacher_stats[0])
                 teacher_var.append(teacher_stats[1])
                 teacher_loss.append(teacher_stats[2])
+                actual_label.append(labels)
+                uncertainties.append(uncertainty)
 
             total_train_loss += train_loss
 
@@ -279,7 +282,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 labels = labels.to(device)
 
                 with torch.no_grad():
-                    val_loss, teacher_stats = forward_pass(
+                    val_loss, teacher_stats, uncertainty = forward_pass(
                             student_model=student_model,
                             teacher_model=teacher_model,
                             student_inputs=student_inputs,
@@ -302,7 +305,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
     pbar.close()
 
-    # plot_uncertainty(teacher_mean, teacher_var, teacher_loss)
+    # plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties)
     # plot_uncertainty_histograms(teacher_mean, teacher_var)
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))

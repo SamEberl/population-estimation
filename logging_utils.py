@@ -67,22 +67,25 @@ def log_confusion_matrix_to_tensorboard(writer, step_nbr, labels, predictions, c
     writer.add_image('Confusion_Matrix', cm_image_tensor, global_step=step_nbr, dataformats='CHW')
 
 
-def plot_uncertainty(teacher_mean, teacher_var, teacher_loss):
+def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties):
     # Convert tensors in the lists to flat numpy arrays
     teacher_mean_numpy = [v.cpu().numpy().flatten() for v in teacher_mean]
     teacher_var_numpy = [v.cpu().numpy().flatten() for v in teacher_var]
     teacher_loss_numpy = [v.cpu().numpy().flatten() for v in teacher_loss]
+    uncertainties_numpy = [v.cpu().detach().numpy().flatten() for v in uncertainties]
 
     # Ensure all arrays are flat and concatenated
     teacher_mean_flat = np.concatenate(teacher_mean_numpy)
     teacher_var_flat = np.concatenate(teacher_var_numpy)
     teacher_loss_flat = np.concatenate(teacher_loss_numpy)
+    teacher_loss_flat = np.sqrt(teacher_loss_flat)+1 / (actual_label+1)
+    uncertainties_flat =np.concatenate(uncertainties_numpy)
 
     s = 1
 
     # Plot for mean vs. loss
-    plt.figure(figsize=(15, 15))
-    ax1 = plt.subplot(2, 2, 1)  # 1 row, 2 columns, 1st plot
+    plt.figure(figsize=(15, 10))
+    ax1 = plt.subplot(2, 3, 1)  # 1 row, 2 columns, 1st plot
     ax1.scatter(teacher_mean_flat, teacher_loss_flat, color='blue', s=s)
     ax1.set_title("Mean vs. Loss")
     ax1.set_xlabel("Mean")
@@ -91,7 +94,7 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss):
     ax1.set_yscale('log')
 
     # Plot for var vs. loss
-    ax2 = plt.subplot(2, 2, 2)  # 1 row, 2 columns, 2nd plot
+    ax2 = plt.subplot(2, 3, 2)  # 1 row, 2 columns, 2nd plot
     ax2.scatter(teacher_var_flat, teacher_loss_flat, color='red', s=s)
     ax2.set_title("Var vs. Loss")
     ax2.set_xlabel("Var")
@@ -99,7 +102,7 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss):
     ax2.set_xscale('log')
     ax2.set_yscale('log')
 
-    ax2 = plt.subplot(2, 2, 3)  # 1 row, 2 columns, 2nd plot
+    ax2 = plt.subplot(2, 3, 3)  # 1 row, 2 columns, 2nd plot
     ax2.scatter(teacher_var_flat/teacher_mean_flat, teacher_loss_flat, color='black', s=s)
     ax2.set_title("Fano vs. Loss")
     ax2.set_xlabel("Var/Mean")
@@ -107,7 +110,7 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss):
     ax2.set_xscale('log')
     ax2.set_yscale('log')
 
-    ax2 = plt.subplot(2, 2, 4)  # 1 row, 2 columns, 2nd plot
+    ax2 = plt.subplot(2, 3, 4)  # 1 row, 2 columns, 2nd plot
     ax2.scatter(np.sqrt(teacher_var_flat)/teacher_mean_flat, teacher_loss_flat, color='green', s=s)
     ax2.set_title("CV vs. Loss")
     ax2.set_xlabel("CV")
@@ -115,13 +118,21 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss):
     # ax2.set_xscale('log')
     ax2.set_yscale('log')
 
-    # ax2 = plt.subplot(2, 3, 6)  # 1 row, 2 columns, 2nd plot
-    # ax2.scatter(teacher_mean_flat**2/teacher_var_flat, teacher_loss_flat, color='green', s=s)
-    # ax2.set_title("SNR vs. Loss")
-    # ax2.set_xlabel("SNR")
-    # ax2.set_ylabel("Loss")
-    # # ax2.set_xscale('log')
-    # ax2.set_yscale('log')
+    ax2 = plt.subplot(2, 3, 5)  # 1 row, 2 columns, 2nd plot
+    ax2.scatter(teacher_mean_flat**2/teacher_var_flat, teacher_loss_flat, color='purple', s=s)
+    ax2.set_title("SNR vs. Loss")
+    ax2.set_xlabel("SNR")
+    ax2.set_ylabel("Loss")
+    # ax2.set_xscale('log')
+    ax2.set_yscale('log')
+
+    ax2 = plt.subplot(2, 3, 6)  # 1 row, 2 columns, 2nd plot
+    ax2.scatter(uncertainties_flat, teacher_loss_flat, color='red', s=s)
+    ax2.set_title("SNR vs. Loss")
+    ax2.set_xlabel("SNR")
+    ax2.set_ylabel("Loss")
+    # ax2.set_xscale('log')
+    ax2.set_yscale('log')
 
     plt.tight_layout()
     plt.savefig('/home/sam/Desktop/logs/figs/measureOverLoss.png')

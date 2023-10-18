@@ -15,7 +15,7 @@ class fixMatch(nn.Module):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc_preds = nn.Linear(self.model.num_features, nbr_outputs)
-        self.fc_log_var = nn.Linear(self.model.num_features, nbr_outputs)
+        self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
         self.unsupervised_factor = 1_000_000 / self.model.num_features
 
         supervised_losses = {'L1': nn.L1Loss(),
@@ -32,8 +32,9 @@ class fixMatch(nn.Module):
         features = self.model(x)
         prediction = self.fc_preds(features).flatten()
         prediction = torch.pow(2, prediction)
-        log_var = self.fc_log_var(features).flatten()
-        return prediction, features, log_var
+        uncertainty = self.uncertainty(features).flatten()
+        uncertainty = torch.pow(2, uncertainty)
+        return prediction, features, uncertainty
 
     def loss_supervised(self, predictions, labels):
         loss = self.supervised_criterion(predictions, labels)
