@@ -24,6 +24,7 @@ train_params:
   ema_alpha: 0.99
   use_teacher: False
   seed: 42
+  num_samples_teacher: 200
 
 hparam_search:
   active: False
