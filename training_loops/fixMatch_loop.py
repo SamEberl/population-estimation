@@ -226,9 +226,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 step_nbr=step_nbr)
 
             if config['train_params']['use_teacher']:
-                print(f'teacher_mean: {teacher_stats[0]}')
-                print(f'teacher_spread: {teacher_stats[3]}')
-
                 teacher_mean.append(teacher_stats[0])
                 teacher_var.append(teacher_stats[1])
                 teacher_loss.append(teacher_stats[2])
