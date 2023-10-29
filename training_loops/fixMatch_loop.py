@@ -23,102 +23,76 @@ def forward_pass(student_model,
                  writer,
                  step_nbr,
                  save_img=False):
+    hparam_search = config['hparam_search']['active']
+
     if split == 'train':
         student_model.train()
     else:
         student_model.eval()
 
-    student_preds, student_features, uncertainty = student_model(student_inputs)
+    student_preds, student_features, student_uncertainty = student_model(student_inputs)
 
     # If label -> Calc loss on pred closest to mean
     label = True  # TODO: pass on whether label is present
     supervised_loss = 0
     if label:
-        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, uncertainty)
+        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_uncertainty)
 
-        hparam_search = config['hparam_search']['active']
         if not hparam_search:
             supervised_loss_name = config['model_params']['supervised_criterion']
             writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
             loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
             writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
 
-    teacher_mean = 0
-    teacher_var = 0
-    teacher_loss = 0
+    teacher_preds_mean = 0
+    teacher_preds_var = 0
+    teacher_preds_loss = 0
     unsupervised_loss = 0
+    euclidean_spread = 0
     if split == 'train' and config['train_params']['use_teacher']:
-        num_samples = 30  # TODO: Put n into config
+        num_samples = config['train_params']['num_samples_teacher']
 
         # Ensure dropout is active during evaluation
         teacher_model.train()
 
         # Store all predictions
         n_teacher_preds = []
+        n_teacher_features = []
 
         with torch.no_grad():  # Ensure no gradients are computed
             for _ in range(num_samples):
-                teacher_preds, teacher_features, teacher_log_var = teacher_model(teacher_inputs)
+                teacher_preds, teacher_features, teacher_uncertainty = teacher_model(teacher_inputs)
                 n_teacher_preds.append(teacher_preds)
+                n_teacher_features.append(teacher_features)
 
         n_teacher_preds = torch.stack(n_teacher_preds)
+        n_teacher_features = torch.stack(n_teacher_features)
 
         # Compute mean and variance
-        teacher_mean = n_teacher_preds.mean(dim=0)
-        teacher_var = n_teacher_preds.var(dim=0)
-        teacher_loss = (teacher_mean - labels)**2
+        teacher_preds_mean = n_teacher_preds.mean(dim=0)
+        teacher_preds_var = n_teacher_preds.var(dim=0)
+        teacher_preds_loss = (teacher_preds_mean - labels)**2
 
-        # If mean & var below threshold -> Calc consistency loss on features
-        # if check: # TODO: compare mean and var to a threshold
-        #     teacher_preds, teacher_features = teacher_model(teacher_inputs)
-        #     unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
-        #     # TODO: scale unsupervised_loss to be similar to supervised_loss
-        #     writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
+        # Get averaged features
+        teacher_features_mean = n_teacher_features.mean(dim=0)
 
-    loss = supervised_loss + unsupervised_loss
+        # Calculate the squared differences
+        squared_diffs = (n_teacher_features - teacher_features_mean) ** 2
+        # print(f'diffs: {squared_diffs.shape}')
+        # Sum along the feature dimension
+        summed_squared_diffs = squared_diffs.sum(dim=-1)
+        # print(f'dim1: {summed_squared_diffs.shape}')
+        # Take the square root to get the Euclidean distances
+        euclidean_distances = torch.sqrt(summed_squared_diffs)
+        # print(f'sqrt: {euclidean_distances.shape}')
+        euclidean_spread = euclidean_distances.std(dim=0)
+        # print(f'spread: {euclidean_spread.shape}')
 
-    # if save_img:
-    #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
-    #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
-    #     log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
-    #                                        student_preds.cpu().flatten())
-
-    return loss, (teacher_mean, teacher_var, teacher_loss), uncertainty
-
-
-def forward_pass_archive(student_model,
-                 teacher_model,
-                 student_inputs,
-                 teacher_inputs,
-                 labels,
-                 config,
-                 split,
-                 writer,
-                 step_nbr,
-                 save_img=False):
-    if split == 'train':
-        student_model.train()
-    else:
-        student_model.eval()
-
-    student_preds, student_features = student_model(student_inputs)
-    supervised_loss = student_model.loss_supervised(student_preds, labels)
-
-    hparam_search = config['hparam_search']['active']
-    if not hparam_search:
-        supervised_loss_name = config['model_params']['supervised_criterion']
-        writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss.item(), step_nbr)
-        loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-        writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
-
-    unsupervised_loss = 0
-    if split == 'train' and config['train_params']['use_teacher']:
-        teacher_preds, teacher_features = teacher_model(teacher_inputs)
-        unsupervised_loss = student_model.unsupervised_loss(student_features, teacher_features)
-        #TODO scale unsupervised_loss to be similar to supervised_loss
-
-        if not hparam_search:
-            writer.add_scalar(f'Loss-{unsupervised_loss}/{split}', unsupervised_loss.item(), step_nbr)
+        # If mean OR var OR uncertainty below threshold -> Calc consistency loss on features
+        check = False
+        if check:  # TODO: compare mean and var to a threshold
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean)
+            writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
     loss = supervised_loss + unsupervised_loss
 
@@ -128,7 +102,7 @@ def forward_pass_archive(student_model,
     #     log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
     #                                        student_preds.cpu().flatten())
 
-    return loss
+    return loss, (teacher_preds_mean, teacher_preds_var, teacher_preds_loss, euclidean_spread), student_uncertainty
 
 
 def batch_generator(dataloader):
@@ -224,6 +198,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     teacher_loss = []
     actual_label = []
     uncertainties = []
+    euclidean_spread = []
     # Train the model
     for epoch in range(num_epochs):
         val_generator = batch_generator(val_dataloader)
@@ -251,11 +226,15 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 step_nbr=step_nbr)
 
             if config['train_params']['use_teacher']:
+                print(f'teacher_mean: {teacher_stats[0]}')
+                print(f'teacher_spread: {teacher_stats[3]}')
+
                 teacher_mean.append(teacher_stats[0])
                 teacher_var.append(teacher_stats[1])
                 teacher_loss.append(teacher_stats[2])
                 actual_label.append(labels)
                 uncertainties.append(uncertainty)
+                euclidean_spread.append(teacher_stats[3])
 
             total_train_loss += train_loss
 
@@ -300,12 +279,13 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', val_loss, config['train_params']['LR'])
                     return
 
-            pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
+            # pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
+            pbar.set_description(f"{i}/{len(train_dataloader)} | Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss:.2f}")
             pbar.update(1)
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
     pbar.close()
 
-    # plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties)
-    # plot_uncertainty_histograms(teacher_mean, teacher_var)
+    plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties, euclidean_spread)
+    plot_uncertainty_histograms(teacher_mean, teacher_var)
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
