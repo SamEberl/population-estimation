@@ -22,7 +22,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
-  use_teacher: False
+  use_teacher: True
   seed: 42
   num_samples_teacher: 200
 
