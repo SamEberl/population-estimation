@@ -6,6 +6,7 @@ import torchvision.transforms.functional as TF
 from PIL import Image
 import logging
 import numpy as np
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -85,12 +86,15 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, unce
     uncertainties_flat = np.concatenate(uncertainties_numpy)
     euclidean_spread_flat = np.concatenate(euclidean_spread_numpy)
 
-    np.save('/home/sam/Desktop/logs/figs/teacher_mean_flat.npy', teacher_mean_flat)
-    np.save('/home/sam/Desktop/logs/figs/teacher_var_flat.npy', teacher_var_flat)
-    np.save('/home/sam/Desktop/logs/figs/teacher_loss_flat.npy', teacher_loss_flat)
-    np.save('/home/sam/Desktop/logs/figs/actual_label_flat.npy', actual_label_flat)
-    np.save('/home/sam/Desktop/logs/figs/uncertainties_flat.npy', uncertainties_flat)
-    np.save('/home/sam/Desktop/logs/figs/euclidean_spread_flat.npy', euclidean_spread_flat)
+    # path = '/home/sam/Desktop/logs/figs/'
+    path = '/mnt1/sameberl/logs/computed_numpy'
+
+    np.save(os.path.join(path, 'teacher_mean_flat.npy'), teacher_mean_flat)
+    np.save(os.path.join(path, 'teacher_var_flat.npy'), teacher_var_flat)
+    np.save(os.path.join(path, 'teacher_loss_flat.npy'), teacher_loss_flat)
+    np.save(os.path.join(path, 'actual_label_flat.npy'), actual_label_flat)
+    np.save(os.path.join(path, 'uncertainties_flat.npy'), uncertainties_flat)
+    np.save(os.path.join(path, 'euclidean_spread_flat.npy'), euclidean_spread_flat)
 
     # teacher_loss_flat = teacher_loss_flat / (actual_label_flat + 1)
     # teacher_loss_flat = actual_label_flat
