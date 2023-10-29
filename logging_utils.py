@@ -67,19 +67,33 @@ def log_confusion_matrix_to_tensorboard(writer, step_nbr, labels, predictions, c
     writer.add_image('Confusion_Matrix', cm_image_tensor, global_step=step_nbr, dataformats='CHW')
 
 
-def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties):
+# def plot_uncertainty(teacher_mean_flat, teacher_var_flat, teacher_loss_flat, actual_label_flat, uncertainties_flat):
+def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, uncertainties, euclidean_spread):
     # Convert tensors in the lists to flat numpy arrays
     teacher_mean_numpy = [v.cpu().numpy().flatten() for v in teacher_mean]
     teacher_var_numpy = [v.cpu().numpy().flatten() for v in teacher_var]
     teacher_loss_numpy = [v.cpu().numpy().flatten() for v in teacher_loss]
+    actual_label_numpy = [v.cpu().numpy().flatten() for v in actual_label]
     uncertainties_numpy = [v.cpu().detach().numpy().flatten() for v in uncertainties]
+    euclidean_spread_numpy = [v.cpu().detach().numpy().flatten() for v in euclidean_spread]
 
     # Ensure all arrays are flat and concatenated
     teacher_mean_flat = np.concatenate(teacher_mean_numpy)
     teacher_var_flat = np.concatenate(teacher_var_numpy)
     teacher_loss_flat = np.concatenate(teacher_loss_numpy)
-    teacher_loss_flat = np.sqrt(teacher_loss_flat)+1 / (actual_label+1)
-    uncertainties_flat =np.concatenate(uncertainties_numpy)
+    actual_label_flat = np.concatenate(actual_label_numpy)
+    uncertainties_flat = np.concatenate(uncertainties_numpy)
+    euclidean_spread_flat = np.concatenate(euclidean_spread_numpy)
+
+    np.save('/home/sam/Desktop/logs/figs/teacher_mean_flat.npy', teacher_mean_flat)
+    np.save('/home/sam/Desktop/logs/figs/teacher_var_flat.npy', teacher_var_flat)
+    np.save('/home/sam/Desktop/logs/figs/teacher_loss_flat.npy', teacher_loss_flat)
+    np.save('/home/sam/Desktop/logs/figs/actual_label_flat.npy', actual_label_flat)
+    np.save('/home/sam/Desktop/logs/figs/uncertainties_flat.npy', uncertainties_flat)
+    np.save('/home/sam/Desktop/logs/figs/euclidean_spread_flat.npy', euclidean_spread_flat)
+
+    # teacher_loss_flat = teacher_loss_flat / (actual_label_flat + 1)
+    # teacher_loss_flat = actual_label_flat
 
     s = 1
 
@@ -128,14 +142,14 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, unce
 
     ax2 = plt.subplot(2, 3, 6)  # 1 row, 2 columns, 2nd plot
     ax2.scatter(uncertainties_flat, teacher_loss_flat, color='red', s=s)
-    ax2.set_title("SNR vs. Loss")
-    ax2.set_xlabel("SNR")
+    ax2.set_title("Uncertainty vs. Loss")
+    ax2.set_xlabel("Uncertainty")
     ax2.set_ylabel("Loss")
-    # ax2.set_xscale('log')
+    ax2.set_xscale('log')
     ax2.set_yscale('log')
 
     plt.tight_layout()
-    plt.savefig('/home/sam/Desktop/logs/figs/measureOverLoss.png')
+    plt.savefig('/home/sam/Desktop/logs/figs/measureOverLoss1.png')
 
 
 def plot_uncertainty_histograms(teacher_mean, teacher_var):
