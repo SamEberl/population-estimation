@@ -87,7 +87,7 @@ def plot_uncertainty(teacher_mean, teacher_var, teacher_loss, actual_label, unce
     euclidean_spread_flat = np.concatenate(euclidean_spread_numpy)
 
     # path = '/home/sam/Desktop/logs/figs/'
-    path = '/mnt1/sameberl/logs/computed_numpy'
+    path = '/home/sameberl/logs/computed_numpy'
 
     np.save(os.path.join(path, 'teacher_mean_flat.npy'), teacher_mean_flat)
     np.save(os.path.join(path, 'teacher_var_flat.npy'), teacher_var_flat)
