@@ -91,12 +91,13 @@ def forward_pass(student_model,
         if config['train_params']['use_teacher']:
             # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
             pseudo_label_mask = teacher_features_spread < 2.5
-            # pseudo_label_mask = teacher_data_uncertainty < ?
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
-            writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
-            print(f'unsupervised_loss: {unsupervised_loss.item()}')
             print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
+            # pseudo_label_mask = teacher_data_uncertainty < ?
+            if torch.sum(pseudo_label_mask) > 0:
+                unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
+                writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
+                print(f'unsupervised_loss: {unsupervised_loss.item()}')
 
         check2 = False
         if check2:  # TODO unsupervised loss on prediction instead of features
