@@ -39,7 +39,7 @@ def forward_pass(student_model,
         supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
     if not hparam_search:
-        print('here')
+
         supervised_loss_name = config['model_params']['supervised_criterion']
         if supervised_loss != -1:
             writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss, step_nbr)
@@ -48,6 +48,10 @@ def forward_pass(student_model,
         if loss_mae != -1:
             writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
         writer.add_scalar(f'Percentage-Labeled/{split}', torch.sum(mask_labeled)/len(mask_labeled), step_nbr)
+
+        print(f'supervised_loss: {supervised_loss}')
+        print(f'L1-Compare: {loss_mae}')
+        print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
 
     unsupervised_loss = 0
     if split == 'train' and config['train_params']['use_teacher']:
@@ -89,9 +93,10 @@ def forward_pass(student_model,
             pseudo_label_mask = teacher_features_spread < 2.5
             # pseudo_label_mask = teacher_data_uncertainty < ?
             unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
-            print('there')
             writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
+            print(f'unsupervised_loss: {unsupervised_loss.item()}')
+            print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
 
         check2 = False
         if check2:  # TODO unsupervised loss on prediction instead of features
@@ -100,6 +105,7 @@ def forward_pass(student_model,
 
     loss = supervised_loss + unsupervised_loss
     writer.add_scalar(f'Loss-Total/{split}', loss, step_nbr)
+    print(f'Loss-total: {loss}')
 
     # if save_img:
     #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
