@@ -2,7 +2,7 @@ model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
-  retrain: True
+  retrain: False
 #  retrain_from: 'convnextv2_atto.fcmae_2023_10_14-13_56_54.pt'
 #  retrain_from: 'convnextv2_atto.fcmae_2023_10_16-18_47_24.pt'
   retrain_from: 'convnextv2_atto.fcmae_2023_10_18-18_43_52.pt'
@@ -16,14 +16,16 @@ data_params:
   train_batch_size: 32
   #val_batch_size:  1024
   num_workers: 6
+  semi_supervised: True
+  percentage_unlabeled: 0.5
 
 train_params:
   LR: 0.00001
-  max_epochs: 1
+  max_epochs: 5
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
-  ema_alpha: 0.99
+  ema_alpha: 0.95
   use_teacher: True
   seed: 42
   num_samples_teacher: 80

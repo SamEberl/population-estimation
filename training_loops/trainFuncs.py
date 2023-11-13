@@ -89,7 +89,6 @@ def train_ae(ae_config, log_dir):
     writer.close()
     pbar.close()
 
-    # TODO: give each model unique name
     torch.save(ae_model.state_dict(), os.path.join(ae_config['logging_params']['save_dir'], ae_config['logging_params']['name']))
 
     return ae_model
@@ -185,7 +184,6 @@ def train_reg(reg_config, log_dir, ae_model):
     writer.close()
     pbar.close()
 
-    # TODO: give each model unique name
     torch.save(reg_model.state_dict(), os.path.join(reg_config['logging_params']['save_dir'], reg_config['logging_params']['name']))
 
 

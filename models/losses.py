@@ -30,14 +30,39 @@ class AleatoricLoss(nn.Module):
         return loss
 
 
+def maskedL1Loss(pred, actual):
+    mask = actual != -1
+    l1_loss = torch.abs(pred - actual)
+    masked_l1_loss = l1_loss * mask
+    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+    pred_numel = torch.sum(mask)
+    if pred_numel > 0:
+        loss = torch.sum(masked_l1_loss) / pred_numel
+    else:
+        loss = torch.tensor([-1], dtype=torch.float32)
+        if torch.cuda.is_available():
+            loss = loss.cuda()
+    return loss
+
+
 class LinUncertaintyLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, pred, actual, log_var):
-        loss = (pred - actual)**2
-        uncertainty_loss = torch.abs(log_var - loss)
-        loss = torch.sum(loss + uncertainty_loss) / pred.numel()
+        mask = actual != -1
+        squared_diff = (pred - actual) ** 2
+        uncertainty_loss = torch.abs(log_var - squared_diff)
+        masked_squared_diff = squared_diff * mask
+        masked_uncertainty_loss = uncertainty_loss * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        pred_numel = torch.sum(mask)
+        if pred_numel > 0:
+            loss = torch.sum(masked_squared_diff + masked_uncertainty_loss) / pred_numel
+        else:
+            loss = torch.tensor([-1], dtype=torch.float32)
+            if torch.cuda.is_available():
+                loss = loss.cuda()
         return loss
 
 

@@ -1,4 +1,6 @@
 import csv
+import random
+
 import numpy as np
 import torch
 import os
@@ -14,8 +16,10 @@ class studentTeacherDataset(Dataset):
                  data_dir,
                  split: str = "train",
                  use_teacher=False,
+                 semi_supervised=False,
                  student_transform=None,
-                 teacher_transform=None):
+                 teacher_transform=None,
+                 percentage_unlabeled=0.0):
         self.student_transform = student_transform
         self.teacher_transform = teacher_transform
         self.split = split
@@ -24,12 +28,15 @@ class studentTeacherDataset(Dataset):
         self.clip_min = 0
         self.clip_max = 4000
         self.use_teacher = use_teacher
+        self.percentage_unlabeled = percentage_unlabeled
 
         splits = ['train', 'valid', 'test']
         if split not in splits:
             raise ValueError(f'split: "{split}" not in {splits}')
         else:
             self.get_data_paths()
+            if semi_supervised and split == 'train':
+                self.split_labeled_unlabeled()
         logger.info(f'{split}-dataset length: {len(self.data)}')
 
     def __len__(self):
@@ -87,6 +94,18 @@ class studentTeacherDataset(Dataset):
                         # print(f'Could not find file: {file_path}')
         # print(f'In: {self.data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
 
+    def split_labeled_unlabeled(self):
+        # Simply remove 80% of labels -> Loss has to be adjusted. Sometimes batch has no labels.
+        # Alternataive option would be: 2 different datasets. One with and one without labels
+        random.seed(42)
+        random.shuffle(self.data)
+        total_images = len(self.data)
+        unlabeled_size = int(self.percentage_unlabeled * total_images)
+
+        labeled_data = self.data[unlabeled_size:]
+        unlabeled_data = [(path, -1, name) for path, _, name in self.data[:unlabeled_size]]
+
+        self.data = unlabeled_data + labeled_data
 
     def generate_rgb_img(self, file_path):
         try:

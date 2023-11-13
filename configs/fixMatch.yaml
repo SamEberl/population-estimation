@@ -14,14 +14,16 @@ data_params:
   train_batch_size: 128
   #val_batch_size:  1024
   num_workers: 32
+  semi_supervised: True
+  percentage_unlabeled: 0.5
 
 train_params:
   LR: 0.00005
-  max_epochs: 1
+  max_epochs: 300
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
-  ema_alpha: 0.99
+  ema_alpha: 0.95
   use_teacher: True
   seed: 42
   num_samples_teacher: 200

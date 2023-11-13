@@ -124,7 +124,7 @@ class vaeBasic(BaseAE):
     def forward(self, input, **kwargs):
         mu, log_var = self.encode(input)
         z = self.reparameterize(mu, log_var)
-        return [self.decode(z), input, mu, log_var] #TODO: replace mu with z
+        return [self.decode(z), input, mu, log_var] #Potential improvement: replace mu with z
 
     def loss_function(self,
                       *args,

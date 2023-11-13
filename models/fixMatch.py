@@ -16,8 +16,8 @@ class fixMatch(nn.Module):
         self.model = create_model(pretrained_weights, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc_preds = nn.Linear(self.model.num_features, nbr_outputs)
         self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
-        #TODO scale unsupervised_loss to be similar to supervised_loss / Calc proper factor
-        self.unsupervised_factor = 1_000_000 / self.model.num_features
+        # factor to scale unsupervised_loss to be similar to supervised_loss
+        self.unsupervised_factor = 100_000_000 / self.model.num_features
 
         supervised_losses = {'L1': nn.L1Loss(),
                              'MSE': nn.MSELoss(),
@@ -28,8 +28,6 @@ class fixMatch(nn.Module):
                              'SquaredUncertainty': SquaredUncertaintyLoss()}
 
         self.supervised_criterion = supervised_losses[supervised_criterion]
-
-        self.unsupervised_criterion = nn.MSELoss()
 
     def forward(self, x):
         features = self.model(x)
@@ -47,6 +45,10 @@ class fixMatch(nn.Module):
         loss = self.supervised_criterion(predictions, labels, log_var)
         return loss
 
-    def loss_unsupervised(self, student_features, teacher_features):
-        loss = self.unsupervised_criterion(student_features, teacher_features) * self.unsupervised_factor
+    def loss_unsupervised(self, student_features, teacher_features, mask):
+        squared_difference = torch.sum((student_features - teacher_features) ** 2, dim=1)
+        masked_squared_difference = squared_difference * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        mse = torch.sum(masked_squared_difference) / torch.sum(mask)
+        loss = mse * self.unsupervised_factor
         return loss
