@@ -49,9 +49,9 @@ def forward_pass(student_model,
             writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
         writer.add_scalar(f'Percentage-Labeled/{split}', torch.sum(mask_labeled)/len(mask_labeled), step_nbr)
 
-        print(f'supervised_loss: {supervised_loss}')
-        print(f'L1-Compare: {loss_mae}')
-        print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
+        # print(f'supervised_loss: {supervised_loss}')
+        # print(f'L1-Compare: {loss_mae}')
+        # print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
 
     unsupervised_loss = 0
     if split == 'train' and config['train_params']['use_teacher']:
@@ -92,12 +92,12 @@ def forward_pass(student_model,
             # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
             pseudo_label_mask = teacher_features_spread < 2.5
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
-            print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
+            #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
             # pseudo_label_mask = teacher_data_uncertainty < ?
             if torch.sum(pseudo_label_mask) > 0:
                 unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
                 writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
-                print(f'unsupervised_loss: {unsupervised_loss.item()}')
+                #print(f'unsupervised_loss: {unsupervised_loss.item()}')
 
         check2 = False
         if check2:  # TODO unsupervised loss on prediction instead of features
@@ -106,7 +106,7 @@ def forward_pass(student_model,
 
     loss = supervised_loss + unsupervised_loss
     writer.add_scalar(f'Loss-Total/{split}', loss, step_nbr)
-    print(f'Loss-total: {loss}')
+    # print(f'Loss-total: {loss}')
 
     # if save_img:
     #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
