@@ -39,6 +39,7 @@ def forward_pass(student_model,
         supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
     if not hparam_search:
+        print('here')
         supervised_loss_name = config['model_params']['supervised_criterion']
         if supervised_loss != -1:
             writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss, step_nbr)
@@ -88,6 +89,7 @@ def forward_pass(student_model,
             pseudo_label_mask = teacher_features_spread < 2.5
             # pseudo_label_mask = teacher_data_uncertainty < ?
             unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
+            print('there')
             writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
 
