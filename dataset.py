@@ -191,6 +191,7 @@ class studentTeacherDataset(Dataset):
         noisy_channels = image_bands + noise
 
         # Clip the values to be within [0, 1]
-        noisy_channels = torch.clamp(noisy_channels, 0, 1)
+        # noisy_channels = torch.clamp(noisy_channels, 0, 1)
+        noisy_channels = np.clip(noisy_channels, 0, 1)
 
         return noisy_channels
