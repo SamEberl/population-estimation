@@ -63,6 +63,16 @@ class studentTeacherDataset(Dataset):
         else:
             student_data = data
 
+        print(f'student_data[0]: \n{student_data[0, :, :]}')
+        print(f'student_data[1]: \n{student_data[1, :, :]}')
+        print(f'student_data[2]: \n{student_data[2, :, :]}')
+        print(f'student_data[3]: \n{student_data[3, :, :]}')
+        print(f'student_data[4]: \n{student_data[4, :, :]}')
+        print(f'student_data[5]: \n{student_data[5, :, :]}')
+        print(f'student_data[6]: \n{student_data[6, :, :]}')
+        print(f'student_data[7]: \n{student_data[7, :, :]}')
+
+
         if self.use_teacher == True:
             if self.teacher_transform is not None:
                 teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
