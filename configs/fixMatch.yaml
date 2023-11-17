@@ -47,6 +47,12 @@ student_transforms:
       p: 0.5
   - RandomRotate90:
       p: 0.5
+  - GaussNoise:
+      var_limit: (10.0, 50.0)
+      mean: 0
+      per_channel: True
+      always_apply: False
+      p: 0.5
 
 teacher_transforms:
   - HorizontalFlip:
