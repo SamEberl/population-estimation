@@ -58,11 +58,19 @@ class studentTeacherDataset(Dataset):
         # transformed_data = self.student_transform(image=data)["image"]
         # print(f'tens: {tensor_data.shape}')
 
-        student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
+        if self.student_transform is not None:
+            student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
+        else:
+            student_data = data
+
         if self.use_teacher == True:
-            teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
+            if self.teacher_transform is not None:
+                teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
+            else:
+                teacher_data = data
         else:
             teacher_data = 0
+
         return student_data, teacher_data, label, datapoint_name
 
 
