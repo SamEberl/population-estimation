@@ -118,8 +118,7 @@ def forward_pass(student_model,
     if save_img:
         #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
         writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
-        log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(),
-                                           student_preds.cpu().flatten())
+        # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
         if random.randint(0, 10) < 2:
             exit()
 
