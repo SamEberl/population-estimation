@@ -205,7 +205,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                            weight_decay=config['train_params']['L2_reg'] * 2)
     scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
 
-    pbar = tqdm(total=config['train_params']['max_epochs'], ncols=140)
+    pbar = tqdm(total=len(train_dataloader), ncols=140)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
