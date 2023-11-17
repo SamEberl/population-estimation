@@ -164,7 +164,7 @@ def get_dataloader(config, student_transform, teacher_transform):
     percentage_unlabeled = config['data_params']['percentage_unlabeled']
 
     train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, semi_supervised=semi_supervised, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled)
-    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, semi_supervised=semi_supervised, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled)
+    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, semi_supervised=semi_supervised, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled)
 
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)
