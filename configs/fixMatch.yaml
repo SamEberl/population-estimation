@@ -19,14 +19,14 @@ data_params:
 
 train_params:
   LR: 0.00005
-  max_epochs: 300
+  max_epochs: 140
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
   use_teacher: True
   seed: 42
-  num_samples_teacher: 200
+  num_samples_teacher: 100
 
 hparam_search:
   active: False
