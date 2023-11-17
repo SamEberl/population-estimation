@@ -17,7 +17,7 @@ class fixMatch(nn.Module):
         self.fc_preds = nn.Linear(self.model.num_features, nbr_outputs)
         self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
         # factor to scale unsupervised_loss to be similar to supervised_loss
-        self.unsupervised_factor = 1e6  # 1_000_000 / self.model.num_features
+        self.unsupervised_factor = 1e5  # 1_000_000 / self.model.num_features
 
         supervised_losses = {'L1': nn.L1Loss(),
                              'MSE': nn.MSELoss(),
