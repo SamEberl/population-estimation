@@ -53,7 +53,7 @@ def forward_pass(student_model,
         # print(f'L1-Compare: {loss_mae}')
         # print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
 
-    unsupervised_loss = torch.tensor([1e6], dtype=torch.float32)
+    unsupervised_loss = torch.tensor([1e7], dtype=torch.float32)
     if torch.cuda.is_available():
         unsupervised_loss = unsupervised_loss.cuda()
     if split == 'train' and config['train_params']['use_teacher']:
