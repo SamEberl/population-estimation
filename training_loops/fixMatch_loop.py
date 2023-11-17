@@ -88,6 +88,10 @@ def forward_pass(student_model,
         # Compute data uncertainty
         teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
 
+        writer.add_scalar(f'Teacher_model_uncertainty/{split}', torch.mean(teacher_model_uncertainty), step_nbr)
+        writer.add_scalar(f'Teacher_feature_spread/{split}', torch.mean(teacher_features_spread), step_nbr)
+        writer.add_scalar(f'Teacher_data_uncertainty/{split}', torch.mean(teacher_data_uncertainty), step_nbr)
+
         if config['train_params']['use_teacher']:
             # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
             pseudo_label_mask = teacher_features_spread < 2.5
