@@ -184,7 +184,8 @@ class studentTeacherDataset(Dataset):
             raise ValueError("Input tensor must have 3 channels.")
 
         # Generate Gaussian noise
-        noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
+        # noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
+        noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
 
         # Add noise to the input channels
         noisy_channels = image_bands + noise
