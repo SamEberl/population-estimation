@@ -100,8 +100,8 @@ def forward_pass(student_model,
             # pseudo_label_mask = teacher_data_uncertainty < ?
             if torch.sum(pseudo_label_mask) > 0:
                 unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
-                writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
                 #print(f'unsupervised_loss: {unsupervised_loss.item()}')
+            writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
         check2 = False
         if check2:  # TODO unsupervised loss on prediction instead of features
