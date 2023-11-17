@@ -167,7 +167,7 @@ class studentTeacherDataset(Dataset):
             print(f'Image could not be created from: {file_path}')
             return None
 
-    def add_gaussian_noise(self, image_bands, mean=0, std=0.1):
+    def add_gaussian_noise(self, image_bands, mean=0, std=0.05, p=0.5):
         """
         Add Gaussian noise to the input channels and clip the values to be within [0, 1].
 
@@ -183,15 +183,59 @@ class studentTeacherDataset(Dataset):
         if image_bands.shape[0] != 3:
             raise ValueError("Input tensor must have 3 channels.")
 
-        # Generate Gaussian noise
-        # noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
-        noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
+        apply_noise = np.random.rand() < p
 
-        # Add noise to the input channels
-        noisy_channels = image_bands + noise
+        if apply_noise:
+            # Generate Gaussian noise
+            # noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
+            noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
 
-        # Clip the values to be within [0, 1]
-        # noisy_channels = torch.clamp(noisy_channels, 0, 1)
-        noisy_channels = np.clip(noisy_channels, 0, 1)
+            # Add noise to the input channels
+            noisy_channels = image_bands + noise
 
-        return noisy_channels
+            # Clip the values to be within [0, 1]
+            # noisy_channels = torch.clamp(noisy_channels, 0, 1)
+            noisy_channels = np.clip(noisy_channels, 0, 1)
+
+            return noisy_channels
+
+        else:
+            return image_bands
+
+
+
+    def block_out_patch(self, image_bands, patch_size=(16, 16), probability=0.5):
+        """
+        Replace a small patch in the input image bands with its mean with a specified probability.
+
+        Args:
+        - image_bands (np.ndarray): Input array with shape (height, width, 3).
+        - patch_size (tuple): Size of the patch to be replaced (default is (16, 16)).
+        - probability (float): Probability of applying the patch replacement (default is 0.5).
+
+        Returns:
+        - np.ndarray: Output array with patch replacement (if applied).
+        """
+        # Check if the input array has the correct shape
+        if image_bands.shape[2] != 3:
+            raise ValueError("Input array must have 3 channels.")
+
+        # Determine whether to apply patch replacement based on the specified probability
+        apply_patch = np.random.rand() < probability
+
+        if apply_patch:
+            # Randomly select the top-left corner of the patch
+            h, w = image_bands.shape[0], image_bands.shape[1]
+            top_left_h = np.random.randint(0, h - patch_size[0] + 1)
+            top_left_w = np.random.randint(0, w - patch_size[1] + 1)
+
+            # Extract the patch
+            patch = image_bands[top_left_h:top_left_h + patch_size[0], top_left_w:top_left_w + patch_size[1], :]
+
+            # Calculate the mean of the patch
+            patch_mean = np.mean(patch, axis=(0, 1))
+
+            # Replace the patch with its mean
+            image_bands[top_left_h:top_left_h + patch_size[0], top_left_w:top_left_w + patch_size[1], :] = patch_mean
+
+        return image_bands
