@@ -48,7 +48,7 @@ student_transforms:
   - RandomRotate90:
       p: 0.5
   - GaussNoise:
-      var_limit: (10.0, 50.0)
+      #var_limit: (10.0, 50.0)
       mean: 0
       per_channel: True
       always_apply: False
