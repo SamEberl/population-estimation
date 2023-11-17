@@ -61,6 +61,7 @@ class studentTeacherDataset(Dataset):
 
         if self.student_transform is not None:
             student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
+            student_data[0:3, :, :] = self.add_gaussian_noise(student_data[0:3, :, :])
         else:
             student_data = data
 
@@ -165,3 +166,30 @@ class studentTeacherDataset(Dataset):
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
             return None
+
+    def add_gaussian_noise(self, image_bands, mean=0, std=0.1):
+        """
+        Add Gaussian noise to the input channels and clip the values to be within [0, 1].
+
+        Args:
+        - channels (torch.Tensor): Input tensor with shape (3, height, width).
+        - mean (float): Mean of the Gaussian noise (default is 0).
+        - std (float): Standard deviation of the Gaussian noise (default is 0.1).
+
+        Returns:
+        - torch.Tensor: Output tensor with Gaussian noise, clipped to be within [0, 1].
+        """
+        # Check if the input tensor has the correct shape
+        if image_bands.shape[0] != 3:
+            raise ValueError("Input tensor must have 3 channels.")
+
+        # Generate Gaussian noise
+        noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
+
+        # Add noise to the input channels
+        noisy_channels = image_bands + noise
+
+        # Clip the values to be within [0, 1]
+        noisy_channels = torch.clamp(noisy_channels, 0, 1)
+
+        return noisy_channels
