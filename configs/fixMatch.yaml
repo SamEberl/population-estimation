@@ -13,7 +13,7 @@ data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
   train_batch_size: 128
   #val_batch_size:  1024
-  num_workers: 26
+  num_workers: 16
   semi_supervised: True
   percentage_unlabeled: 0.5
 
