@@ -279,9 +279,11 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', val_loss, config['train_params']['LR'])
                     return
 
+            break
+
             pbar.set_description(f"Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
-        print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {total_val_loss / len(val_dataloader):.2f}')
+        print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss / len(val_dataloader)):.2f}')
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
