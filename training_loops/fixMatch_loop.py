@@ -287,8 +287,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         print(f'num_: {num_epochs}')
         print(f'total: {total_val_loss}')
         print(f'val: {len(val_dataloader)}')
-        print(f'Total_Val_Loss: {(total_val_loss / len(val_dataloader)):.2f}')
-        print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss / len(val_dataloader)):.2f}')
+        print(f'Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
+        print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
