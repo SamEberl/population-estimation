@@ -15,7 +15,7 @@ data_params:
   #val_batch_size:  1024
   num_workers: 32
   semi_supervised: True
-  percentage_unlabeled: 0.5
+  percentage_unlabeled: 0.8
 
 train_params:
   LR: 0.00005
