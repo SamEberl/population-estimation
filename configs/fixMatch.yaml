@@ -14,7 +14,7 @@ data_params:
   train_batch_size: 128
   #val_batch_size:  1024
   num_workers: 32
-  semi_supervised: True
+  drop_labels: False
   percentage_unlabeled: 0.0
 
 train_params:
@@ -24,7 +24,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  use_teacher: True
+  use_teacher: False
   seed: 42
   num_samples_teacher: 100
 

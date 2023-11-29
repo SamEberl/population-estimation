@@ -41,7 +41,6 @@ def forward_pass(student_model,
         supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
     if not hparam_search:
-
         supervised_loss_name = config['model_params']['supervised_criterion']
         if supervised_loss != -1:
             writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss, step_nbr)
@@ -159,12 +158,12 @@ def get_dataloader(config, student_transform, teacher_transform):
     #val_bs = config["data_params"]["val_batch_size"]
     num_workers = config["data_params"]["num_workers"]
     use_teacher = config['train_params']['use_teacher']
-    semi_supervised = config['data_params']['semi_supervised']
+    drop_labels = config['data_params']['drop_labels']
     seed = config['train_params']['seed']
     percentage_unlabeled = config['data_params']['percentage_unlabeled']
 
-    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, semi_supervised=semi_supervised, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled)
-    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, semi_supervised=semi_supervised, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled)
+    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, drop_labels=drop_labels, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled)
+    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, drop_labels=drop_labels, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled)
 
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)

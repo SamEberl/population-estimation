@@ -16,7 +16,7 @@ data_params:
   train_batch_size: 32
   #val_batch_size:  1024
   num_workers: 6
-  semi_supervised: True
+  drop_labels: True
   percentage_unlabeled: 0.5
 
 train_params:

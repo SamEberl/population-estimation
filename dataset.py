@@ -16,7 +16,7 @@ class studentTeacherDataset(Dataset):
                  data_dir,
                  split: str = "train",
                  use_teacher=False,
-                 semi_supervised=False,
+                 drop_labels=False,
                  student_transform=None,
                  teacher_transform=None,
                  percentage_unlabeled=0.0):
@@ -35,7 +35,7 @@ class studentTeacherDataset(Dataset):
             raise ValueError(f'split: "{split}" not in {splits}')
         else:
             self.get_data_paths()
-            if semi_supervised and split == 'train':
+            if drop_labels and split == 'train':
                 self.split_labeled_unlabeled()
         logger.info(f'{split}-dataset length: {len(self.data)}')
 
