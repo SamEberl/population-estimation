@@ -34,7 +34,9 @@ def forward_pass(student_model,
 
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
     mask_labeled = labels != -1
-    supervised_loss = 0
+    supervised_loss = torch.tensor(0, dtype=torch.float32)
+    if torch.cuda.is_available():
+        supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
         supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
