@@ -21,7 +21,7 @@ data_params:
   percentage_unlabeled: 0.0
 
 train_params:
-  LR: 0.005
+  LR: 0.05
   max_epochs: 140
   L2_reg: 0.005
   beta1: 0.9
