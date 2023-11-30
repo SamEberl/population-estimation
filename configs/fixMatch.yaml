@@ -1,4 +1,5 @@
-info: 'try aleatoric loss from kendall et al. to see if stable training is possible'
+info:
+  info: 'change lr to make aleatoric loss work'
 
 model_params:
   architecture: 'fixMatch'
@@ -20,7 +21,7 @@ data_params:
   percentage_unlabeled: 0.0
 
 train_params:
-  LR: 0.00005
+  LR: 0.005
   max_epochs: 140
   L2_reg: 0.005
   beta1: 0.9
