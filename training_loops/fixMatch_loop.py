@@ -49,7 +49,7 @@ def forward_pass(student_model,
         loss_rmse = maskedRMSELoss(student_preds, labels)
         if loss_mae != -1:
             writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
-            writer.add_scalar(f'Loss-MSE-Compare/{split}', loss_rmse, step_nbr)
+            writer.add_scalar(f'Loss-RMSE-Compare/{split}', loss_rmse, step_nbr)
         writer.add_scalar(f'Percentage-Labeled/{split}', torch.sum(mask_labeled)/len(mask_labeled), step_nbr)
 
         # print(f'supervised_loss: {supervised_loss}')
