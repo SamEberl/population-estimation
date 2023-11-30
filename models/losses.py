@@ -44,6 +44,20 @@ def maskedL1Loss(pred, actual):
             loss = loss.cuda()
     return loss
 
+def maskedRMSELoss(pred, actual):
+    mask = actual != -1
+    rmse_loss = torch.sqrt((pred - actual)**2)
+    masked_rmse_loss = rmse_loss * mask
+    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+    pred_numel = torch.sum(mask)
+    if pred_numel > 0:
+        loss = torch.sum(masked_rmse_loss) / pred_numel
+    else:
+        loss = torch.tensor([-1], dtype=torch.float32)
+        if torch.cuda.is_available():
+            loss = loss.cuda()
+    return loss
+
 
 class LinUncertaintyLoss(nn.Module):
     def __init__(self):

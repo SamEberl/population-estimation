@@ -10,7 +10,7 @@ from utils import *
 from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from models.losses import maskedL1Loss
+from models.losses import maskedL1Loss, maskedRMSELoss
 
 import matplotlib.pyplot as plt
 
@@ -46,8 +46,10 @@ def forward_pass(student_model,
             writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss, step_nbr)
         # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
         loss_mae = maskedL1Loss(student_preds, labels)
+        loss_rmse = maskedRMSELoss(student_preds, labels)
         if loss_mae != -1:
             writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
+            writer.add_scalar(f'Loss-MSE-Compare/{split}', loss_rmse, step_nbr)
         writer.add_scalar(f'Percentage-Labeled/{split}', torch.sum(mask_labeled)/len(mask_labeled), step_nbr)
 
         # print(f'supervised_loss: {supervised_loss}')
