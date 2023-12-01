@@ -1,5 +1,5 @@
 info:
-  info: 'change lr to make aleatoric loss work'
+  info: 'Try aleatoric loss without 0.001 factor and forward passed with sigmoid*18'
 
 model_params:
   architecture: 'fixMatch'
