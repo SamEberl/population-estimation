@@ -221,7 +221,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         total_val_loss = 0
         #config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
         for i, train_data in enumerate(train_dataloader):
-            step_nbr = epoch * len(train_dataloader) + (i + 1) * train_dataloader.batch_size
+            step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
 
             student_inputs, teacher_inputs, labels, datapoint_name = train_data
             student_inputs = student_inputs.to(device)
@@ -254,7 +254,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
             val_data = next(val_generator)
             if val_data is not None:
-                step_nbr = epoch * len(val_dataloader) + (i+1) * val_dataloader.batch_size
+                step_nbr = epoch * len(val_dataloader.dataset) + (i+1) * val_dataloader.batch_size
 
                 save_img = False
                 if step_nbr % (num_epochs * len(val_dataloader) / 10) == 0:
