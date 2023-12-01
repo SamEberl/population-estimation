@@ -25,6 +25,17 @@ class AleatoricLoss(nn.Module):
 
     def forward(self, pred, actual, log_var):
         loss = (pred - actual)**2
+        loss = 0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)
+        loss = torch.sum(loss) / pred.numel()
+        return loss
+
+
+class AleatoricLossModified(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, pred, actual, log_var):
+        loss = (pred - actual)**2
         loss = 0.5 * torch.exp(-log_var*0.001) * loss + (0.5 * log_var)
         loss = torch.sum(loss) / pred.numel()
         return loss
