@@ -11,7 +11,7 @@ class fixMatch(nn.Module):
                  nbr_outputs=1,
                  supervised_criterion='MSE',
                  unsupervised_criterion='contrastive',
-                 unsupervised_factor=1e4,
+                 unsupervised_factor=1e5,
                  drop_rate=0,
                  **kwargs):
         super(fixMatch, self).__init__()
