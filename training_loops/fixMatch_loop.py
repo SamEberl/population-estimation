@@ -116,7 +116,6 @@ def forward_pass(student_model,
                 Y = Y.cuda()
             negative_loss = student_model.loss_unsupervised(student_features, dearanged_teacher_features, pseudo_label_mask, Y)
             unsupervised_loss = positive_loss + negative_loss
-            print(unsupervised_loss)
         writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
         check2 = False
@@ -250,6 +249,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 split='train',
                 writer=writer,
                 step_nbr=step_nbr)
+            print(train_loss)
             total_train_loss += train_loss
 
             # Backward pass and optimization
