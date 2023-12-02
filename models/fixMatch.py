@@ -31,7 +31,7 @@ class fixMatch(nn.Module):
 
         self.supervised_criterion = supervised_losses[supervised_criterion]
 
-        unsupervised_losses = {'contrastive': contrastiveLoss()}
+        unsupervised_losses = {'contrastive': ContrastiveLoss()}
 
         self.unsupervised_criterion = unsupervised_losses[unsupervised_criterion]
 

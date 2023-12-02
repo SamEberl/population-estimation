@@ -101,6 +101,7 @@ class SquaredUncertaintyLoss(nn.Module):
         loss = torch.sum(loss + 0.1*uncertainty_loss) / pred.numel()
         return loss
 
+
 # def contrastiveLoss(self, student_features, teacher_features, mask):
 #     squared_difference = torch.sum((student_features - teacher_features) ** 2, dim=1)
 #     masked_squared_difference = squared_difference * mask
@@ -109,29 +110,34 @@ class SquaredUncertaintyLoss(nn.Module):
 #     loss = mse * self.unsupervised_factor
 #     return loss
 
-def contrastiveLoss(self, student_features, teacher_features, mask, Y, margin=1.0):
-    """
-    Compute the Contrastive Loss for batches of vectors P1 and P2 with a feature mask,
-    using only the unmasked features for the distance calculation.
 
-    :param P1: Batch of vectors (PyTorch tensor)
-    :param P2: Batch of vectors (PyTorch tensor)
-    :param Y: Batch of binary labels (1 for positive pairs, 0 for negative pairs)
-    :param mask: Tensor of the same shape as P1 and P2, with 1s for features to use and 0s for features to ignore
-    :param margin: Margin for the loss (default is 1.0)
-    :return: Masked contrastive loss for the batch
-    """
-    # Calculate Euclidean distances
-    euclidean_distance = torch.sqrt(torch.sum(torch.pow(student_features - teacher_features, 2), dim=1))
+class ContrastiveLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
 
-    # Apply the mask to the squared differences
-    masked_distance = euclidean_distance * mask
+    def forward(self, student_features, teacher_features, mask, Y, margin=1.0):
+        """
+        Compute the Contrastive Loss for batches of vectors P1 and P2 with a feature mask,
+        using only the unmasked features for the distance calculation.
 
-    # Compute loss for each pair and then average over the batch
-    loss_contrastive = (torch.sum(Y * torch.pow(masked_distance, 2) +
-                                  (1 - Y) * torch.pow(torch.clamp(margin - masked_distance, min=0.0), 2)) / torch.sum(mask))
+        :param P1: Batch of vectors (PyTorch tensor)
+        :param P2: Batch of vectors (PyTorch tensor)
+        :param Y: Batch of binary labels (1 for positive pairs, 0 for negative pairs)
+        :param mask: Tensor of the same shape as P1 and P2, with 1s for features to use and 0s for features to ignore
+        :param margin: Margin for the loss (default is 1.0)
+        :return: Masked contrastive loss for the batch
+        """
+        # Calculate Euclidean distances
+        euclidean_distance = torch.sqrt(torch.sum(torch.pow(student_features - teacher_features, 2), dim=1))
 
-    # Scale to be on the same magnitude as the supervised loss
-    loss = loss_contrastive #* self.unsupervised_factor
+        # Apply the mask to the squared differences
+        masked_distance = euclidean_distance * mask
 
-    return loss
+        # Compute loss for each pair and then average over the batch
+        loss_contrastive = (torch.sum(Y * torch.pow(masked_distance, 2) +
+                                      (1 - Y) * torch.pow(torch.clamp(margin - masked_distance, min=0.0), 2)) / torch.sum(mask))
+
+        # Scale to be on the same magnitude as the supervised loss
+        loss = loss_contrastive #* self.unsupervised_factor
+
+        return loss
