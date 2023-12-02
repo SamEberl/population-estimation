@@ -252,7 +252,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 split='train',
                 writer=writer,
                 step_nbr=step_nbr)
-            print(train_loss)
             total_train_loss += train_loss
 
             # Backward pass and optimization
