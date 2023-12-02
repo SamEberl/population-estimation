@@ -56,7 +56,7 @@ def forward_pass(student_model,
         # print(f'L1-Compare: {loss_mae}')
         # print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
 
-    unsupervised_loss = torch.tensor([0], dtype=torch.float32)
+    unsupervised_loss = torch.tensor(0, dtype=torch.float32)
     if torch.cuda.is_available():
         unsupervised_loss = unsupervised_loss.cuda()
     if split == 'train' and config['train_params']['use_teacher']:
@@ -98,7 +98,7 @@ def forward_pass(student_model,
         writer.add_scalar(f'Teacher_data_uncertainty/{split}', torch.mean(teacher_data_uncertainty), step_nbr)
 
         # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-        pseudo_label_mask = teacher_features_spread < 2.0
+        pseudo_label_mask = teacher_features_spread < 3.0
         if step_nbr < 1000:
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
         #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
@@ -124,9 +124,9 @@ def forward_pass(student_model,
             # teacher_preds_loss = (teacher_preds_mean - labels)**2
 
     loss = supervised_loss + unsupervised_loss
-    print(f'sup: {supervised_loss}')
-    print(f'unsup: {unsupervised_loss}')
-    print(f'loss: {loss}')
+    # print(f'sup: {supervised_loss}')
+    # print(f'unsup: {unsupervised_loss}')
+    # print(f'loss: {loss}')
     writer.add_scalar(f'Loss-Total/{split}', loss, step_nbr)
 
     # if save_img:
