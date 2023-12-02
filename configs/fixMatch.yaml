@@ -1,5 +1,5 @@
 info:
-  info: 'Try aleatoric loss without 0.001 factor and forward passed with sigmoid*18'
+  info: 'Try lower lr with unmodified aleatoric loss'
 
 model_params:
   architecture: 'fixMatch'
@@ -21,7 +21,7 @@ data_params:
   percentage_unlabeled: 0.0
 
 train_params:
-  LR: 0.0001
+  LR: 0.00001
   max_epochs: 140
   L2_reg: 0.005
   beta1: 0.9
