@@ -5,6 +5,7 @@ import torchvision.transforms
 import yaml
 import os
 import torch
+import random
 
 import numpy as np
 import tifffile as tiff
@@ -241,3 +242,18 @@ def count_decimal_places(number):
     else:
         # If there is no decimal point, return 0
         return 0
+
+
+def derangement_shuffle(tensor):
+    """
+    Shuffle a tensor such that no element remains in its original position.
+
+    :param tensor: A PyTorch tensor to be shuffled.
+    :return: A shuffled tensor.
+    """
+    n = tensor.size(0)
+    indices = list(range(n))
+    while any(i == indices[i] for i in range(n)):
+        random.shuffle(indices)
+
+    return tensor[torch.tensor(indices)]
