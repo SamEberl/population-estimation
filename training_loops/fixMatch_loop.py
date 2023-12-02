@@ -114,8 +114,9 @@ def forward_pass(student_model,
             Y = torch.zeros(config['data_params']['train_batch_size'], dtype=torch.float32)
             if torch.cuda.is_available():
                 Y = Y.cuda()
-            negative_loss = unsupervised_loss = student_model.loss_unsupervised(student_features, dearanged_teacher_features, pseudo_label_mask, Y)
+            negative_loss = student_model.loss_unsupervised(student_features, dearanged_teacher_features, pseudo_label_mask, Y)
             unsupervised_loss = positive_loss + negative_loss
+            print(unsupervised_loss)
         writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
         check2 = False
