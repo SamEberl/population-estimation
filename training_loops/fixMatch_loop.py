@@ -124,6 +124,9 @@ def forward_pass(student_model,
             # teacher_preds_loss = (teacher_preds_mean - labels)**2
 
     loss = supervised_loss + unsupervised_loss
+    print(f'sup: {supervised_loss}')
+    print(f'unsup: {unsupervised_loss}')
+    print(f'loss: {loss}')
     writer.add_scalar(f'Loss-Total/{split}', loss, step_nbr)
 
     # if save_img:
