@@ -97,16 +97,22 @@ def forward_pass(student_model,
         writer.add_scalar(f'Teacher_feature_spread/{split}', torch.mean(teacher_features_spread), step_nbr)
         writer.add_scalar(f'Teacher_data_uncertainty/{split}', torch.mean(teacher_data_uncertainty), step_nbr)
 
-        if config['train_params']['use_teacher']:
-            # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-            pseudo_label_mask = teacher_features_spread < 1.0
+        # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
+        pseudo_label_mask = teacher_features_spread < 2.0
+        if step_nbr < 1000:
             writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
-            #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
-            # pseudo_label_mask = teacher_data_uncertainty < ?
-            if torch.sum(pseudo_label_mask) > 0:
-                unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask)
-                #print(f'unsupervised_loss: {unsupervised_loss.item()}')
-            writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
+        #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
+        # pseudo_label_mask = teacher_data_uncertainty < ?
+        if torch.sum(pseudo_label_mask) > 0:
+            # positive examples
+            Y = torch.ones(config['data_params']['train_batch_size'], dtype=torch.float32)
+            positive_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, pseudo_label_mask, Y)
+            # negative examples
+            dearanged_teacher_features = derangement_shuffle(teacher_features)
+            Y = torch.zeros(config['data_params']['train_batch_size'], dtype=torch.float32)
+            negative_loss = unsupervised_loss = student_model.loss_unsupervised(student_features, dearanged_teacher_features, pseudo_label_mask, Y)
+            unsupervised_loss = positive_loss + negative_loss
+        writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
         check2 = False
         if check2:  # TODO unsupervised loss on prediction instead of features
