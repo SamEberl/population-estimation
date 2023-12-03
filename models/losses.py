@@ -91,11 +91,10 @@ class LinUncertaintyLoss(nn.Module):
         print(f'\n---------------')
         # print(f'mse: {masked_squared_diff} \n')
         # print(f'uncert: {uncertainty_loss} \n')
-        print(f'pred: {torch.sum(pred)}')
-        print(f'actual: {torch.sum(actual)}')
-        print(f'mse: {torch.sum(masked_squared_diff)}')
-        print(f'uncert: {torch.sum(uncertainty_loss)}')
         print(f'pred_numel: {pred_numel}')
+        print(f'pred: {torch.sum(pred)} | actual: {torch.sum(actual)} | log_var: {torch.sum(log_var)}')
+        print(f'mse   : {torch.sum(masked_squared_diff)}')
+        print(f'uncert: {torch.sum(uncertainty_loss)}')
         print(f'loss: {loss} \n')
         return loss
 
