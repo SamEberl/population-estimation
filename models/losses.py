@@ -57,12 +57,12 @@ def maskedL1Loss(pred, actual):
 
 def maskedRMSELoss(pred, actual):
     mask = actual != -1
-    rmse_loss = torch.sqrt((pred - actual)**2)
-    masked_rmse_loss = rmse_loss * mask
+    mse_loss = torch.pow(pred - actual, 2)
+    masked_mse_loss = mse_loss * mask
     # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
     pred_numel = torch.sum(mask)
     if pred_numel > 0:
-        loss = torch.sum(masked_rmse_loss) / pred_numel
+        loss = torch.sqrt(torch.sum(masked_mse_loss) / pred_numel)
     else:
         loss = torch.tensor([-1], dtype=torch.float32)
         if torch.cuda.is_available():
