@@ -43,8 +43,8 @@ class fixMatch(nn.Module):
         print(f'pred-2: {prediction}')
         uncertainty = self.uncertainty(features).flatten()
         print(f'uncertainty-1: {uncertainty}')
-        # uncertainty = torch.sigmoid(uncertainty) * 18
-        uncertainty = torch.pow(2, uncertainty)
+        uncertainty = torch.sigmoid(uncertainty) * 18
+        # uncertainty = torch.pow(2, uncertainty)
         print(f'uncertainty-2: {uncertainty}')
         return prediction, features, uncertainty
 
