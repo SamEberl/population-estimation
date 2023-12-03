@@ -88,18 +88,16 @@ class LinUncertaintyLoss(nn.Module):
             loss = torch.tensor([-1], dtype=torch.float32)
             if torch.cuda.is_available():
                 loss = loss.cuda()
-        print(f'\n---------------')
-        # print(f'mse: {masked_squared_diff} \n')
-        # print(f'uncert: {uncertainty_loss} \n')
-        print(f'log_var     : {log_var}')
-        print(f'squared_diff: {squared_diff}')
-        print(f'log_var-diff: {log_var-squared_diff}')
-        print(f'uncertainty : {uncertainty_loss}')
-        print(f'pred_numel: {pred_numel}')
-        print(f'pred: {torch.sum(pred)} | actual: {torch.sum(actual)} | log_var: {torch.sum(log_var)}')
-        print(f'mse   : {torch.sum(masked_squared_diff)}')
-        print(f'uncert: {torch.sum(uncertainty_loss)}')
-        print(f'loss: {loss} \n')
+        # print(f'\n---------------')
+        # print(f'log_var     : {log_var}')
+        # print(f'squared_diff: {squared_diff}')
+        # print(f'log_var-diff: {log_var-squared_diff}')
+        # print(f'uncertainty : {uncertainty_loss}')
+        # print(f'pred_numel: {pred_numel}')
+        # print(f'pred: {torch.sum(pred)} | actual: {torch.sum(actual)} | log_var: {torch.sum(log_var)}')
+        # print(f'mse   : {torch.sum(masked_squared_diff)}')
+        # print(f'uncert: {torch.sum(uncertainty_loss)}')
+        # print(f'loss: {loss} \n')
         return loss
 
 
