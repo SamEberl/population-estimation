@@ -88,6 +88,10 @@ class LinUncertaintyLoss(nn.Module):
             loss = torch.tensor([-1], dtype=torch.float32)
             if torch.cuda.is_available():
                 loss = loss.cuda()
+        print(f'---------------')
+        print(f'mse: {masked_squared_diff} \n')
+        print(f'uncert: {uncertainty_loss} \n')
+        print(f'loss: {loss} \n')
         return loss
 
 
