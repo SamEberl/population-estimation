@@ -77,13 +77,14 @@ class LinUncertaintyLoss(nn.Module):
     def forward(self, pred, actual, log_var):
         mask = actual != -1
         squared_diff = (pred - actual) ** 2
-        uncertainty_loss = torch.abs(log_var - squared_diff)
+        #uncertainty_loss = torch.abs(log_var - squared_diff)
+        uncertainty_loss = torch.sqrt(torch.sum(torch.pow(log_var - squared_diff, 2)))
         masked_squared_diff = squared_diff * mask
         masked_uncertainty_loss = uncertainty_loss * mask
         # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
         pred_numel = torch.sum(mask)
         if pred_numel > 0:
-            loss = torch.sum(masked_squared_diff + masked_uncertainty_loss) / pred_numel
+            loss = (torch.sum(masked_squared_diff) + uncertainty_loss) / pred_numel
         else:
             loss = torch.tensor([-1], dtype=torch.float32)
             if torch.cuda.is_available():
