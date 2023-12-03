@@ -89,8 +89,11 @@ class LinUncertaintyLoss(nn.Module):
             if torch.cuda.is_available():
                 loss = loss.cuda()
         print(f'---------------')
-        print(f'mse: {masked_squared_diff} \n')
-        print(f'uncert: {uncertainty_loss} \n')
+        # print(f'mse: {masked_squared_diff} \n')
+        # print(f'uncert: {uncertainty_loss} \n')
+        print(f'mse: {torch.sum(masked_squared_diff)} \n')
+        print(f'uncert: {torch.sum(uncertainty_loss)} \n')
+        print(f'pred_numel: {pred_numel} / 256')
         print(f'loss: {loss} \n')
         return loss
 
