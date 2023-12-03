@@ -38,14 +38,10 @@ class fixMatch(nn.Module):
     def forward(self, x):
         features = self.model(x)
         prediction = self.fc_preds(features).flatten()
-        print(f'pred-1: {prediction}')
         prediction = torch.pow(2, prediction)
-        print(f'pred-2: {prediction}')
         uncertainty = self.uncertainty(features).flatten()
-        print(f'uncertainty-1: {uncertainty}')
         # uncertainty = torch.sigmoid(uncertainty) * 18
-        # uncertainty = torch.pow(2, uncertainty)
-        # print(f'uncertainty-2: {uncertainty}')
+        uncertainty = torch.pow(2, uncertainty)
         return prediction, features, uncertainty
 
     def loss_supervised(self, predictions, labels):
