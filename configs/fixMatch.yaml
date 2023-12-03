@@ -1,5 +1,5 @@
 info:
-  info: 'run to calibrate uncertainty loss term'
+  info: 'use teacher and try to get similar or better performance than without'
 
 model_params:
   architecture: 'fixMatch'
@@ -29,7 +29,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  use_teacher: False
+  use_teacher: True
   seed: 42
   num_samples_teacher: 100
 
