@@ -1,5 +1,5 @@
 info:
-  info: 'unsupervisedLoss*factor | forward uncertainty with 2^x'
+  info: 'run to calibrate uncertainty loss term'
 
 model_params:
   architecture: 'fixMatch'
