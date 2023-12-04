@@ -1,5 +1,5 @@
 info:
-  info: 'baseline without teacher and 100% labels | but LinUncertainty'
+  info: 'use teacher with new contrastive loss and 50% labels'
 
 model_params:
   architecture: 'fixMatch'
@@ -19,8 +19,8 @@ data_params:
   train_batch_size: 256
   #val_batch_size:  1024
   num_workers: 32
-  drop_labels: False
-  percentage_unlabeled: 0.0
+  drop_labels: True
+  percentage_unlabeled: 0.5
 
 train_params:
   LR: 0.00005
@@ -29,7 +29,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  use_teacher: False
+  use_teacher: True
   seed: 42
   num_samples_teacher: 100
 
