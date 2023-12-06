@@ -16,6 +16,8 @@ import pandas as pd
 from tqdm import tqdm
 from ssl_dataset import sslDataset
 
+from torchvision import transforms, datasets
+
 
 def display_input_output(model, input_tensor):
     def show_images():
@@ -257,3 +259,99 @@ def derangement_shuffle(tensor):
         random.shuffle(indices)
 
     return tensor[torch.tensor(indices)]
+
+
+
+
+def calc_stats_dataset():
+    from dataset import studentTeacherDataset
+
+    data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
+    # data_path = "/home/sam/Desktop/so2sat_test/tmp_train"
+    nbr_channels = 19
+
+    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    #val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+
+    # Initialize variables
+    n_samples = 0
+    channel_sum = torch.tensor([0.0] * nbr_channels)
+    channel_sum_squared = torch.tensor([0.0] * nbr_channels)
+    channel_min = torch.tensor([float('inf')] * nbr_channels)
+    channel_max = torch.tensor([float('-inf')] * nbr_channels)
+
+    # Loop through the dataset
+    for data, _, _, _ in train_dataset:
+        # Convert numpy array to PyTorch tensor if necessary
+        if isinstance(data, np.ndarray):
+            data = torch.from_numpy(data)
+
+        # Assuming data is a CxHxW tensor
+        C, H, W = data.shape
+        n_samples += H * W  # HxW
+        channel_sum += torch.sum(data, dim=[1, 2])
+        # channel_sum += data.sum(dim=[1, 2])  # Sum over HxW for each channel
+        channel_sum_squared += (data ** 2).sum(dim=[1, 2])  # Sum of squares
+
+        # Update min and max
+        channel_min = torch.min(channel_min, data.view(data.size(0), -1).min(dim=1).values)
+        channel_max = torch.max(channel_max, data.view(data.size(0), -1).max(dim=1).values)
+
+    # Compute mean and std
+    mean = channel_sum / n_samples
+    std = (channel_sum_squared / n_samples - mean ** 2).sqrt()
+
+    torch.set_printoptions(precision=3, sci_mode=False)
+    # Print statistics
+    print(f'shape: {mean.shape}')
+    print(f"Mean: {mean}")
+    print(f"Standard Deviation: {std}")
+    print(f"Minimum: {channel_min}")
+    print(f"Maximum: {channel_max}")
+
+import torch
+import numpy as np
+from dataset import studentTeacherDataset
+
+def calc_stats_and_approximate_percentiles(dataset, nbr_channels):
+    # Initialize dictionaries to count occurrences of each value
+    value_counts = [{} for _ in range(nbr_channels)]
+
+    # Loop through the dataset
+    for data, _, _, _ in tqdm(dataset):
+        # Convert numpy array to PyTorch tensor if necessary
+        if isinstance(data, np.ndarray):
+            data = torch.from_numpy(data)
+
+        # Assuming data is a CxHxW tensor
+        C, H, W = data.shape
+        for c in range(C):
+            for value in data[c].view(-1).tolist():
+                value_counts[c][value] = value_counts[c].get(value, 0) + 1
+
+    # Calculate percentiles
+    percentiles = [0.25, 0.5, 0.75, 0.999]
+    percentile_values = torch.zeros((nbr_channels, len(percentiles)))
+
+    for c in tqdm(range(nbr_channels)):
+        sorted_values = sorted(value_counts[c].items())  # Sort by value
+        total_counts = sum(value_counts[c].values())
+        cumulative_count = 0
+        percentile_indices = [int(p * total_counts) for p in percentiles]
+        current_index = 0
+
+        for value, count in sorted_values:
+            cumulative_count += count
+            while current_index < len(percentiles) and cumulative_count >= percentile_indices[current_index]:
+                percentile_values[c, current_index] = value
+                current_index += 1
+
+    return percentile_values
+
+# Example Usage
+data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
+nbr_channels = 19
+train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+
+approx_percentiles = calc_stats_and_approximate_percentiles(train_dataset, nbr_channels)
+print("Approximate Percentiles:", approx_percentiles)
