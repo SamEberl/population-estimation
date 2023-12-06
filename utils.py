@@ -348,10 +348,9 @@ def calc_stats_and_approximate_percentiles(dataset, nbr_channels):
 
     return percentile_values
 
-# Example Usage
-data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
-nbr_channels = 19
-train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
-
-approx_percentiles = calc_stats_and_approximate_percentiles(train_dataset, nbr_channels)
-print("Approximate Percentiles:", approx_percentiles)
+# data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
+# nbr_channels = 19
+# train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+#
+# approx_percentiles = calc_stats_and_approximate_percentiles(train_dataset, nbr_channels)
+# print("Approximate Percentiles:", approx_percentiles)
