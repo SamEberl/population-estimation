@@ -19,7 +19,8 @@ class studentTeacherDataset(Dataset):
                  drop_labels=False,
                  student_transform=None,
                  teacher_transform=None,
-                 percentage_unlabeled=0.0):
+                 percentage_unlabeled=0.0,
+                 nbr_channels=7):
         self.student_transform = student_transform
         self.teacher_transform = teacher_transform
         self.split = split
@@ -29,6 +30,7 @@ class studentTeacherDataset(Dataset):
         self.clip_max = 4000
         self.use_teacher = use_teacher
         self.percentage_unlabeled = percentage_unlabeled
+        self.nbr_channels = nbr_channels
 
         splits = ['train', 'valid', 'test']
         if split not in splits:
@@ -47,12 +49,13 @@ class studentTeacherDataset(Dataset):
         label = torch.tensor(float(self.data[idx][1]))
         datapoint_name = self.data[idx][2]
 
-        data = np.empty((7, 100, 100), dtype=np.float32)
+        data = np.empty((self.nbr_channels, 100, 100), dtype=np.float32)
 
         # All values are expected to be between 0 and 1
         data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
         data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        # data[7, :, :] = self.generate_viirs(file_path)  # viirs
+        # data[17, :, :] = self.generate_viirs(file_path)  # viirs
+        # data[18, :, :] = self.generate_lcz(file_path)
 
         # tensor_data = torch.cat((sen2spring_rgb, lu_tensor, viirs_tensor), dim=0)
         # data = np.concatenate((sen2spring_rgb, lu, viirs))
@@ -161,6 +164,19 @@ class studentTeacherDataset(Dataset):
                 image_bands = data.read().astype(np.float16)
                 image_bands[image_bands < 0] = 0
                 image_bands = image_bands / 20
+                #image_bands = torch.from_numpy(image_bands)
+                return image_bands
+        except rasterio.RasterioIOError:
+            print(f'Image could not be created from: {file_path}')
+            return None
+
+    def generate_lcz(self, file_path):
+        file_path = file_path.replace('sen2spring', 'lcz')
+        try:
+            with rasterio.open(file_path, 'r') as data:
+                image_bands = data.read().astype(np.float16)
+                # image_bands[image_bands < 0] = 0
+                # image_bands = image_bands / 20
                 #image_bands = torch.from_numpy(image_bands)
                 return image_bands
         except rasterio.RasterioIOError:
