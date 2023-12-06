@@ -38,7 +38,9 @@ def forward_pass(student_model,
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
-        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+        # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+        total_step = 140 * 119794 + (0 + 1) * 256
+        supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
     if not hparam_search:
         supervised_loss_name = config['model_params']['supervised_criterion']
@@ -268,11 +270,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
             val_data = next(val_generator)
             if val_data is not None:
-                step_nbr = epoch * len(val_dataloader.dataset) + (i+1) * val_dataloader.batch_size
-
-                save_img = False
-                if step_nbr % (num_epochs * len(val_dataloader) / 10) == 0:
-                    save_img = True
+                # step_nbr = epoch * len(val_dataloader.dataset) + (i+1) * val_dataloader.batch_size
 
                 student_inputs, teacher_inputs, labels, datapoint_name = val_data
                 student_inputs = student_inputs.to(device)

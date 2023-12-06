@@ -26,6 +26,8 @@ class fixMatch(nn.Module):
                              'RMSE': RMSELoss(),
                              'RMSLE': RMSLELoss(),
                              'Aleatoric': AleatoricLoss(),
+                             'AleatoricModified': AleatoricLossModified(),
+                             'AleatoricLinDecay': AleatoricLinDecayLoss(),
                              'LinUncertainty': LinUncertaintyLoss(),
                              'SquaredUncertainty': SquaredUncertaintyLoss()}
 
@@ -50,6 +52,10 @@ class fixMatch(nn.Module):
 
     def loss_supervised_w_uncertainty(self, predictions, labels, log_var):
         loss = self.supervised_criterion(predictions, labels, log_var)
+        return loss
+
+    def loss_supervised_w_uncertainty_decay(self, predictions, labels, log_var, cur_step, total_step):
+        loss = self.supervised_criterion(predictions, labels, log_var, cur_step, total_step)
         return loss
 
     def loss_unsupervised(self, student_features, teacher_features, mask, Y, margin=1.0):

@@ -40,6 +40,19 @@ class AleatoricLossModified(nn.Module):
         loss = torch.sum(loss) / pred.numel()
         return loss
 
+class AleatoricLinDecayLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, pred, actual, log_var, cur_step, total_step):
+        loss = (pred - actual)**2
+        if cur_step < 0.2*total_step:
+            loss = 0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)
+        else:
+            loss = 0.5 * torch.exp(-log_var) * loss + (0.5 * log_var) * (1-(cur_step/total_step))
+        loss = torch.sum(loss) / pred.numel()
+        return loss
+
 
 def maskedL1Loss(pred, actual):
     mask = actual != -1
