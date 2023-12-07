@@ -1,9 +1,9 @@
 info:
-  info: 'try larger model compared to baseline'
+  info: 'add linear layer to head with size=model_features/4'
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'convnextv2_pico.fcmae'  # choose from timm models
+  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
   unsupervised_criterion: 'contrastive'
   unsupervised_factor: 10000
