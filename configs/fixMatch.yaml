@@ -1,10 +1,10 @@
 info:
-  info: 'use aleatoric loss with linear decay after 20% of data has been seen'
+  info: 'use aleatoric loss with higher lr'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
-  supervised_criterion: 'AleatoricLinDecay'
+  supervised_criterion: 'Aleatoric'
   unsupervised_criterion: 'contrastive'
   unsupervised_factor: 10000
   retrain: False
@@ -22,7 +22,7 @@ data_params:
   percentage_unlabeled: 0.0
 
 train_params:
-  LR: 0.00001
+  LR: 0.001
   max_epochs: 140
   L2_reg: 0.005
   beta1: 0.9
