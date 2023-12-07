@@ -38,9 +38,9 @@ def forward_pass(student_model,
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
-        # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
-        total_step = 140 * 119794 + (0 + 1) * 256
-        supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
+        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+        # total_step = 140 * 119794 + (0 + 1) * 256
+        # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
     if not hparam_search:
         supervised_loss_name = config['model_params']['supervised_criterion']
