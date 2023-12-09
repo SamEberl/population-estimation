@@ -1,9 +1,9 @@
 info:
-  info: 'try larger model to compare to baseline'
+  info: 'compare global normalization to baseline (with local normalization)'
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'convnextv2_pico.fcmae'  # choose from timm models
+  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
   unsupervised_criterion: 'contrastive'
   unsupervised_factor: 10000
@@ -18,7 +18,7 @@ data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
   train_batch_size: 256
   num_workers: 32
-  drop_labels: True
+  drop_labels: False
   percentage_unlabeled: 0.0
 
 train_params:

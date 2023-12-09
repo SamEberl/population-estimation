@@ -6,6 +6,7 @@ import yaml
 import os
 import torch
 import random
+import pickle
 
 import numpy as np
 import tifffile as tiff
@@ -17,6 +18,8 @@ from tqdm import tqdm
 from ssl_dataset import sslDataset
 
 from torchvision import transforms, datasets
+from dataset import studentTeacherDataset
+from pathlib import Path
 
 
 def display_input_output(model, input_tensor):
@@ -261,17 +264,13 @@ def derangement_shuffle(tensor):
     return tensor[torch.tensor(indices)]
 
 
-
-
 def calc_stats_dataset():
-    from dataset import studentTeacherDataset
-
     data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
     # data_path = "/home/sam/Desktop/so2sat_test/tmp_train"
-    nbr_channels = 19
+    nbr_channels = 20
 
-    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
-    #val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    # dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
 
     # Initialize variables
     n_samples = 0
@@ -280,8 +279,10 @@ def calc_stats_dataset():
     channel_min = torch.tensor([float('inf')] * nbr_channels)
     channel_max = torch.tensor([float('-inf')] * nbr_channels)
 
+    value_counts = [{} for _ in range(nbr_channels)]
+
     # Loop through the dataset
-    for data, _, _, _ in train_dataset:
+    for data, _, _, _ in tqdm(dataset):
         # Convert numpy array to PyTorch tensor if necessary
         if isinstance(data, np.ndarray):
             data = torch.from_numpy(data)
@@ -297,40 +298,24 @@ def calc_stats_dataset():
         channel_min = torch.min(channel_min, data.view(data.size(0), -1).min(dim=1).values)
         channel_max = torch.max(channel_max, data.view(data.size(0), -1).max(dim=1).values)
 
+        for c in range(C):
+            for value in data[c].view(-1).tolist():
+                value_counts[c][value] = value_counts[c].get(value, 0) + 1
+
     # Compute mean and std
     mean = channel_sum / n_samples
     std = (channel_sum_squared / n_samples - mean ** 2).sqrt()
 
     torch.set_printoptions(precision=3, sci_mode=False)
     # Print statistics
-    print(f'shape: {mean.shape}')
-    print(f"Mean: {mean}")
-    print(f"Standard Deviation: {std}")
-    print(f"Minimum: {channel_min}")
-    print(f"Maximum: {channel_max}")
-
-import torch
-import numpy as np
-from dataset import studentTeacherDataset
-
-def calc_stats_and_approximate_percentiles(dataset, nbr_channels):
-    # Initialize dictionaries to count occurrences of each value
-    value_counts = [{} for _ in range(nbr_channels)]
-
-    # Loop through the dataset
-    for data, _, _, _ in tqdm(dataset):
-        # Convert numpy array to PyTorch tensor if necessary
-        if isinstance(data, np.ndarray):
-            data = torch.from_numpy(data)
-
-        # Assuming data is a CxHxW tensor
-        C, H, W = data.shape
-        for c in range(C):
-            for value in data[c].view(-1).tolist():
-                value_counts[c][value] = value_counts[c].get(value, 0) + 1
+    print(f'shape:\n{mean.shape}')
+    print(f"Mean: \n{mean}")
+    print(f"Standard Deviation: \n{std}")
+    print(f"Minimum: \n{channel_min}")
+    print(f"Maximum: \n{channel_max}")
 
     # Calculate percentiles
-    percentiles = [0.25, 0.5, 0.75, 0.999]
+    percentiles = [0.001, 0.01, 0.25, 0.5, 0.75, 0.99, 0.999]
     percentile_values = torch.zeros((nbr_channels, len(percentiles)))
 
     for c in tqdm(range(nbr_channels)):
@@ -346,11 +331,106 @@ def calc_stats_and_approximate_percentiles(dataset, nbr_channels):
                 percentile_values[c, current_index] = value
                 current_index += 1
 
-    return percentile_values
+    print("Approximate Percentiles:\n", percentile_values)
 
-# data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
-# nbr_channels = 19
-# train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
-#
-# approx_percentiles = calc_stats_and_approximate_percentiles(train_dataset, nbr_channels)
-# print("Approximate Percentiles:", approx_percentiles)
+
+    # Directory to save histograms
+    histogram_dir = Path("/home/sam/Desktop/so2sat_test/histograms")
+    # After value_counts has been computed
+    value_counts_file = histogram_dir/'value_counts.pkl'
+
+    # Check if the directory exists, if not create it
+    if not os.path.exists(histogram_dir):
+        os.makedirs(histogram_dir)
+
+    # Save value_counts to a Pickle file
+    with open(value_counts_file, 'wb') as f:
+        pickle.dump(value_counts, f)
+
+    # with open(value_counts_file, 'rb') as f:
+    #     value_counts = pickle.load(f)
+
+    # Create and save histograms
+    for c in range(nbr_channels):
+        values = list(value_counts[c].keys())
+        counts = list(value_counts[c].values())
+
+        # Determine bin width based on the range of values
+        min_value, max_value = min(values), max(values)
+        range_of_values = max_value - min_value
+        bin_width = range_of_values / 50  # for example, create 50 bins
+
+        plt.figure()
+        plt.hist(values, bins=np.arange(min_value, max_value + bin_width, bin_width), weights=counts)
+        plt.title(f'Histogram for Channel {c}')
+        plt.xlabel('Value')
+        plt.ylabel('Frequency')
+        plt.savefig(f'{histogram_dir}/channel_{c}_histogram_custom.png')
+        plt.close()
+
+
+def calc_r2_denominator():
+    data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
+    # data_path = "/home/sam/Desktop/so2sat_test/tmp_train"
+    nbr_channels = 20
+    dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False,
+                                    student_transform=None,
+                                    teacher_transform=None, nbr_channels=nbr_channels)
+    # dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+
+    train_mean = 1074.556447 # 883259408384.0     # 7373152.5
+    # val_mean = 1158.546960     # 180515012608.0 # 9868522.0
+
+    total_sum = 0
+
+    for _, _, label, _ in tqdm(dataset):
+        total_sum += np.square(label - train_mean)
+
+    print(f'total_sum: {total_sum}')
+    print(len(dataset))
+    print(f'specific_sum: {total_sum/len(dataset)}')
+
+
+def calc_r2(numbers, split):
+    # Filtering out the zeros and calculating the sum of the remaining numbers
+    non_zero_numbers = [num for num in numbers if num != 0]
+    total_sum = sum(non_zero_numbers)
+
+    # Counting the number of non-zero elements
+    non_zero_count = len(non_zero_numbers)
+
+    # Avoiding division by zero
+    if non_zero_count == 0:
+        return 0
+
+    # Calculating the mean
+    mean = total_sum / non_zero_count
+
+    r2 = 0
+    if split == 'train':
+        r2 = 1-(mean/7373152.5)
+    elif split == 'test' or split == 'val':
+        r2 = 1-(mean/9868522.0)
+    else:
+        print('wrong split when computing r2')
+    return r2
+
+
+def calc_bias(numbers):
+    """
+    Computes the mean of a list of numbers, excluding zeros from both the sum and the count.
+    """
+    # Filtering out the zeros and calculating the sum of the remaining numbers
+    non_zero_numbers = [num for num in numbers if num != 0]
+    total_sum = sum(non_zero_numbers)
+
+    # Counting the number of non-zero elements
+    non_zero_count = len(non_zero_numbers)
+
+    # Avoiding division by zero
+    if non_zero_count == 0:
+        return 0
+
+    # Calculating the mean
+    mean = total_sum / non_zero_count
+    return mean

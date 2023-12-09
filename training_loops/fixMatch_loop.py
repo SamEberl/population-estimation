@@ -10,7 +10,7 @@ from utils import *
 from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from models.losses import maskedL1Loss, maskedRMSELoss
+from models.losses import maskedBias, maskedL1Loss, maskedMSELoss, maskedRMSELoss
 
 import matplotlib.pyplot as plt
 
@@ -35,10 +35,14 @@ def forward_pass(student_model,
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
     mask_labeled = labels != -1
     supervised_loss = torch.tensor(0, dtype=torch.float32)
+    r2_numerator = torch.tensor(0, dtype=torch.float32)
+    bias = torch.tensor(0, dtype=torch.float32)
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
         supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+        r2_numerator = maskedMSELoss(student_preds, labels)
+        bias = maskedBias(student_preds, labels)
         # total_step = 140 * 119794 + (0 + 1) * 256
         # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
@@ -136,7 +140,7 @@ def forward_pass(student_model,
     #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
     #     # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
 
-    return loss
+    return loss, r2_numerator, bias
 
 
 def batch_generator(dataloader):
@@ -235,6 +239,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
+        r2_numerators_train = []
+        r2_numerators_val = []
+        biases_train = []
+        biases_val = []
         #config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
         for i, train_data in enumerate(train_dataloader):
             step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
@@ -245,7 +253,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_inputs = teacher_inputs.to(device)
             labels = labels.to(device)
 
-            train_loss = forward_pass(
+            train_loss, r2_numerator_train, bias_train = forward_pass(
                 student_model=student_model,
                 teacher_model=teacher_model,
                 student_inputs=student_inputs,
@@ -256,6 +264,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 writer=writer,
                 step_nbr=step_nbr)
             total_train_loss += train_loss
+            r2_numerators_train.append(r2_numerator_train)
+            biases_train.append(bias_train)
 
             # Backward pass and optimization
             if train_loss != 0:
@@ -277,7 +287,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 labels = labels.to(device)
 
                 with torch.no_grad():
-                    val_loss = forward_pass(
+                    val_loss, r2_numerator_val, bias_val = forward_pass(
                             student_model=student_model,
                             teacher_model=teacher_model,
                             student_inputs=student_inputs,
@@ -288,6 +298,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             writer=writer,
                             step_nbr=step_nbr)
                     total_val_loss += val_loss
+                    r2_numerators_val.append(r2_numerator_val)
+                    biases_val.append(bias_val)
 
                 if config['hparam_search']['active'] and ((i+1) % config['hparam_search']['nbr_batches']) == 0:
                     hparam_name = config['hparam_search']['hparam_name']
@@ -297,6 +309,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             pbar.set_description(f"Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
         print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
+        writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
+        writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
+        writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
+        writer.add_scalar(f'Bias/val', calc_bias(biases_val), epoch)
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))

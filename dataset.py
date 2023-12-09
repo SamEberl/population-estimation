@@ -54,8 +54,9 @@ class studentTeacherDataset(Dataset):
         # All values are expected to be between 0 and 1
         data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
         data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        # data[17, :, :] = self.generate_viirs(file_path)  # viirs
-        # data[18, :, :] = self.generate_lcz(file_path)
+        # data[10, :, :] = self.generate_viirs(file_path)  # viirs
+        # data[11, :, :] = self.generate_lcz(file_path)
+        # data[12, :, :] = self.generate_dem(file_path)
 
         # tensor_data = torch.cat((sen2spring_rgb, lu_tensor, viirs_tensor), dim=0)
         # data = np.concatenate((sen2spring_rgb, lu, viirs))
@@ -131,15 +132,23 @@ class studentTeacherDataset(Dataset):
 
     def generate_rgb_img(self, file_path):
         try:
+            # with rasterio.open(file_path, 'r') as data:
+            #     # image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], :, :]
+            #     image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
+            #     # image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
+            #     image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
+            #     # Set empty parts to mean to avoid skewing the normalization
+            #     image_bands[(image_bands == 0)] = image_bands.mean()
+            #     # normalize channelwise
+            #     image_bands -= image_bands.min(axis=(1, 2), keepdims=True)
+            #     image_bands /= (image_bands.max(axis=(1, 2), keepdims=True) - image_bands.min(axis=(1, 2), keepdims=True))
+            #     #image_bands = torch.from_numpy(image_bands)
+            #     return image_bands
             with rasterio.open(file_path, 'r') as data:
-                # image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], :, :]
                 image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
-                # Set empty parts to mean to avoid skewing the normalization
-                image_bands[(image_bands == 0)] = image_bands.mean()
                 # normalize channelwise
-                image_bands -= image_bands.min(axis=(1, 2), keepdims=True)
-                image_bands /= (image_bands.max(axis=(1, 2), keepdims=True) - image_bands.min(axis=(1, 2), keepdims=True))
+                image_bands /= self.clip_max
                 #image_bands = torch.from_numpy(image_bands)
                 return image_bands
         except rasterio.RasterioIOError:
@@ -151,7 +160,7 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                #image_bands = torch.from_numpy(image_bands)
+                # image_bands[image_bands > 1] = 1
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
@@ -162,9 +171,9 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                image_bands[image_bands < 0] = 0
-                image_bands = image_bands / 20
-                #image_bands = torch.from_numpy(image_bands)
+                image_bands[image_bands > 100] = 100
+                image_bands /= 100
+                # image_bands = image_bands / 20
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
@@ -175,10 +184,33 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                # image_bands[image_bands < 0] = 0
-                # image_bands = image_bands / 20
-                #image_bands = torch.from_numpy(image_bands)
+                image_bands /= 17
                 return image_bands
+        except rasterio.RasterioIOError:
+            print(f'Image could not be created from: {file_path}')
+            return None
+
+    def generate_dem(self, file_path):
+        file_path = file_path.replace('So2Sat_POP_Part1', 'So2Sat_POP_Part2')
+        file_path = file_path.replace('sen2spring', 'dem')
+        try:
+            with rasterio.open(file_path, 'r') as data:
+                image_bands = data.read().astype(np.float16)
+                image_bands[image_bands < -2] = 2
+                image_bands[image_bands > 10] = 10
+
+                height, width = image_bands.shape[1], image_bands.shape[2]
+                # Calculate how much padding is needed
+                padding_height = max(0, 100 - height)
+                padding_width = max(0, 100 - width)
+
+                padded_image = np.pad(
+                    image_bands,
+                    ((0, 0), (0, padding_height), (0, padding_width)),
+                    mode='constant',
+                    constant_values=image_bands.mean()
+                )
+                return padded_image
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
             return None

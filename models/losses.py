@@ -54,6 +54,21 @@ class AleatoricLinDecayLoss(nn.Module):
         return loss
 
 
+def maskedBias(pred, actual):
+    mask = actual != -1
+    diff = (pred - actual)
+    masked_diff = diff * mask
+    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+    pred_numel = torch.sum(mask)
+    if pred_numel > 0:
+        bias = torch.sum(masked_diff) / pred_numel
+    else:
+        bias = torch.tensor([-1], dtype=torch.float32)
+        if torch.cuda.is_available():
+            bias = bias.cuda()
+    return bias
+
+
 def maskedL1Loss(pred, actual):
     mask = actual != -1
     l1_loss = torch.abs(pred - actual)
@@ -67,6 +82,22 @@ def maskedL1Loss(pred, actual):
         if torch.cuda.is_available():
             loss = loss.cuda()
     return loss
+
+
+def maskedMSELoss(pred, actual):
+    mask = actual != -1
+    mse_loss = torch.pow(pred - actual, 2)
+    masked_mse_loss = mse_loss * mask
+    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+    pred_numel = torch.sum(mask)
+    if pred_numel > 0:
+        loss = (torch.sum(masked_mse_loss) / pred_numel)
+    else:
+        loss = torch.tensor([-1], dtype=torch.float32)
+        if torch.cuda.is_available():
+            loss = loss.cuda()
+    return loss
+
 
 def maskedRMSELoss(pred, actual):
     mask = actual != -1
