@@ -52,16 +52,12 @@ class studentTeacherDataset(Dataset):
         data = np.empty((self.nbr_channels, 100, 100), dtype=np.float32)
 
         # All values are expected to be between 0 and 1
-        data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
-        data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        # data[10, :, :] = self.generate_viirs(file_path)  # viirs
-        # data[11, :, :] = self.generate_lcz(file_path)
-        # data[12, :, :] = self.generate_dem(file_path)
-
-        # tensor_data = torch.cat((sen2spring_rgb, lu_tensor, viirs_tensor), dim=0)
-        # data = np.concatenate((sen2spring_rgb, lu, viirs))
-        # transformed_data = self.student_transform(image=data)["image"]
-        # print(f'tens: {tensor_data.shape}')
+        data[0:6, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
+        data[6:9, :, :] = self.generate_winter_img(file_path)
+        data[9:13, :, :] = self.generate_lu(file_path)  # lu
+        data[13, :, :] = self.generate_viirs(file_path)  # viirs
+        data[14, :, :] = self.generate_lcz(file_path)
+        data[15, :, :] = self.generate_dem(file_path)
 
         if self.student_transform is not None:
             student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
@@ -76,15 +72,6 @@ class studentTeacherDataset(Dataset):
                 teacher_data = data
         else:
             teacher_data = 0
-
-        # print(f'student_data[0]: \n{student_data[0, :, :]}')
-        # print(f'student_data[1]: \n{student_data[1, :, :]}')
-        # print(f'student_data[2]: \n{student_data[2, :, :]}')
-        # print(f'student_data[3]: \n{student_data[3, :, :]}')
-        # print(f'student_data[4]: \n{student_data[4, :, :]}')
-        # print(f'student_data[5]: \n{student_data[5, :, :]}')
-        # print(f'student_data[6]: \n{student_data[6, :, :]}')
-        # print(f'student_data[7]: \n{student_data[7, :, :]}')
 
         return student_data, teacher_data, label, datapoint_name
 
@@ -145,11 +132,22 @@ class studentTeacherDataset(Dataset):
             #     #image_bands = torch.from_numpy(image_bands)
             #     return image_bands
             with rasterio.open(file_path, 'r') as data:
+                # image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
+                image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
+                image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
+                image_bands /= self.clip_max
+                return image_bands
+        except rasterio.RasterioIOError:
+            print(f'Image could not be created from: {file_path}')
+            return None
+
+    def generate_winter_img(self, file_path):
+        file_path = file_path.replace('sen2spring', 'sen2winter')
+        try:
+            with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
-                # normalize channelwise
                 image_bands /= self.clip_max
-                #image_bands = torch.from_numpy(image_bands)
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
@@ -171,9 +169,8 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                image_bands[image_bands > 100] = 100
-                image_bands /= 100
-                # image_bands = image_bands / 20
+                image_bands[image_bands > 50] = 50
+                image_bands /= 50
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')

@@ -1,5 +1,5 @@
 info:
-  info: 'compare global normalization to baseline (with local normalization)'
+  info: 'try 16 channels instead of 7 (7spring, 3winter, 4lu, 1viirs, 1lcz, 1dem)'
 
 model_params:
   architecture: 'fixMatch'
@@ -9,7 +9,7 @@ model_params:
   unsupervised_factor: 10000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
-  in_channels: 7
+  in_channels: 16
   nbr_outputs: 1
   drop_rate: 0.1
   #  drop_rate_teacher: 0.4
