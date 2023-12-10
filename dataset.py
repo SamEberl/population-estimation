@@ -55,9 +55,9 @@ class studentTeacherDataset(Dataset):
         data[0:6, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
         data[6:9, :, :] = self.generate_winter_img(file_path)
         data[9:13, :, :] = self.generate_lu(file_path)  # lu
-        data[13, :, :] = self.generate_viirs(file_path)  # viirs
-        data[14, :, :] = self.generate_lcz(file_path)
-        data[15, :, :] = self.generate_dem(file_path)
+        data[13, :, :] = self.generate_lcz(file_path)
+        data[14, :, :] = self.generate_dem(file_path)
+        # data[15, :, :] = self.generate_viirs(file_path)  # viirs
 
         if self.student_transform is not None:
             student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
@@ -193,8 +193,11 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                image_bands[image_bands < -2] = 2
-                image_bands[image_bands > 10] = 10
+                image_bands[image_bands < -3] = -3
+                image_bands[image_bands > 12] = 12
+
+                image_bands += 3
+                image_bands /= 15
 
                 height, width = image_bands.shape[1], image_bands.shape[2]
                 # Calculate how much padding is needed

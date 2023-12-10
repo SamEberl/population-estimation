@@ -1,9 +1,9 @@
 info:
-  info: 'try 16 channels instead of 7 (7spring, 3winter, 4lu, 1viirs, 1lcz, 1dem)'
+  info: 'bigger network + 15 channels (7spring, 3winter, 4lu, 1lcz, 1dem)'
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
+  pretrained_weights: 'convnextv2_nano.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
   unsupervised_criterion: 'contrastive'
   unsupervised_factor: 10000
