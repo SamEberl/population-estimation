@@ -193,11 +193,11 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read().astype(np.float16)
-                image_bands[image_bands < -3] = -3
-                image_bands[image_bands > 12] = 12
+                image_bands[image_bands < -2] = -2
+                image_bands[image_bands > 10] = 10
 
-                image_bands += 3
-                image_bands /= 15
+                image_bands += 2
+                image_bands /= 12
 
                 height, width = image_bands.shape[1], image_bands.shape[2]
                 # Calculate how much padding is needed
@@ -246,11 +246,8 @@ class studentTeacherDataset(Dataset):
             noisy_channels = np.clip(noisy_channels, 0, 1)
 
             return noisy_channels
-
         else:
             return image_bands
-
-
 
     def block_out_patch(self, image_bands, patch_size=(16, 16), probability=0.5):
         """

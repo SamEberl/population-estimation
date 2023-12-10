@@ -9,7 +9,7 @@ model_params:
   unsupervised_factor: 10000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
-  in_channels: 16
+  in_channels: 15
   nbr_outputs: 1
   drop_rate: 0.1
   #  drop_rate_teacher: 0.4
