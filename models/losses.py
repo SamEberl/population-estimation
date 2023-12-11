@@ -201,7 +201,7 @@ class ContrastiveLoss(nn.Module):
 
 class TripletLoss(nn.Module):
     def __init__(self):
-        super(TripletLoss, self).__init__()
+        super().__init__()
 
     def forward(self, anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive
@@ -222,7 +222,7 @@ class TripletLoss(nn.Module):
 
 class TripletLossModified(nn.Module):
     def __init__(self):
-        super(TripletLossModified, self).__init__()
+        super().__init__()
 
     def forward(self, anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive

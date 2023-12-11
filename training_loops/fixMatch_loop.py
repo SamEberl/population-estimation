@@ -297,7 +297,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     return
             pbar.set_description(f"Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
             pbar.update(1)
-        print(f'Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
+        print(f'  Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
         writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
         writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
         writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
