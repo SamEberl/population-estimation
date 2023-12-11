@@ -5,8 +5,8 @@ model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
-  unsupervised_criterion: 'tripletModified'
-  unsupervised_factor: 1000000
+  unsupervised_criterion: 'triplet'
+  unsupervised_factor: 1000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
   in_channels: 7

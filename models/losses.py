@@ -205,9 +205,9 @@ class TripletLoss(nn.Module):
 
     def forward(self, anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive
-        positive_distance = torch.sqrt((anchor - positive).pow(2).sum(1))
+        positive_distance = (anchor - positive).pow(2).sum(1)
         # Compute the Euclidean distance between anchor and negative
-        negative_distance = torch.sqrt((anchor - negative).pow(2).sum(1))
+        negative_distance = (anchor - negative).pow(2).sum(1)
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
         losses_masked = losses * mask
