@@ -33,7 +33,9 @@ class fixMatch(nn.Module):
 
         self.supervised_criterion = supervised_losses[supervised_criterion]
 
-        unsupervised_losses = {'contrastive': ContrastiveLoss()}
+        unsupervised_losses = {'contrastive': ContrastiveLoss(),
+                               'triplet': TripletLoss,
+                               'tripletModified': TripletLossModified}
 
         self.unsupervised_criterion = unsupervised_losses[unsupervised_criterion]
 
@@ -58,8 +60,8 @@ class fixMatch(nn.Module):
         loss = self.supervised_criterion(predictions, labels, log_var, cur_step, total_step)
         return loss
 
-    def loss_unsupervised(self, student_features, teacher_features, mask, Y, margin=1.0):
-        loss = self.unsupervised_criterion(student_features, teacher_features, mask, Y, margin)
+    def loss_unsupervised(self, student_features, teacher_features, mask, margin=2.0):
+        loss = self.unsupervised_criterion(student_features, teacher_features, mask, margin)
         loss = loss * self.unsupervised_factor
         return loss
 

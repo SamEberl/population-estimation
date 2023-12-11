@@ -197,3 +197,50 @@ class ContrastiveLoss(nn.Module):
         loss = loss_contrastive #* self.unsupervised_factor
 
         return loss
+
+
+class TripletLoss(nn.Module):
+    def __init__(self):
+        super(TripletLoss, self).__init__()
+
+    def forward(self, anchor, positive, negative, mask, margin):
+        # Compute the Euclidean distance between anchor and positive
+        positive_distance = (anchor - positive).pow(2).sum(1)
+        # Compute the Euclidean distance between anchor and negative
+        negative_distance = (anchor - negative).pow(2).sum(1)
+        # Compute the loss
+        losses = torch.relu(positive_distance - negative_distance + margin)
+        losses_masked = losses * mask
+        if torch.sum(mask) != 0:
+            triplet_loss = torch.sum(losses_masked) / torch.sum(mask)
+        else:
+            triplet_loss = torch.tensor([0], dtype=torch.float32)
+            if torch.cuda.is_available():
+                triplet_loss = triplet_loss.cuda()
+        return triplet_loss
+
+
+class TripletLossModified(nn.Module):
+    def __init__(self):
+        super(TripletLossModified, self).__init__()
+
+    def forward(self, anchor, positive, negative, mask, margin):
+        # Compute the Euclidean distance between anchor and positive
+        positive_distance = (anchor - positive).pow(2).sum(1)
+        # Compute the Euclidean distance between anchor and negative
+        negative_distance = (anchor - negative).pow(2).sum(1)
+        # Compute the loss
+        losses = torch.relu(positive_distance - negative_distance + margin)
+        losses_masked = losses * mask
+        if torch.sum(mask) != 0:
+            triplet_loss = torch.sum(losses_masked) / torch.sum(mask)
+        else:
+            triplet_loss = torch.tensor([0], dtype=torch.float32)
+            if torch.cuda.is_available():
+                triplet_loss = triplet_loss.cuda()
+
+        mean_distances = torch.mean((anchor - positive).pow(2).sum() + (anchor - negative).pow(2).sum())
+        new_term = torch.abs((0.5 * mean_distances) - 1)
+
+        loss = triplet_loss + new_term
+        return loss

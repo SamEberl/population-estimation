@@ -52,11 +52,12 @@ class studentTeacherDataset(Dataset):
         data = np.empty((self.nbr_channels, 100, 100), dtype=np.float32)
 
         # All values are expected to be between 0 and 1
-        data[0:6, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
-        data[6:9, :, :] = self.generate_winter_img(file_path)
-        data[9:13, :, :] = self.generate_lu(file_path)  # lu
-        data[13, :, :] = self.generate_lcz(file_path)
-        data[14, :, :] = self.generate_dem(file_path)
+        data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
+        data[3:7, :, :] = self.generate_lu(file_path)  # lu
+        # data[13, :, :] = self.generate_lcz(file_path)
+        # data[14, :, :] = self.generate_dem(file_path)
+        # data[6:9, :, :] = self.generate_winter_img(file_path)
+
         # data[15, :, :] = self.generate_viirs(file_path)  # viirs
 
         if self.student_transform is not None:
@@ -132,8 +133,8 @@ class studentTeacherDataset(Dataset):
             #     #image_bands = torch.from_numpy(image_bands)
             #     return image_bands
             with rasterio.open(file_path, 'r') as data:
-                # image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
-                image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
+                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
+                # image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
                 return image_bands
