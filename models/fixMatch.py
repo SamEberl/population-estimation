@@ -60,8 +60,8 @@ class fixMatch(nn.Module):
         loss = self.supervised_criterion(predictions, labels, log_var, cur_step, total_step)
         return loss
 
-    def loss_unsupervised(self, student_features, teacher_features, mask, margin=2.0):
-        loss = self.unsupervised_criterion(student_features, teacher_features, mask, margin)
+    def loss_unsupervised(self, student_features, teacher_features, dearanged_teacher_features, mask, margin=2.0):
+        loss = self.unsupervised_criterion(student_features, teacher_features, dearanged_teacher_features, mask, margin)
         loss = loss * self.unsupervised_factor
         return loss
 
