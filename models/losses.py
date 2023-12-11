@@ -205,9 +205,9 @@ class TripletLoss(nn.Module):
 
     def forward(self, anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive
-        positive_distance = (anchor - positive).pow(2).sum(1)
+        positive_distance = torch.sqrt((anchor - positive).pow(2).sum(1))
         # Compute the Euclidean distance between anchor and negative
-        negative_distance = (anchor - negative).pow(2).sum(1)
+        negative_distance = torch.sqrt((anchor - negative).pow(2).sum(1))
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
         losses_masked = losses * mask
@@ -226,9 +226,9 @@ class TripletLossModified(nn.Module):
 
     def forward(self, anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive
-        positive_distance = (anchor - positive).pow(2).sum(1)
+        positive_distance = torch.sqrt((anchor - positive).pow(2).sum(1))
         # Compute the Euclidean distance between anchor and negative
-        negative_distance = (anchor - negative).pow(2).sum(1)
+        negative_distance = torch.sqrt((anchor - negative).pow(2).sum(1))
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
         losses_masked = losses * mask
@@ -239,7 +239,8 @@ class TripletLossModified(nn.Module):
             if torch.cuda.is_available():
                 triplet_loss = triplet_loss.cuda()
 
-        mean_distances = torch.mean((anchor - positive).pow(2).sum() + (anchor - negative).pow(2).sum())
+        # mean_distances = torch.mean((anchor - positive).pow(2).sum() + (anchor - negative).pow(2).sum())
+        mean_distances = torch.mean(positive_distance + negative_distance)
         new_term = torch.abs((0.5 * mean_distances) - 1)
 
         loss = triplet_loss + new_term
