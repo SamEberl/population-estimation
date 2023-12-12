@@ -54,8 +54,8 @@ class studentTeacherDataset(Dataset):
         # All values are expected to be between 0 and 1
         data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
         data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        # data[13, :, :] = self.generate_lcz(file_path)
-        # data[14, :, :] = self.generate_dem(file_path)
+        data[7, :, :] = self.generate_lcz(file_path)
+        data[8, :, :] = self.generate_dem(file_path)
         # data[6:9, :, :] = self.generate_winter_img(file_path)
 
         # data[15, :, :] = self.generate_viirs(file_path)  # viirs
