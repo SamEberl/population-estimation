@@ -105,7 +105,7 @@ def forward_pass(student_model,
         writer.add_scalar(f'Teacher_feature_euclidean/{split}', torch.mean(euclidean_distances), step_nbr)
 
         # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-        pseudo_label_mask = teacher_features_spread < 0.8
+        pseudo_label_mask = teacher_features_spread < 0.7
         writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
         #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
         # pseudo_label_mask = teacher_data_uncertainty < ?
