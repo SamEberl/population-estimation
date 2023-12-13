@@ -212,10 +212,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     num_epochs = config['train_params']['max_epochs']
     use_teacher = config['train_params']['use_teacher']
 
-    optimizer = optim.Adam(student_model.parameters(),
-                           lr=config['train_params']['LR'],
-                           betas=(config['train_params']['beta1'], config['train_params']['beta2']),
-                           weight_decay=config['train_params']['L2_reg'] * 2)
+    optimizer = optim.AdamW(student_model.parameters(),
+                            lr=config['train_params']['LR'],
+                            betas=(config['train_params']['beta1'], config['train_params']['beta2']),
+                            weight_decay=config['train_params']['L2_reg'] * 2)
     scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
 
     pbar = tqdm(total=len(train_dataloader), ncols=140)
