@@ -110,8 +110,8 @@ def forward_pass(student_model,
         #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
         # pseudo_label_mask = teacher_data_uncertainty < ?
         if torch.sum(pseudo_label_mask) > 0:
-            dearanged_teacher_features = derangement_shuffle(teacher_features)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, pseudo_label_mask)
+            dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, pseudo_label_mask)
         writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
 
         check2 = False

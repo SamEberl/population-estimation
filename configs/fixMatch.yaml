@@ -1,36 +1,36 @@
 info:
-  info: 'for uncertainty analysis | larger model | 9 channels (3rgb, 4lu, 1lcz, 1dem)'
+  info: 'normalized triplet loss | 3 channels (3rgb)'
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'convnextv2_nano.fcmae'  # choose from timm models
+  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
-  in_channels: 9
+  in_channels: 3
   nbr_outputs: 1
-  drop_rate: 0.2
+  drop_rate: 0.1
   #  drop_rate_teacher: 0.4
 
 data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
-  train_batch_size: 256
+  train_batch_size: 1024
   num_workers: 32
   drop_labels: False
   percentage_unlabeled: 0.0
 
 train_params:
   LR: 0.00005
-  max_epochs: 140
+  max_epochs: 100
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
   use_teacher: True
   seed: 42
-  num_samples_teacher: 100
+  num_samples_teacher: 30
 
 hparam_search:
   active: False

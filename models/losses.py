@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class RMSLELoss(nn.Module):
     def __init__(self):
@@ -204,20 +205,30 @@ class TripletLoss(nn.Module):
         super().__init__()
 
     def forward(self, anchor, positive, negative, mask, margin):
+        # L2 Normalize the embeddings
+        anchor = F.normalize(anchor, p=2, dim=1)
+        positive = F.normalize(positive, p=2, dim=1)
+        negative = F.normalize(negative, p=2, dim=1)
+
         # Compute the Euclidean distance between anchor and positive
         positive_distance = (anchor - positive).pow(2).sum(1)
         # Compute the Euclidean distance between anchor and negative
         negative_distance = (anchor - negative).pow(2).sum(1)
+
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
         losses_masked = losses * mask
+
+        # Calculate the average loss only for non-zero mask elements
         if torch.sum(mask) != 0:
             triplet_loss = torch.sum(losses_masked) / torch.sum(mask)
         else:
             triplet_loss = torch.tensor([0], dtype=torch.float32)
             if torch.cuda.is_available():
                 triplet_loss = triplet_loss.cuda()
+
         return triplet_loss
+
 
 
 class TripletLossModified(nn.Module):
