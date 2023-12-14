@@ -53,9 +53,9 @@ class studentTeacherDataset(Dataset):
 
         # All values are expected to be between 0 and 1
         data[0:3, :, :] = self.generate_rgb_img(file_path)  # sen2spring_rgb
-        data[3:7, :, :] = self.generate_lu(file_path)  # lu
-        data[7, :, :] = self.generate_lcz(file_path)
-        data[8, :, :] = self.generate_dem(file_path)
+        # data[3:7, :, :] = self.generate_lu(file_path)  # lu
+        # data[7, :, :] = self.generate_lcz(file_path)
+        # data[8, :, :] = self.generate_dem(file_path)
         # data[6:9, :, :] = self.generate_winter_img(file_path)
 
         # data[15, :, :] = self.generate_viirs(file_path)  # viirs
@@ -120,23 +120,19 @@ class studentTeacherDataset(Dataset):
 
     def generate_rgb_img(self, file_path):
         try:
-            # with rasterio.open(file_path, 'r') as data:
-            #     # image_bands = data.read(out_shape=(data.count, 100, 100), resampling=Resampling.cubic)[[3, 2, 1], :, :]
-            #     image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
-            #     # image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
-            #     image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
-            #     # Set empty parts to mean to avoid skewing the normalization
-            #     image_bands[(image_bands == 0)] = image_bands.mean()
-            #     # normalize channelwise
-            #     image_bands -= image_bands.min(axis=(1, 2), keepdims=True)
-            #     image_bands /= (image_bands.max(axis=(1, 2), keepdims=True) - image_bands.min(axis=(1, 2), keepdims=True))
-            #     #image_bands = torch.from_numpy(image_bands)
-            #     return image_bands
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
-                # image_bands = data.read()[[3, 2, 1, 7, 11, 12], :, :].astype(np.float16)
+                # Read specific bands (4, 3, and 2 for RGB)
+                band4 = data.read(4).astype(np.float16)  # Red
+                band3 = data.read(3).astype(np.float16)  # Green
+                band2 = data.read(2).astype(np.float16)  # Blue
+
+                # Stack bands to form an RGB image
+                image_bands = np.stack([band4, band3, band2], axis=0)
+
+                # Clip and normalize the values
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
+
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
