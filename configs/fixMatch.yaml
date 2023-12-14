@@ -6,7 +6,7 @@ model_params:
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   supervised_criterion: 'LinUncertainty'
   unsupervised_criterion: 'triplet'
-  unsupervised_factor: 100000
+  unsupervised_factor: 1_000_000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
   in_channels: 3
