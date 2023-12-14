@@ -121,18 +121,21 @@ class studentTeacherDataset(Dataset):
     def generate_rgb_img(self, file_path):
         try:
             with rasterio.open(file_path, 'r') as data:
-                # Read specific bands (4, 3, and 2 for RGB)
-                band4 = data.read(4).astype(np.float16)  # Red
-                band3 = data.read(3).astype(np.float16)  # Green
-                band2 = data.read(2).astype(np.float16)  # Blue
+                # # Read specific bands (4, 3, and 2 for RGB)
+                # band4 = data.read(4).astype(np.float16)  # Red
+                # band3 = data.read(3).astype(np.float16)  # Green
+                # band2 = data.read(2).astype(np.float16)  # Blue
+                #
+                # # Stack bands to form an RGB image
+                # image_bands = np.stack([band4, band3, band2], axis=0)
+                #
+                # # Clip and normalize the values
+                # image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
+                # image_bands /= self.clip_max
 
-                # Stack bands to form an RGB image
-                image_bands = np.stack([band4, band3, band2], axis=0)
-
-                # Clip and normalize the values
+                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
-
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
