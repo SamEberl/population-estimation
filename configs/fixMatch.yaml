@@ -1,5 +1,5 @@
 info:
-  info: 'Baseline MSE no teacher | 3 channels (3rgb)'
+  info: 'Try batch_size of 32 instead of 1024'
 
 model_params:
   architecture: 'fixMatch'
