@@ -172,12 +172,13 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
     use_teacher = config['train_params']['use_teacher']
+    info = config['info']['info']
 
     optimizer = optim.AdamW(student_model.parameters(),
                             lr=config['train_params']['LR'],
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
-    scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
+    #scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
 
     pbar = tqdm(total=len(train_dataloader), ncols=140)
 
@@ -223,7 +224,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 optimizer.zero_grad()
                 train_loss.backward()
                 optimizer.step()
-            scheduler.step()
+            #scheduler.step()
 
             # Update teacher model using exponential moving average
             for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
@@ -257,9 +258,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     writer.add_scalar(f'Search_Hparam/{hparam_name}-Train-Loss', train_loss, config['train_params']['LR'])
                     writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', val_loss, config['train_params']['LR'])
                     return
-            pbar.set_description(f"Train Loss: {train_loss.item():.2f} | Val Loss: {val_loss.item():.2f}")
-            pbar.update(1)
-        print(f'  Epoch: [{epoch + 1}/{num_epochs}] Total_Val_Loss: {(total_val_loss.item() / len(val_dataloader)):.2f}')
+            if i % 10 == 0:
+                pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
+                pbar.update(1)
         writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
         writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
         writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)

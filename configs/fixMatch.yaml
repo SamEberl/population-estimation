@@ -1,5 +1,5 @@
 info:
-  info: 'try double lr'
+  info: 'train without sheduler'
 
 model_params:
   architecture: 'fixMatch'
