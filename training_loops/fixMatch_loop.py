@@ -266,6 +266,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
         writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
         writer.add_scalar(f'Bias/val', calc_bias(biases_val), epoch)
+        writer.add_scalar(f'LR', optimizer.lr, epoch)
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
