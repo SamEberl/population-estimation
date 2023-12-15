@@ -23,7 +23,7 @@ data_params:
   drop_data: False  # Drops 80% of the training data
 
 train_params:
-  LR: 0.00005
+  LR: 0.0001
   max_epochs: 50
   L2_reg: 0.005
   beta1: 0.9
