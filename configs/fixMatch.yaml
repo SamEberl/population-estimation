@@ -1,5 +1,5 @@
 info:
-  info: 'normalized triplet loss | 3 channels (3rgb)'
+  info: 'Baseline LinUncertainty no teacher | 3 channels (3rgb)'
 
 model_params:
   architecture: 'fixMatch'
@@ -28,7 +28,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  use_teacher: True
+  use_teacher: False
   seed: 42
   num_samples_teacher: 30
 
