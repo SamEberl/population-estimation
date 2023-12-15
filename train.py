@@ -1,6 +1,7 @@
 import copy
 from models import *
 from training_loops.fixMatch_loop import *
+from dataset import get_dataloader
 
 print('--- Loading model ---')
 

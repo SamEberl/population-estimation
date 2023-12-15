@@ -297,3 +297,46 @@ class studentTeacherDataset(Dataset):
             image_bands[top_left_h:top_left_h + patch_size[0], top_left_w:top_left_w + patch_size[1], :] = patch_mean
 
         return image_bands
+
+def get_dataloader(config, student_transform, teacher_transform):
+    data_path = config["data_params"]["data_path"]
+    train_bs = config["data_params"]["train_batch_size"]
+    #val_bs = config["data_params"]["val_batch_size"]
+    num_workers = config["data_params"]["num_workers"]
+    use_teacher = config['train_params']['use_teacher']
+    drop_labels = config['data_params']['drop_labels']
+    drop_data = config['data_params']['drop_data']
+    seed = config['train_params']['seed']
+    percentage_unlabeled = config['data_params']['percentage_unlabeled']
+    nbr_channels = config['model_params']['in_channels']
+
+    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, drop_labels=drop_labels, drop_data=drop_data, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
+    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, drop_labels=drop_labels, drop_data=drop_data, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
+
+    # Use adapted val batch sizes to accommodate different amounts of data
+    data_ratio = len(train_dataset) / len(val_dataset)
+
+    shuffle = True
+    # train_sampler = None
+    # val_sampler = None
+    # if config['hparam_search']['active']:
+    #     shuffle = False
+    #     train_sampler = SequentialSampler(train_dataset)
+    #     val_sampler = SequentialSampler(val_dataset)
+
+    train_dataloader = DataLoader(train_dataset,
+                                  batch_size=train_bs,
+                                  shuffle=shuffle,
+                                  #sampler=train_sampler,
+                                  num_workers=num_workers,
+                                  pin_memory=True,
+                                  )
+    val_dataloader = DataLoader(val_dataset,
+                                batch_size=int(train_bs//data_ratio),
+                                shuffle=shuffle,
+                                #sampler=val_sampler,
+                                num_workers=num_workers,
+                                pin_memory=True,
+                                )
+
+    return train_dataloader, val_dataloader
