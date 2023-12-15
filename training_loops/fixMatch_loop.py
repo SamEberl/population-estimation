@@ -40,7 +40,8 @@ def forward_pass(student_model,
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
-        supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+        supervised_loss = student_model.loss_supervised(student_preds, labels)
+        # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
         r2_numerator = maskedMSELoss(student_preds, labels)
         bias = maskedBias(student_preds, labels)
         # total_step = 140 * 119794 + (0 + 1) * 256
