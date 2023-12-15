@@ -3,7 +3,6 @@ import datetime
 import albumentations as A
 import torch
 from torch import optim
-from torch.utils.data import DataLoader
 from dataset import studentTeacherDataset
 from tensorboardX import SummaryWriter
 from utils import *

@@ -8,6 +8,7 @@ import rasterio
 import math
 
 from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
 from logging_utils import logger
 
 
