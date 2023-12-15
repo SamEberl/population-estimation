@@ -16,14 +16,15 @@ model_params:
 
 data_params:
   data_path: "/home/pop-dens/data/So2Sat_POP_Part1"
-  train_batch_size: 1024
+  train_batch_size: 32
   num_workers: 32
   drop_labels: False
   percentage_unlabeled: 0.0
+  drop_data: False  # Drops 80% of the training data
 
 train_params:
   LR: 0.00005
-  max_epochs: 30
+  max_epochs: 50
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999

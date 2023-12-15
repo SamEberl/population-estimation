@@ -171,12 +171,13 @@ def get_dataloader(config, student_transform, teacher_transform):
     num_workers = config["data_params"]["num_workers"]
     use_teacher = config['train_params']['use_teacher']
     drop_labels = config['data_params']['drop_labels']
+    drop_data = config['data_params']['drop_data']
     seed = config['train_params']['seed']
     percentage_unlabeled = config['data_params']['percentage_unlabeled']
     nbr_channels = config['model_params']['in_channels']
 
-    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, drop_labels=drop_labels, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
-    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, drop_labels=drop_labels, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
+    train_dataset = studentTeacherDataset(data_path, split='train', use_teacher=use_teacher, drop_labels=drop_labels, drop_data=drop_data, student_transform=student_transform, teacher_transform=teacher_transform, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
+    val_dataset = studentTeacherDataset(data_path, split='test', use_teacher=use_teacher, drop_labels=drop_labels, drop_data=drop_data, student_transform=None, teacher_transform=None, percentage_unlabeled=percentage_unlabeled, nbr_channels=nbr_channels)
 
     # Use adapted val batch sizes to accommodate different amounts of data
     data_ratio = len(train_dataset) / len(val_dataset)

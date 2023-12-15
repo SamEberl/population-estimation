@@ -17,6 +17,7 @@ class studentTeacherDataset(Dataset):
                  split: str = "train",
                  use_teacher=False,
                  drop_labels=False,
+                 drop_data=False,
                  student_transform=None,
                  teacher_transform=None,
                  percentage_unlabeled=0.0,
@@ -39,6 +40,8 @@ class studentTeacherDataset(Dataset):
             self.get_data_paths()
             if drop_labels and split == 'train':
                 self.split_labeled_unlabeled()
+            if drop_data and split == 'train':
+                self.drop_data()
         logger.info(f'{split}-dataset length: {len(self.data)}')
 
     def __len__(self):
@@ -117,6 +120,16 @@ class studentTeacherDataset(Dataset):
         unlabeled_data = [(path, -1, name) for path, _, name in self.data[:unlabeled_size]]
 
         self.data = unlabeled_data + labeled_data
+
+    def drop_data(self):
+        # Drop 80% of datapoints
+        random.seed(42)
+        random.shuffle(self.data)
+        total_images = len(self.data)
+        # Calculate the number of images to keep (20% of the total)
+        keep_size = int(0.2 * total_images)
+        # Keep only 20% of the data
+        self.data = self.data[:keep_size]
 
     def generate_rgb_img(self, file_path):
         try:
