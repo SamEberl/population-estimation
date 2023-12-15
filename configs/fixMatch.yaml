@@ -1,5 +1,5 @@
 info:
-  info: 'train with 9 channels to compare time'
+  info: 'train without power 2 | 3 channels'
 
 model_params:
   architecture: 'fixMatch'
@@ -9,7 +9,7 @@ model_params:
   unsupervised_factor: 1_000_000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
-  in_channels: 9
+  in_channels: 3
   nbr_outputs: 1
   drop_rate: 0.1
   #  drop_rate_teacher: 0.4
