@@ -1,5 +1,5 @@
 info:
-  info: 'Try batch_size of 32 instead of 1024'
+  info: 'try double lr'
 
 model_params:
   architecture: 'fixMatch'
