@@ -8,7 +8,7 @@ from tensorboardX import SummaryWriter
 from utils import *
 from datetime import datetime
 from logging_utils import *
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from models.losses import maskedBias, maskedL1Loss, maskedMSELoss, maskedRMSELoss
 
 import matplotlib.pyplot as plt
@@ -177,7 +177,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             lr=config['train_params']['LR'],
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
-    #scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
+    # scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     pbar = tqdm(total=len(train_dataloader), ncols=140)
 
@@ -260,6 +261,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             if i % 10 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
                 pbar.update(1)
+        scheduler.step(total_val_loss/len(val_dataloader))
         writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
         writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
         writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)

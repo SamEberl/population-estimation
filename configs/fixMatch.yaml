@@ -1,5 +1,5 @@
 info:
-  info: 'train without sheduler'
+  info: 'train with new scheduler'
 
 model_params:
   architecture: 'fixMatch'
