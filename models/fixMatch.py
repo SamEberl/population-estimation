@@ -7,6 +7,7 @@ from .losses import *
 class fixMatch(nn.Module):
     def __init__(self,
                  pretrained_weights='resnet18',
+                 pretrained=True,
                  in_channels=3,
                  nbr_outputs=1,
                  supervised_criterion='MSE',
@@ -15,7 +16,7 @@ class fixMatch(nn.Module):
                  drop_rate=0,
                  **kwargs):
         super(fixMatch, self).__init__()
-        self.model = create_model(pretrained_weights, pretrained=True, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
+        self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
         self.fc_preds = nn.Linear(self.model.num_features, nbr_outputs)
         self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
         # factor to scale unsupervised_loss to be similar to supervised_loss

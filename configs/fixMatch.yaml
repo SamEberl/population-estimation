@@ -4,6 +4,7 @@ info:
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
+  pretrained: 'False'
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
