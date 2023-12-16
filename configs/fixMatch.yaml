@@ -1,10 +1,10 @@
 info:
-  info: 'train normally with only 20% of data | 3 channels'
+  info: 'train with full data but sigmoid*55k | 3 channels'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
-  pretrained: 'False'
+  pretrained: True
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
@@ -21,7 +21,7 @@ data_params:
   num_workers: 32
   drop_labels: False
   percentage_unlabeled: 0.0
-  drop_data: True  # Drops 80% of the training data
+  drop_data: False  # Drops 80% of the training data
 
 train_params:
   LR: 0.0001
