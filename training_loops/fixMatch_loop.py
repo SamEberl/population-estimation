@@ -10,6 +10,7 @@ from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from models.losses import maskedBias, maskedL1Loss, maskedMSELoss, maskedRMSELoss
+from MetricsLogger import MetricsLogger
 
 import matplotlib.pyplot as plt
 
@@ -21,11 +22,7 @@ def forward_pass(student_model,
                  labels,
                  config,
                  split,
-                 writer,
-                 step_nbr,
-                 save_img=False):
-    hparam_search = config['hparam_search']['active']
-
+                 logger):
     if split == 'train':
         student_model.train()
     else:
@@ -34,33 +31,28 @@ def forward_pass(student_model,
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
     mask_labeled = labels != -1
     supervised_loss = torch.tensor(0, dtype=torch.float32)
-    r2_numerator = torch.tensor(0, dtype=torch.float32)
-    bias = torch.tensor(0, dtype=torch.float32)
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
     if torch.sum(mask_labeled) > 0:
         supervised_loss = student_model.loss_supervised(student_preds, labels)
         # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
         r2_numerator = maskedMSELoss(student_preds, labels)
+        logger.add_metric('Observe-R2', split, r2_numerator)
         bias = maskedBias(student_preds, labels)
+        logger.add_metric('Observe-Bias', split, bias)
         # total_step = 140 * 119794 + (0 + 1) * 256
         # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
-    if not hparam_search:
-        supervised_loss_name = config['model_params']['supervised_criterion']
-        if supervised_loss != -1:
-            writer.add_scalar(f'Loss-{supervised_loss_name}/{split}', supervised_loss, step_nbr)
-        # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-        loss_mae = maskedL1Loss(student_preds, labels)
-        loss_rmse = maskedRMSELoss(student_preds, labels)
-        if loss_mae != -1:
-            writer.add_scalar(f'Loss-L1-Compare/{split}', loss_mae, step_nbr)
-            writer.add_scalar(f'Loss-RMSE-Compare/{split}', loss_rmse, step_nbr)
-        writer.add_scalar(f'Percentage-Labeled/{split}', torch.sum(mask_labeled)/len(mask_labeled), step_nbr)
-
-        # print(f'supervised_loss: {supervised_loss}')
-        # print(f'L1-Compare: {loss_mae}')
-        # print(f'Percentage: {torch.sum(mask_labeled)/len(mask_labeled)}')
+    supervised_loss_name = config['model_params']['supervised_criterion']
+    if supervised_loss != -1:
+        logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
+    # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    loss_mae = maskedL1Loss(student_preds, labels)
+    loss_rmse = maskedRMSELoss(student_preds, labels)
+    if loss_mae != -1:
+        logger.add_metric('Loss-Compare-L1', split, loss_mae)
+        logger.add_metric('Loss-Compare-RMSE', split, loss_rmse)
+    logger.add_metric('Observe-%-Labeled', split, torch.sum(mask_labeled)/len(mask_labeled))
 
     unsupervised_loss = torch.tensor(0, dtype=torch.float32)
     if torch.cuda.is_available():
@@ -92,45 +84,35 @@ def forward_pass(student_model,
 
         # Compute feature spread
         teacher_features_mean = n_teacher_features.mean(dim=0)  # Get averaged features
-        squared_diffs = (n_teacher_features - teacher_features_mean) ** 2  # Calculate the squared differences
-        euclidean_distances = torch.sqrt(squared_diffs.sum(dim=-1))  # Sum along the feature dimension and take root
-        teacher_features_spread = euclidean_distances.std(dim=0)  # Get spread
+        l2_distances = torch.sqrt(((n_teacher_features - teacher_features_mean) ** 2).sum(dim=-1))  # Calculate the squared differences
+        l2_distances_var = l2_distances.var(dim=0)  # Get spread
 
         # Compute data uncertainty
         teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
 
-        writer.add_scalar(f'Teacher_model_uncertainty/{split}', torch.mean(teacher_model_uncertainty), step_nbr)
-        writer.add_scalar(f'Teacher_feature_spread/{split}', torch.mean(teacher_features_spread), step_nbr)
-        writer.add_scalar(f'Teacher_data_uncertainty/{split}', torch.mean(teacher_data_uncertainty), step_nbr)
-        writer.add_scalar(f'Teacher_feature_euclidean/{split}', torch.mean(euclidean_distances), step_nbr)
+        logger.add_metric('Uncertainty_Var_Regression', split, torch.mean(teacher_model_uncertainty))
+        logger.add_metric('Uncertainty-Features-L2-Var', torch.mean(l2_distances_var))
+        logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
+        logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
 
         # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-        pseudo_label_mask = teacher_features_spread < 0.7
-        writer.add_scalar(f'Percentage-used-unsupervised', torch.sum(pseudo_label_mask)/len(pseudo_label_mask), step_nbr)
-        #print(f'Percentage-used-unsupervised: {torch.sum(pseudo_label_mask)/len(pseudo_label_mask)}')
+        pseudo_label_mask = l2_distances_var < 0.5
+        logger.add_metric(f'Observe-%-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
         # pseudo_label_mask = teacher_data_uncertainty < ?
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
             unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, pseudo_label_mask)
-        writer.add_scalar(f'Loss-Unsupervised/{split}', unsupervised_loss.item(), step_nbr)
-
-        check2 = False
-        if check2:  # TODO unsupervised loss on prediction instead of features
-            pass
-            # teacher_preds_loss = (teacher_preds_mean - labels)**2
+        logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
 
     loss = supervised_loss + unsupervised_loss
-    # print(f'sup: {supervised_loss}')
-    # print(f'unsup: {unsupervised_loss}')
-    # print(f'loss: {loss}')
-    writer.add_scalar(f'Loss-Total/{split}', loss, step_nbr)
+    logger.add_metric('Loss-All', split, loss)
 
     # if save_img:
     #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
     #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
     #     # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
 
-    return loss, r2_numerator, bias
+    return loss
 
 
 def batch_generator(dataloader):
@@ -163,10 +145,9 @@ def get_transforms(config):
     return student_transform, teacher_transform
 
 
-
-
-
 def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader):
+    logger = MetricsLogger(writer)
+
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
@@ -191,14 +172,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
-        r2_numerators_train = []
-        r2_numerators_val = []
-        biases_train = []
-        biases_val = []
         writer.add_scalar(f'LR', optimizer.defaults['lr'], epoch)
-        #config['train_params']['use_teacher'] = (epoch == (num_epochs - 1))
         for i, train_data in enumerate(train_dataloader):
-            step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
+            # step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
 
             student_inputs, teacher_inputs, labels, datapoint_name = train_data
             student_inputs = student_inputs.to(device)
@@ -206,7 +182,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_inputs = teacher_inputs.to(device)
             labels = labels.to(device)
 
-            train_loss, r2_numerator_train, bias_train = forward_pass(
+            train_loss = forward_pass(
                 student_model=student_model,
                 teacher_model=teacher_model,
                 student_inputs=student_inputs,
@@ -214,18 +190,14 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 labels=labels,
                 config=config,
                 split='train',
-                writer=writer,
-                step_nbr=step_nbr)
+                logger=logger)
             total_train_loss += train_loss
-            r2_numerators_train.append(r2_numerator_train)
-            biases_train.append(bias_train)
 
             # Backward pass and optimization
             if train_loss != 0:
                 optimizer.zero_grad()
                 train_loss.backward()
                 optimizer.step()
-            #scheduler.step()
 
             # Update teacher model using exponential moving average
             for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
@@ -233,8 +205,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
             val_data = next(val_generator)
             if val_data is not None:
-                # step_nbr = epoch * len(val_dataloader.dataset) + (i+1) * val_dataloader.batch_size
-
                 student_inputs, teacher_inputs, labels, datapoint_name = val_data
                 student_inputs = student_inputs.to(device)
                 labels = labels.to(device)
@@ -248,25 +218,18 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             labels=labels,
                             config=config,
                             split='valid',
-                            writer=writer,
-                            step_nbr=step_nbr)
+                            logger=logger)
                     total_val_loss += val_loss
-                    r2_numerators_val.append(r2_numerator_val)
-                    biases_val.append(bias_val)
 
-                if config['hparam_search']['active'] and ((i+1) % config['hparam_search']['nbr_batches']) == 0:
-                    hparam_name = config['hparam_search']['hparam_name']
-                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Train-Loss', train_loss, config['train_params']['LR'])
-                    writer.add_scalar(f'Search_Hparam/{hparam_name}-Val-Loss', val_loss, config['train_params']['LR'])
-                    return
             if i % 10 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
                 pbar.update(1)
         scheduler.step(total_val_loss/len(val_dataloader))
-        writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
-        writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
-        writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
-        writer.add_scalar(f'Bias/val', calc_bias(biases_val), epoch)
+        logger.write(epoch+1)
+        # writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
+        # writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
+        # writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
+        # writer.add_scalar(f'Bias/val', calc_bias(biases_val), epoch)
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))

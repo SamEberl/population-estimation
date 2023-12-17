@@ -1,5 +1,5 @@
 info:
-  info: 'try 0.1x l2-reg | 3 channels'
+  info: 'Test new logger + 0 dropout | 3 channels | full data'
 
 model_params:
   architecture: 'fixMatch'
@@ -26,7 +26,7 @@ data_params:
 train_params:
   LR: 0.0001
   max_epochs: 50
-  L2_reg: 0.0005
+  L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
