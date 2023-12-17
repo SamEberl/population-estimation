@@ -1,5 +1,5 @@
 info:
-  info: 'Test new logger + with no dropout | 3 channels | full data'
+  info: 'Test no dropout | 3 channels | full data'
 
 model_params:
   architecture: 'fixMatch'
