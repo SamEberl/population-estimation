@@ -34,14 +34,6 @@ train_params:
   seed: 42
   num_samples_teacher: 30
 
-hparam_search:
-  active: False
-  hparam_name: 'LR'
-  lowest: 0.0000001
-  highest: 0.01
-  nbr_values: 5  # Evaluates this many values by splitting the range into equal parts
-  nbr_batches: 5 # Number of batches after which the evaluation is done
-
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
   model_save_dir: "/home/sameberl/models"
