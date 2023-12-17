@@ -1,5 +1,4 @@
-import numpy as np
-
+import torch
 
 def calc_r2(numbers, split):
     # Filtering out the zeros and calculating the sum of the remaining numbers
@@ -88,7 +87,7 @@ class MetricsLogger:
                 elif 'val' in metric_name:
                     calc_r2(values, 'val')
             else:
-                average_value = np.mean(values)
+                average_value = torch.mean(values)
                 self.writer.add_scalar(metric_name, average_value, step_nbr)
 
         # Clear metrics after logging
