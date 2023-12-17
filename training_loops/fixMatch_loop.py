@@ -210,7 +210,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 labels = labels.to(device)
 
                 with torch.no_grad():
-                    val_loss, r2_numerator_val, bias_val = forward_pass(
+                    val_loss = forward_pass(
                             student_model=student_model,
                             teacher_model=teacher_model,
                             student_inputs=student_inputs,
