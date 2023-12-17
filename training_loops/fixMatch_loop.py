@@ -51,7 +51,7 @@ def forward_pass(student_model,
     if loss_mae != -1:
         logger.add_metric('Loss-Compare-L1', split, loss_mae)
         logger.add_metric('Loss-Compare-RMSE', split, loss_rmse)
-    logger.add_metric('Observe-%-Labeled', split, torch.sum(mask_labeled)/len(mask_labeled))
+    logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled)/len(mask_labeled))
 
     unsupervised_loss = torch.tensor(0, dtype=torch.float32)
     if torch.cuda.is_available():
@@ -96,7 +96,7 @@ def forward_pass(student_model,
 
         # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
         pseudo_label_mask = l2_distances_var < 0.5
-        logger.add_metric(f'Observe-%-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
+        logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
         # pseudo_label_mask = teacher_data_uncertainty < ?
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
