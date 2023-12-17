@@ -40,7 +40,6 @@ def forward_pass(student_model,
         logger.add_metric('Observe-R2', split, r2_numerator)
         bias = maskedBias(student_preds, labels)
         logger.add_metric('Observe-Bias', split, bias)
-        # total_step = 140 * 119794 + (0 + 1) * 256
         # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
     supervised_loss_name = config['model_params']['supervised_criterion']
