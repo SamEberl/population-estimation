@@ -43,8 +43,8 @@ class fixMatch(nn.Module):
     def forward(self, x):
         features = self.model(x)
         prediction = self.fc_preds(features).flatten()
-        # prediction = torch.pow(2, prediction)
-        prediction = torch.sigmoid(prediction) * 55_000
+        prediction = torch.pow(2, prediction)
+        # prediction = torch.sigmoid(prediction) * 55_000
         uncertainty = self.uncertainty(features).flatten()
         # uncertainty = torch.sigmoid(uncertainty) * 18
         uncertainty = torch.pow(2, uncertainty)

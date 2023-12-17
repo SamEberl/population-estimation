@@ -1,5 +1,5 @@
 info:
-  info: 'Try sigmoid | 3 channels | full data'
+  info: 'Try power 2 | 3 channels | full data'
 
 model_params:
   architecture: 'fixMatch'
