@@ -171,7 +171,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
-        writer.add_scalar(f'LR', optimizer.defaults['lr'], epoch)
+        writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         for i, train_data in enumerate(train_dataloader):
             # step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
 
