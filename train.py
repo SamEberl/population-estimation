@@ -14,18 +14,20 @@ torch.manual_seed(seed)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 
-# Create model
+# Choose device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# Init models
 student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
 teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
+
+# Retrain from checkpoint
 if config['model_params']['retrain']:
     retrain_from = config['model_params']['retrain_from']
-    # Load previous checkpoint
     student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
     teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
-# Make sure no grad is calculated for teacher & remove things like dropout
-teacher_model.eval()
 
+# Set logging directory
 log_dir = config['save_dirs']['log_save_dir']
 current_datetime = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
 print(f'--- Start training at {current_datetime} ---')

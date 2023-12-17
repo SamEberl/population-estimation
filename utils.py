@@ -391,46 +391,4 @@ def calc_r2_denominator():
     print(f'specific_sum: {total_sum/len(dataset)}')
 
 
-def calc_r2(numbers, split):
-    # Filtering out the zeros and calculating the sum of the remaining numbers
-    non_zero_numbers = [num for num in numbers if num != 0]
-    total_sum = sum(non_zero_numbers)
 
-    # Counting the number of non-zero elements
-    non_zero_count = len(non_zero_numbers)
-
-    # Avoiding division by zero
-    if non_zero_count == 0:
-        return 0
-
-    # Calculating the mean
-    mean = total_sum / non_zero_count
-
-    r2 = 0
-    if split == 'train':
-        r2 = 1-(mean/7373152.5)
-    elif split == 'test' or split == 'val':
-        r2 = 1-(mean/9868522.0)
-    else:
-        print('wrong split when computing r2')
-    return r2
-
-
-def calc_bias(numbers):
-    """
-    Computes the mean of a list of numbers, excluding zeros from both the sum and the count.
-    """
-    # Filtering out the zeros and calculating the sum of the remaining numbers
-    non_zero_numbers = [num for num in numbers if num != 0]
-    total_sum = sum(non_zero_numbers)
-
-    # Counting the number of non-zero elements
-    non_zero_count = len(non_zero_numbers)
-
-    # Avoiding division by zero
-    if non_zero_count == 0:
-        return 0
-
-    # Calculating the mean
-    mean = total_sum / non_zero_count
-    return mean
