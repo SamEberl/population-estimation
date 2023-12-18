@@ -144,20 +144,24 @@ def create_feature_csv():
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
+    # student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
     teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
-    for param in student_model.parameters():
-        param.requires_grad = False
+    # for param in student_model.parameters():
+    #     param.requires_grad = False
     for param in teacher_model.parameters():
         param.requires_grad = False
+
+    retrain_from = config['model_params']['retrain_from']
+    student_model.load_state_dict(torch.load('/home/sameberl/models', retrain_from)))
+    teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
     student_transform, teacher_transform = get_transforms(config)
     train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
 
-    df_train = pd.DataFrame(columns=range(config['model_params']['in_size']))
+    df_train = pd.DataFrame(columns=range(teacher_model.model.num_features))
     df_train['PopCount'] = None
 
-    df_val = pd.DataFrame(columns=range(config['model_params']['in_size']))
+    df_val = pd.DataFrame(columns=range(teacher_model.model.num_features))
     df_val['PopCount'] = None
 
     with torch.no_grad():

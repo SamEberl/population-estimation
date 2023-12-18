@@ -10,6 +10,7 @@ from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from models.losses import maskedBias, maskedL1Loss, maskedMSELoss, maskedRMSELoss
 from MetricsLogger import MetricsLogger
+from dataset import batch_generator
 
 import matplotlib.pyplot as plt
 
@@ -189,9 +190,13 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             logger=logger)
                     total_val_loss += val_loss
 
-            if i % 10 == 0:
+            if i % 100 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
                 pbar.update(1)
+
+            if (i+1) % 4 == 0:
+                logger.write(epoch + 1)
+
         writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         logger.write(epoch+1)
         scheduler.step(total_val_loss/len(val_dataloader))
