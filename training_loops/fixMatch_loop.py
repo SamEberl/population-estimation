@@ -30,11 +30,11 @@ def forward_pass(student_model,
 
     for i in range(len(student_inputs)):
         student_path = f'/home/sameberl/img_logs/student_{i}.png'
-        student_array = student_inputs[i, :, :, :].transpose(1, 2, 0)
+        student_array = student_inputs[i, :, :, :].permute(1, 2, 0)
         plt.imsave(student_path, student_array)
 
         teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
-        teacher_array = teacher_inputs[i, :, :, :].transpose(1, 2, 0)
+        teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
         plt.imsave(teacher_path, teacher_array)
     exit()
 
