@@ -43,23 +43,23 @@ def forward_pass(student_model,
         logger.add_metric('Observe-Bias', split, bias)
         # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
-    # for i in range(len(student_inputs)):
-    #     student_path = f'/home/sameberl/img_logs/student_{i}.png'
-    #     student_array = student_inputs[i, :, :, :].permute(1, 2, 0)
-    #     if student_array.is_cuda:
-    #         student_array = student_array.cpu()
-    #     student_array = student_array.numpy()
-    #     plt.imsave(student_path, student_array)
-    #
-    #     teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
-    #     teacher_path = f'/home/sameberl/img_logs/teacher_{i}.png'
-    #     teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
-    #     if teacher_array.is_cuda:
-    #         teacher_array = teacher_array.cpu()
-    #     teacher_array = teacher_array.numpy()
-    #     plt.imsave(teacher_path, teacher_array)
-    # print('saved student and teacher imgs')
-    # exit()
+    for i in range(len(student_inputs)):
+        student_path = f'/home/sameberl/img_logs/student_{i}.png'
+        student_array = student_inputs[i, :, :, :].permute(1, 2, 0)
+        if student_array.is_cuda:
+            student_array = student_array.cpu()
+        student_array = student_array.numpy()
+        plt.imsave(student_path, student_array)
+
+        teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
+        teacher_path = f'/home/sameberl/img_logs/teacher_{i}.png'
+        teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
+        if teacher_array.is_cuda:
+            teacher_array = teacher_array.cpu()
+        teacher_array = teacher_array.numpy()
+        plt.imsave(teacher_path, teacher_array)
+    print('saved student and teacher imgs')
+    exit()
 
     supervised_loss_name = config['model_params']['supervised_criterion']
     if supervised_loss != -1:
