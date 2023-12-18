@@ -33,14 +33,14 @@ def forward_pass(student_model,
         student_array = student_inputs[i, :, :, :].permute(1, 2, 0)
         if student_array.is_cuda:
             student_array = student_array.cpu()
-        student_array.numpy()
+        student_array = student_array.numpy()
         plt.imsave(student_path, student_array)
 
         teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
         teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
         if teacher_array.is_cuda:
             teacher_array = teacher_array.cpu()
-        teacher_array.numpy()
+        teacher_array = teacher_array.numpy()
         plt.imsave(teacher_path, teacher_array)
     exit()
 
