@@ -240,7 +240,7 @@ class studentTeacherDataset(Dataset):
             std = np.random.uniform(std_min, std_max)
 
             # Generate Gaussian noise
-            noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
+            noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape).astype(np.float16)
 
             # Add noise to the input channels
             noisy_channels = image_bands + noise
@@ -268,7 +268,7 @@ class studentTeacherDataset(Dataset):
 
         if apply_brightness_adjustment:
             # Randomly choose a brightness multiplier
-            brightness_multiplier = np.random.uniform(*brightness_range)
+            brightness_multiplier = np.random.uniform(*brightness_range).astype(np.float16)
 
             # Adjust brightness
             adjusted_channels = image_bands * brightness_multiplier
@@ -296,8 +296,8 @@ class studentTeacherDataset(Dataset):
             num_channels = image_bands.shape[0]
 
             for i in range(num_channels):
-                contrast_factor = np.random.uniform(*contrast_range)
-                channel_mean = np.mean(image_bands[i])
+                contrast_factor = np.random.uniform(*contrast_range).astype(np.float16)
+                channel_mean = np.mean(image_bands[i]).astype(np.float16)
 
                 # Adjust contrast
                 image_bands[i] = (image_bands[i] - channel_mean) * contrast_factor + channel_mean
