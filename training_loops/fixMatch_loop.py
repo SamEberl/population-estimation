@@ -1,6 +1,5 @@
 import random
 import datetime
-import albumentations as A
 import torch
 from torch import optim
 from dataset import studentTeacherDataset
@@ -113,36 +112,6 @@ def forward_pass(student_model,
     #     # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
 
     return loss
-
-
-def batch_generator(dataloader):
-    dataloader_iter = iter(dataloader)
-    while True:
-        try:
-            yield next(dataloader_iter)
-        except StopIteration:
-            yield None
-
-
-def get_transforms(config):
-    student_transforms_list = []
-    # Loop through the dictionary and add augmentations to the list
-    for student_params in config['student_transforms']:
-        student_aug_fn = getattr(A, list(student_params.keys())[0])(**list(student_params.values())[0])
-        student_transforms_list.append(student_aug_fn)
-    # Create an augmentation pipeline using the list of augmentation functions
-    student_transform = A.Compose(student_transforms_list)
-
-    teacher_transfroms_list = []
-    if config['train_params']['use_teacher']:
-        # Loop through the dictionary and add augmentations to the list
-        for teacher_params in config['teacher_transforms']:
-            teacher_aug_fn = getattr(A, list(teacher_params.keys())[0])(**list(teacher_params.values())[0])
-            teacher_transfroms_list.append(teacher_aug_fn)
-        # Create an augmentation pipeline using the list of augmentation functions
-    teacher_transform = A.Compose(teacher_transfroms_list)
-
-    return student_transform, teacher_transform
 
 
 def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader):
