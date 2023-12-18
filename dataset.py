@@ -28,8 +28,8 @@ class studentTeacherDataset(Dataset):
         self.split = split
         self.data_sub_dir = os.path.join(data_dir, split)
         self.data = []
-        self.clip_min = 0
-        self.clip_max = 4000
+        self.clip_min = np.float16(0.0)
+        self.clip_max = np.float16(4000.0)
         self.use_teacher = use_teacher
         self.percentage_unlabeled = percentage_unlabeled
         self.nbr_channels = nbr_channels
@@ -141,7 +141,7 @@ class studentTeacherDataset(Dataset):
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read()[[3, 2, 1], :, :]#.astype(np.float16)
                 print('here')
-                print(type(image_bands))
+                print(type(image_bands[0, 0, 0]))
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
                 return image_bands
