@@ -37,7 +37,7 @@ def forward_pass(student_model,
     if torch.sum(mask_labeled) > 0:
         supervised_loss = student_model.loss_supervised(student_preds, labels)
         # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
-        r2_numerator = maskedMSELoss(student_preds, labels)
+        r2_numerator = maskedMSELoss.forward(student_preds, labels)
         logger.add_metric('Observe-R2', split, r2_numerator)
         bias = maskedBias(student_preds, labels)
         logger.add_metric('Observe-Bias', split, bias)

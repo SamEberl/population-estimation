@@ -84,20 +84,23 @@ def maskedL1Loss(pred, actual):
             loss = loss.cuda()
     return loss
 
+class maskedMSELoss(nn.Module):
+    def __init__(self):
+        super().__init__()
 
-def maskedMSELoss(pred, actual):
-    mask = actual != -1
-    mse_loss = torch.pow(pred - actual, 2)
-    masked_mse_loss = mse_loss * mask
-    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-    pred_numel = torch.sum(mask)
-    if pred_numel > 0:
-        loss = (torch.sum(masked_mse_loss) / pred_numel)
-    else:
-        loss = torch.tensor([-1], dtype=torch.float32)
-        if torch.cuda.is_available():
-            loss = loss.cuda()
-    return loss
+    def forward(pred, actual):
+        mask = actual != -1
+        mse_loss = torch.pow(pred - actual, 2)
+        masked_mse_loss = mse_loss * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        pred_numel = torch.sum(mask)
+        if pred_numel > 0:
+            loss = (torch.sum(masked_mse_loss) / pred_numel)
+        else:
+            loss = torch.tensor([-1], dtype=torch.float32)
+            if torch.cuda.is_available():
+                loss = loss.cuda()
+        return loss
 
 
 def maskedRMSELoss(pred, actual):

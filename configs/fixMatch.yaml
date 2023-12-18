@@ -1,5 +1,5 @@
 info:
-  info: 'Teacher with 80% unlabeled | Sigmoid * 54k'
+  info: 'No Teacher with 80% unlabeled (should be same as drop_data: True) | Use masked MSE | Sigmoid * 54k'
 
 model_params:
   architecture: 'fixMatch'

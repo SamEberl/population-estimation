@@ -23,7 +23,7 @@ class fixMatch(nn.Module):
         self.unsupervised_factor = unsupervised_factor  # 1_000_000 / self.model.num_features
 
         supervised_losses = {'L1': nn.L1Loss(),
-                             'MSE': nn.MSELoss(),
+                             'MSE': maskedMSELoss(),
                              'RMSE': RMSELoss(),
                              'RMSLE': RMSLELoss(),
                              'Aleatoric': AleatoricLoss(),
