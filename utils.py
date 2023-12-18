@@ -21,6 +21,9 @@ from torchvision import transforms, datasets
 from dataset import studentTeacherDataset
 from pathlib import Path
 
+from models import *
+from dataset import get_dataloader, get_transforms
+
 
 def display_input_output(model, input_tensor):
     def show_images():
@@ -136,44 +139,54 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
-def create_feature_csv(reg_config, ssl_model):
+def create_feature_csv(config, model):
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Set to utilize tensor cores of GPU
-    torch.set_float32_matmul_precision('medium')
-
-    data = sslDataset(**reg_config["data_params"])
-    #train_dataloader = data.train_dataloader()
-    val_dataloader = data.val_dataloader()
-
-
-    df_train = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
-    df_train['PopCount'] = None
-
-    df_val = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
-    df_val['PopCount'] = None
-
-    for param in ssl_model.parameters():
+    student_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
+    teacher_model = ssl_models[config['model_params']['architecture']](**config['model_params']).to(device)
+    for param in student_model.parameters():
+        param.requires_grad = False
+    for param in teacher_model.parameters():
         param.requires_grad = False
 
+    student_transform, teacher_transform = get_transforms(config)
+    train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
+
+    df_train = pd.DataFrame(columns=range(config['model_params']['in_size']))
+    df_train['PopCount'] = None
+
+    df_val = pd.DataFrame(columns=range(config['model_params']['in_size']))
+    df_val['PopCount'] = None
+
     with torch.no_grad():
-        for i, data in enumerate(val_dataloader):
-            inputs, labels, name = data
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+        for loader in [train_dataloader, val_dataloader]:
+            for i, data in enumerate(loader):
+                student_data, teacher_data, label, datapoint_name = data
+                teacher_data = teacher_data.to(device)
+                label = label.to(device)
 
-            ssl_features = ssl_model(inputs)
-            df_train_tmp = pd.DataFrame(columns=range(reg_config['model_params']['in_size']))
-            df_train_tmp['PopCount'] = None
-            for j, feature in tqdm(enumerate(ssl_features)):
-                feature = feature.tolist()
-                feature.append(labels[j].item())
-                df_feature = pd.DataFrame([feature], columns=df_train.columns, index=[(i+1)*(j+1)])
-                df_train_tmp = pd.concat([df_train_tmp, df_feature], ignore_index=False)
-            df_train = pd.concat([df_train, df_train_tmp], ignore_index=False)
+                teacher_features = teacher_model.model(teacher_data)
+                df_train_tmp = pd.DataFrame(columns=range(config['model_params']['in_size']))
+                df_train_tmp['PopCount'] = None
+                for j, feature in tqdm(enumerate(teacher_features)):
+                    feature = feature.tolist()
+                    feature.append(label[j].item())
+                    df_feature = pd.DataFrame([feature], columns=df_train.columns, index=[(i+1)*(j+1)])
+                    df_train_tmp = pd.concat([df_train_tmp, df_feature], ignore_index=False)
+                df_train = pd.concat([df_train, df_train_tmp], ignore_index=False)
 
-    df_train.to_csv('/home/sam/Desktop/val_features_sen2spring_full.csv', index=False)
+                df_val_tmp = pd.DataFrame(columns=range(config['model_params']['in_size']))
+                df_val_tmp['PopCount'] = None
+                for j, feature in tqdm(enumerate(teacher_features)):
+                    feature = feature.tolist()
+                    feature.append(label[j].item())
+                    df_feature = pd.DataFrame([feature], columns=df_val.columns, index=[(i+1)*(j+1)])
+                    df_val_tmp = pd.concat([df_val_tmp, df_feature], ignore_index=False)
+                df_val = pd.concat([df_val, df_val_tmp], ignore_index=False)
+
+    df_train.to_csv('/home/sam/Desktop/so2sat_test/train_features_23-12-18.csv', index=False)
+    df_train.to_csv('/home/sam/Desktop/val_features_23-12-18.csv', index=False)
 
 
 def save_data_as_jpg(reg_config, save_dir):
