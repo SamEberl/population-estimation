@@ -28,29 +28,9 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
-
-
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
     mask_labeled = labels != -1
     supervised_loss = torch.tensor(0, dtype=torch.float32)
-
-    for i in range(len(student_inputs)):
-        student_path = f'/home/sameberl/img_logs/student_{i}.png'
-        student_array = student_inputs[i, :, :, :].permute(1, 2, 0)
-        if student_array.is_cuda:
-            student_array = student_array.cpu()
-        student_array = student_array.numpy()
-        plt.imsave(student_path, student_array)
-
-        teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
-        teacher_path = f'/home/sameberl/img_logs/teacher_{i}.png'
-        teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
-        if teacher_array.is_cuda:
-            teacher_array = teacher_array.cpu()
-        teacher_array = teacher_array.numpy()
-        plt.imsave(teacher_path, teacher_array)
-    print('saved student and teacher imgs')
-    exit()
 
     if torch.cuda.is_available():
         supervised_loss = supervised_loss.cuda()
