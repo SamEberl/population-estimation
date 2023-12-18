@@ -90,7 +90,7 @@ def forward_pass(student_model,
         teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
 
         logger.add_metric('Uncertainty_Var_Regression', split, torch.mean(teacher_model_uncertainty))
-        logger.add_metric('Uncertainty-Features-L2-Var', torch.mean(l2_distances_var))
+        logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
         logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
         logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
 
