@@ -140,6 +140,8 @@ class studentTeacherDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read()[[3, 2, 1], :, :]#.astype(np.float16)
+                print('here')
+                print(type(image_bands))
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
                 return image_bands
