@@ -88,7 +88,7 @@ class maskedMSELoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(pred, actual):
+    def forward(self, pred, actual):
         mask = actual != -1
         mse_loss = torch.pow(pred - actual, 2)
         masked_mse_loss = mse_loss * mask
