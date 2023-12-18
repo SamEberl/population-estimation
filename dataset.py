@@ -82,7 +82,7 @@ class studentTeacherDataset(Dataset):
         else:
             teacher_data = 0
 
-        student_data = student_data.float(np.float32)
+        student_data = student_data.astype(np.float32)
         teacher_data = teacher_data.astype(np.float32)
 
         return student_data, teacher_data, label, datapoint_name
