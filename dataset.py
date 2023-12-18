@@ -28,8 +28,8 @@ class studentTeacherDataset(Dataset):
         self.split = split
         self.data_sub_dir = os.path.join(data_dir, split)
         self.data = []
-        self.clip_min = np.uint16(0.0)
-        self.clip_max = np.uint16(4000.0)
+        self.clip_min = 0.0
+        self.clip_max = 4000.0
         self.use_teacher = use_teacher
         self.percentage_unlabeled = percentage_unlabeled
         self.nbr_channels = nbr_channels
