@@ -66,7 +66,11 @@ class studentTeacherDataset(Dataset):
 
         if self.student_transform is not None:
             student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
-            student_data[0:3, :, :] = self.add_gaussian_noise(student_data[0:3, :, :])
+            student_data = self.add_gaussian_noise(student_data)
+            student_data = self.adjust_brightness(student_data)
+            student_data = self.adjust_contrast(student_data)
+            # Clip the values to ensure they are within a valid range
+            student_data = np.clip(student_data, 0, 1)
         else:
             student_data = data
 
@@ -234,34 +238,84 @@ class studentTeacherDataset(Dataset):
         Add Gaussian noise to the input channels and clip the values to be within [0, 1].
 
         Args:
-        - channels (torch.Tensor): Input tensor with shape (3, height, width).
+        - channels (np.ndarray): Input tensor with shape (channels, height, width).
         - mean (float): Mean of the Gaussian noise (default is 0).
-        - std (float): Standard deviation of the Gaussian noise (default is 0.1).
+        - std (float): Standard deviation of the Gaussian noise (default is 0.05).
 
         Returns:
         - torch.Tensor: Output tensor with Gaussian noise, clipped to be within [0, 1].
         """
-        # Check if the input tensor has the correct shape
-        if image_bands.shape[0] != 3:
-            raise ValueError("Input tensor must have 3 channels.")
 
         apply_noise = np.random.rand() < p
 
         if apply_noise:
             # Generate Gaussian noise
-            # noise = torch.normal(mean=mean, std=std, size=image_bands.shape)
             noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
 
             # Add noise to the input channels
             noisy_channels = image_bands + noise
 
-            # Clip the values to be within [0, 1]
-            # noisy_channels = torch.clamp(noisy_channels, 0, 1)
-            noisy_channels = np.clip(noisy_channels, 0, 1)
-
             return noisy_channels
         else:
             return image_bands
+
+    import numpy as np
+
+    def adjust_brightness(self, image_bands, brightness_range=(0.8, 1.2), p=0.5):
+        """
+        Randomly adjust the brightness of the input channels.
+
+        Args:
+        - image_bands (np.array): Input array with shape (3, height, width).
+        - brightness_range (tuple): A tuple containing min and max multiplier for brightness adjustment.
+        - p (float): Probability of applying the brightness adjustment.
+
+        Returns:
+        - np.array: Output array with adjusted brightness.
+        """
+
+        apply_brightness_adjustment = np.random.rand() < p
+
+        if apply_brightness_adjustment:
+            # Randomly choose a brightness multiplier
+            brightness_multiplier = np.random.uniform(*brightness_range)
+
+            # Adjust brightness
+            adjusted_channels = image_bands * brightness_multiplier
+
+            return adjusted_channels
+        else:
+            return image_bands
+
+    def adjust_contrast(self, image_bands, contrast_range=(0.8, 1.2), p=0.5):
+        """
+        Randomly adjust the contrast of each channel of the image.
+
+        Args:
+        - image_bands (np.array): Input array with shape (num_channels, height, width).
+        - contrast_range (tuple): A tuple containing min and max contrast adjustment factors.
+        - p (float): Probability of applying the contrast adjustment.
+
+        Returns:
+        - np.array: Output array with adjusted contrast.
+        """
+
+        apply_contrast_adjustment = np.random.rand() < p
+
+        if apply_contrast_adjustment:
+            num_channels = image_bands.shape[0]
+
+            for i in range(num_channels):
+                contrast_factor = np.random.uniform(*contrast_range)
+                channel_mean = np.mean(image_bands[i])
+
+                # Adjust contrast
+                image_bands[i] = (image_bands[i] - channel_mean) * contrast_factor + channel_mean
+
+            return image_bands
+        else:
+            return image_bands
+
 
     def block_out_patch(self, image_bands, patch_size=(16, 16), probability=0.5):
         """

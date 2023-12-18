@@ -1,5 +1,5 @@
 info:
-  info: 'Try sigmoid * 54k and partial data'
+  info: 'check new augmentation | Try sigmoid * 54k and partial data'
 
 model_params:
   architecture: 'fixMatch'

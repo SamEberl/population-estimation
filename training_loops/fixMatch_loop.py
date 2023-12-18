@@ -28,6 +28,16 @@ def forward_pass(student_model,
     else:
         student_model.eval()
 
+    for i in range(len(student_inputs)):
+        student_path = f'/home/sameberl/img_logs/student_{i}.png'
+        student_array = student_inputs[i, :, :, :]
+        plt.imsave(student_path, student_array)
+
+        teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
+        teacher_array = teacher_inputs[i, :, :, :]
+        plt.imsave(teacher_path, teacher_array)
+    exit()
+
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
     mask_labeled = labels != -1
     supervised_loss = torch.tensor(0, dtype=torch.float32)
