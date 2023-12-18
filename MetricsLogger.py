@@ -71,6 +71,8 @@ class MetricsLogger:
         metric_name = f'{metric_name}/{split}'
         if metric_name not in self.metrics:
             self.metrics[metric_name] = []
+        if isinstance(value, torch.Tensor):
+            value = value.item()
         self.metrics[metric_name].append(value)
 
     def write(self, step_nbr):
