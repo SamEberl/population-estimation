@@ -139,7 +139,8 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
-def create_feature_csv(config):
+def create_feature_csv():
+    config = parse_yaml('configs/fixMatch.yaml')
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -185,9 +186,10 @@ def create_feature_csv(config):
                     df_val_tmp = pd.concat([df_val_tmp, df_feature], ignore_index=False)
                 df_val = pd.concat([df_val, df_val_tmp], ignore_index=False)
 
-    df_train.to_csv('/home/sam/Desktop/so2sat_test/train_features_23-12-18.csv', index=False)
-    df_train.to_csv('/home/sam/Desktop/val_features_23-12-18.csv', index=False)
+    df_train.to_csv('/mnt1/sameberl/feature_csv/train_features_23-12-18.csv', index=False)
+    df_train.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
 
+create_feature_csv()
 
 def save_data_as_jpg(reg_config, save_dir):
     # Set to utilize tensor cores of GPU
