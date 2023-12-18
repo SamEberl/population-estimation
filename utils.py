@@ -162,7 +162,7 @@ def create_feature_csv():
 
     with torch.no_grad():
         for loader in [train_dataloader, val_dataloader]:
-            for i, data in enumerate(loader):
+            for i, data in tqdm(enumerate(loader)):
                 student_data, teacher_data, label, datapoint_name = data
                 teacher_data = teacher_data.to(device)
                 label = label.to(device)
