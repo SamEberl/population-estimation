@@ -139,7 +139,7 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
-def create_feature_csv(config, model):
+def create_feature_csv(config):
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
