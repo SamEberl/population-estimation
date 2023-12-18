@@ -171,7 +171,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         val_generator = batch_generator(val_dataloader)
         total_train_loss = 0
         total_val_loss = 0
-        writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         for i, train_data in enumerate(train_dataloader):
             # step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
 
@@ -223,12 +222,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             if i % 10 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
                 pbar.update(1)
-        scheduler.step(total_val_loss/len(val_dataloader))
+        writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         logger.write(epoch+1)
-        # writer.add_scalar(f'R2/train', calc_r2(r2_numerators_train, 'train'), epoch)
-        # writer.add_scalar(f'R2/val', calc_r2(r2_numerators_val, 'val'), epoch)
-        # writer.add_scalar(f'Bias/train', calc_bias(biases_train), epoch)
-        # writer.add_scalar(f'Bias/val', calc_bias(biases_val), epoch)
+        scheduler.step(total_val_loss/len(val_dataloader))
     pbar.close()
 
     return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
