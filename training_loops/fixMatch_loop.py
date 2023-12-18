@@ -8,7 +8,8 @@ from utils import *
 from datetime import datetime
 from logging_utils import *
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
-from models.losses import maskedBias, maskedL1Loss, maskedMSELoss, maskedRMSELoss
+from models.losses import maskedBias, maskedL1Loss, maskedRMSELoss
+from models.losses import MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from dataset import batch_generator
 
@@ -37,7 +38,11 @@ def forward_pass(student_model,
     if torch.sum(mask_labeled) > 0:
         supervised_loss = student_model.loss_supervised(student_preds, labels)
         # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
-        r2_numerator = maskedMSELoss.forward(student_preds, labels)
+
+        # maskedMSELoss = MaskedMSELoss()
+        # r2_numerator = maskedMSELoss(student_preds, labels)
+        r2_numerator = supervised_loss  # ONLY valid if maskedMSE is used as supervised loss!
+
         logger.add_metric('Observe-R2', split, r2_numerator)
         bias = maskedBias(student_preds, labels)
         logger.add_metric('Observe-Bias', split, bias)

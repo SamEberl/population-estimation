@@ -84,7 +84,8 @@ def maskedL1Loss(pred, actual):
             loss = loss.cuda()
     return loss
 
-class maskedMSELoss(nn.Module):
+
+class MaskedMSELoss(nn.Module):
     def __init__(self):
         super().__init__()
 
