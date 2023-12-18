@@ -141,7 +141,7 @@ class studentTeacherDataset(Dataset):
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read()[[3, 2, 1], :, :]#.astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
-                image_bands /= self.clip_max
+                image_bands = image_bands / self.clip_max
                 return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
