@@ -168,7 +168,7 @@ def create_feature_csv():
                 label = label.to(device)
 
                 teacher_features = teacher_model.model(teacher_data)
-                df_train_tmp = pd.DataFrame(columns=range(config['model_params']['in_size']))
+                df_train_tmp = pd.DataFrame(columns=range(teacher_model.model.num_features))
                 df_train_tmp['PopCount'] = None
                 for j, feature in tqdm(enumerate(teacher_features)):
                     feature = feature.tolist()
@@ -177,7 +177,7 @@ def create_feature_csv():
                     df_train_tmp = pd.concat([df_train_tmp, df_feature], ignore_index=False)
                 df_train = pd.concat([df_train, df_train_tmp], ignore_index=False)
 
-                df_val_tmp = pd.DataFrame(columns=range(config['model_params']['in_size']))
+                df_val_tmp = pd.DataFrame(columns=range(teacher_model.model.num_features))
                 df_val_tmp['PopCount'] = None
                 for j, feature in tqdm(enumerate(teacher_features)):
                     feature = feature.tolist()
