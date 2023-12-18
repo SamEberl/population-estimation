@@ -91,9 +91,10 @@ class MetricsLogger:
                 elif 'val' in metric_name:
                     calc_r2(values, 'val')
             else:
-                tensor_values = torch.stack(values)
-                average_value = torch.mean(tensor_values).item()
-                self.writer.add_scalar(metric_name, average_value, step_nbr)
+                # tensor_values = torch.stack(values)
+                # mean_value = torch.mean(tensor_values).item()
+                mean_value = sum(values) / len(values)
+                self.writer.add_scalar(metric_name, mean_value, step_nbr)
 
         # Clear metrics after logging
         self.metrics.clear()
