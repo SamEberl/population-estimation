@@ -37,14 +37,12 @@ def forward_pass(student_model,
         plt.imsave(student_path, student_array)
 
         teacher_path = f'/home/sameberl/img_logs/student_{i}.png'
-        print(teacher_inputs)
-        print(f'shape: \n')
-        print(teacher_inputs.shape)
         teacher_array = teacher_inputs[i, :, :, :].permute(1, 2, 0)
         if teacher_array.is_cuda:
             teacher_array = teacher_array.cpu()
         teacher_array = teacher_array.numpy()
         plt.imsave(teacher_path, teacher_array)
+    print('saved student and teacher imgs')
     exit()
 
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
