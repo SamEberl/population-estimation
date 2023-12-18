@@ -80,7 +80,7 @@ class studentTeacherDataset(Dataset):
             else:
                 teacher_data = data
         else:
-            teacher_data = 0
+            teacher_data = np.float32(0)
 
         student_data = student_data.astype(np.float32)
         teacher_data = teacher_data.astype(np.float32)
