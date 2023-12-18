@@ -139,7 +139,7 @@ class studentTeacherDataset(Dataset):
     def generate_rgb_img(self, file_path):
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
+                image_bands = data.read()[[3, 2, 1], :, :]#.astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)
                 image_bands /= self.clip_max
                 return image_bands
@@ -151,7 +151,7 @@ class studentTeacherDataset(Dataset):
         file_path = file_path.replace('sen2spring', 'sen2winter')
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read()[[3, 2, 1], :, :].astype(np.float16)
+                image_bands = data.read()[[3, 2, 1], :, :]#.astype(np.float16)
                 image_bands = np.clip(image_bands, self.clip_min, self.clip_max)  # * (1 / self.clip_max)
                 image_bands /= self.clip_max
                 return image_bands
@@ -163,7 +163,7 @@ class studentTeacherDataset(Dataset):
         file_path = file_path.replace('sen2spring', 'lu')
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read().astype(np.float16)
+                image_bands = data.read()#.astype(np.float16)
                 # image_bands[image_bands > 1] = 1
                 return image_bands
         except rasterio.RasterioIOError:
@@ -174,7 +174,7 @@ class studentTeacherDataset(Dataset):
         file_path = file_path.replace('sen2spring', 'viirs')
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read().astype(np.float16)
+                image_bands = data.read()#.astype(np.float16)
                 image_bands[image_bands > 50] = 50
                 image_bands /= 50
                 return image_bands
@@ -186,7 +186,7 @@ class studentTeacherDataset(Dataset):
         file_path = file_path.replace('sen2spring', 'lcz')
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read().astype(np.float16)
+                image_bands = data.read()#.astype(np.float16)
                 image_bands /= 17
                 return image_bands
         except rasterio.RasterioIOError:
@@ -198,7 +198,7 @@ class studentTeacherDataset(Dataset):
         file_path = file_path.replace('sen2spring', 'dem')
         try:
             with rasterio.open(file_path, 'r') as data:
-                image_bands = data.read().astype(np.float16)
+                image_bands = data.read()#.astype(np.float16)
                 image_bands[image_bands < -2] = -2
                 image_bands[image_bands > 10] = 10
 
@@ -240,7 +240,7 @@ class studentTeacherDataset(Dataset):
             std = np.random.uniform(std_min, std_max)
 
             # Generate Gaussian noise
-            noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape).astype(np.float16)
+            noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
 
             # Add noise to the input channels
             noisy_channels = image_bands + noise
@@ -268,7 +268,7 @@ class studentTeacherDataset(Dataset):
 
         if apply_brightness_adjustment:
             # Randomly choose a brightness multiplier
-            brightness_multiplier = np.random.uniform(*brightness_range).astype(np.float16)
+            brightness_multiplier = np.random.uniform(*brightness_range)
 
             # Adjust brightness
             adjusted_channels = image_bands * brightness_multiplier
@@ -296,8 +296,8 @@ class studentTeacherDataset(Dataset):
             num_channels = image_bands.shape[0]
 
             for i in range(num_channels):
-                contrast_factor = np.random.uniform(*contrast_range).astype(np.float16)
-                channel_mean = np.mean(image_bands[i]).astype(np.float16)
+                contrast_factor = np.random.uniform(*contrast_range)
+                channel_mean = np.mean(image_bands[i])
 
                 # Adjust contrast
                 image_bands[i] = (image_bands[i] - channel_mean) * contrast_factor + channel_mean
