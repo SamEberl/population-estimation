@@ -233,7 +233,7 @@ class studentTeacherDataset(Dataset):
             print(f'Image could not be created from: {file_path}')
             return None
 
-    def add_gaussian_noise(self, image_bands, mean=0, std=0.05, p=0.5):
+    def add_gaussian_noise(self, image_bands, mean=0, std_min=0.01, std_max=0.07, p=0.5):
         """
         Add Gaussian noise to the input channels and clip the values to be within [0, 1].
 
@@ -245,10 +245,12 @@ class studentTeacherDataset(Dataset):
         Returns:
         - torch.Tensor: Output tensor with Gaussian noise, clipped to be within [0, 1].
         """
-
         apply_noise = np.random.rand() < p
 
         if apply_noise:
+            # Randomly choose a standard deviation value between std_min and std_max
+            std = np.random.uniform(std_min, std_max)
+
             # Generate Gaussian noise
             noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
 
