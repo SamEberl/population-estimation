@@ -1,5 +1,5 @@
 info:
-  info: 'Teacher with 80% dropped + extra lin layer | Use masked MSE | Sigmoid * 54k'
+  info: 'Teacher with 80% dropped + extra lin layer'
 
 model_params:
   architecture: 'fixMatch'
