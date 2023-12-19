@@ -145,7 +145,7 @@ def fill_feature_df(dataloader, device, model, cols):
         label = label.to(device)
         teacher_features = model.model(teacher_data)
         for j, features in tqdm(enumerate(teacher_features)):
-            features.tolist()
+            feature_list = features.tolist()
             features.append(label[j].item())
             feature_list.append(features)
     feature_df = pd.DataFrame(feature_list, columns=cols)
@@ -181,9 +181,8 @@ def create_feature_csv():
     df_train.to_csv('/mnt1/sameberl/feature_csv/train_features_23-12-18.csv', index=False)
     df_val.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
 
+
 create_feature_csv()
-
-
 
 
 def save_data_as_jpg(reg_config, save_dir):
