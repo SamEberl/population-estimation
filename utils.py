@@ -158,8 +158,8 @@ def fill_feature_df_single_datapoint(dataloader, device, model, cols):
 
             with torch.no_grad():  # Ensure no gradients are computed
                 for _ in range(200):
-                    preds, features, uncertainty = model.model(teacher_data[index])
-                    features = features.tolist()
+                    preds, features, uncertainty = model.model(teacher_data)
+                    features = features[index].tolist()
                     features.append(label[index].item())
                     feature_list.append(features)
             feature_df = pd.DataFrame(feature_list, columns=cols)
