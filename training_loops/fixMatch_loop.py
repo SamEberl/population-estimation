@@ -30,7 +30,6 @@ def forward_pass(student_model,
         # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
         r2_numerator = MaskedMSELoss.forward(student_preds, labels)
-
         logger.add_metric('Observe-R2', split, r2_numerator)
         bias = MaskedBias.forward(student_preds, labels)
         logger.add_metric('Observe-Bias', split, bias)
