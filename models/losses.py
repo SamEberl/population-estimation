@@ -24,7 +24,8 @@ class AleatoricLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual, log_var):
+    @staticmethod
+    def forward(pred, actual, log_var):
         loss = (pred - actual)**2
         loss = 0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)
         loss = torch.sum(loss) / pred.numel()
@@ -35,7 +36,8 @@ class AleatoricLossModified(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual, log_var):
+    @staticmethod
+    def forward(pred, actual, log_var):
         loss = (pred - actual)**2
         loss = 0.5 * torch.exp(-log_var*0.001) * loss + (0.5 * log_var)
         loss = torch.sum(loss) / pred.numel()
@@ -45,7 +47,8 @@ class AleatoricLinDecayLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual, log_var, cur_step, total_step):
+    @staticmethod
+    def forward(pred, actual, log_var, cur_step, total_step):
         loss = (pred - actual)**2
         if cur_step < 0.2*total_step:
             loss = 0.5 * torch.exp(-log_var) * loss + (0.5 * log_var)
@@ -55,41 +58,52 @@ class AleatoricLinDecayLoss(nn.Module):
         return loss
 
 
-def maskedBias(pred, actual):
-    mask = actual != -1
-    diff = (pred - actual)
-    masked_diff = diff * mask
-    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-    pred_numel = torch.sum(mask)
-    if pred_numel > 0:
-        bias = torch.sum(masked_diff) / pred_numel
-    else:
-        bias = torch.tensor([-1], dtype=torch.float32)
-        if torch.cuda.is_available():
-            bias = bias.cuda()
-    return bias
+class MaskedBias(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(pred, actual):
+        mask = actual != -1
+        diff = (pred - actual)
+        masked_diff = diff * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        pred_numel = torch.sum(mask)
+        if pred_numel > 0:
+            bias = torch.sum(masked_diff) / pred_numel
+        else:
+            bias = torch.tensor([-1], dtype=torch.float32)
+            if torch.cuda.is_available():
+                bias = bias.cuda()
+        return bias
 
 
-def maskedL1Loss(pred, actual):
-    mask = actual != -1
-    l1_loss = torch.abs(pred - actual)
-    masked_l1_loss = l1_loss * mask
-    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-    pred_numel = torch.sum(mask)
-    if pred_numel > 0:
-        loss = torch.sum(masked_l1_loss) / pred_numel
-    else:
-        loss = torch.tensor([-1], dtype=torch.float32)
-        if torch.cuda.is_available():
-            loss = loss.cuda()
-    return loss
+class MaskedL1Loss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(pred, actual):
+        mask = actual != -1
+        l1_loss = torch.abs(pred - actual)
+        masked_l1_loss = l1_loss * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        pred_numel = torch.sum(mask)
+        if pred_numel > 0:
+            loss = torch.sum(masked_l1_loss) / pred_numel
+        else:
+            loss = torch.tensor([-1], dtype=torch.float32)
+            if torch.cuda.is_available():
+                loss = loss.cuda()
+        return loss
 
 
 class MaskedMSELoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual):
+    @staticmethod
+    def forward(pred, actual):
         mask = actual != -1
         mse_loss = torch.pow(pred - actual, 2)
         masked_mse_loss = mse_loss * mask
@@ -104,26 +118,32 @@ class MaskedMSELoss(nn.Module):
         return loss
 
 
-def maskedRMSELoss(pred, actual):
-    mask = actual != -1
-    mse_loss = torch.pow(pred - actual, 2)
-    masked_mse_loss = mse_loss * mask
-    # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-    pred_numel = torch.sum(mask)
-    if pred_numel > 0:
-        loss = torch.sqrt(torch.sum(masked_mse_loss) / pred_numel)
-    else:
-        loss = torch.tensor([-1], dtype=torch.float32)
-        if torch.cuda.is_available():
-            loss = loss.cuda()
-    return loss
-
-
-class LinUncertaintyLoss(nn.Module):
+class MaskedRMSELoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual, log_var):
+    @staticmethod
+    def forward(pred, actual):
+        mask = actual != -1
+        mse_loss = torch.pow(pred - actual, 2)
+        masked_mse_loss = mse_loss * mask
+        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
+        pred_numel = torch.sum(mask)
+        if pred_numel > 0:
+            loss = torch.sqrt(torch.sum(masked_mse_loss) / pred_numel)
+        else:
+            loss = torch.tensor([-1], dtype=torch.float32)
+            if torch.cuda.is_available():
+                loss = loss.cuda()
+        return loss
+
+
+class MaskedLinUncertaintyLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(pred, actual, log_var):
         mask = actual != -1
         squared_diff = (pred - actual) ** 2
         #uncertainty_loss = torch.abs(log_var - squared_diff)
@@ -156,7 +176,8 @@ class SquaredUncertaintyLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, pred, actual, log_var):
+    @staticmethod
+    def forward(pred, actual, log_var):
         loss = (pred - actual)**2
         uncertainty_loss = (((log_var - loss)**2)/loss)
         loss = torch.sum(loss + 0.1*uncertainty_loss) / pred.numel()
@@ -176,7 +197,8 @@ class ContrastiveLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, student_features, teacher_features, mask, Y, margin=1.0):
+    @staticmethod
+    def forward(student_features, teacher_features, mask, Y, margin=1.0):
         """
         Compute the Contrastive Loss for batches of vectors P1 and P2 with a feature mask,
         using only the unmasked features for the distance calculation.
@@ -208,7 +230,8 @@ class TripletLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, anchor, positive, negative, mask, margin):
+    @staticmethod
+    def forward(anchor, positive, negative, mask, margin):
         # L2 Normalize the embeddings
         anchor = F.normalize(anchor, p=2, dim=1)
         positive = F.normalize(positive, p=2, dim=1)
@@ -239,7 +262,8 @@ class TripletLossModified(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, anchor, positive, negative, mask, margin):
+    @staticmethod
+    def forward(anchor, positive, negative, mask, margin):
         # Compute the Euclidean distance between anchor and positive
         positive_distance = torch.sqrt((anchor - positive).pow(2).sum(1))
         # Compute the Euclidean distance between anchor and negative

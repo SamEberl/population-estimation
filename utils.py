@@ -4,7 +4,6 @@ import argparse
 import torchvision.transforms
 import yaml
 import os
-import torch
 import random
 import pickle
 
@@ -17,7 +16,6 @@ import pandas as pd
 from tqdm import tqdm
 from ssl_dataset import sslDataset
 
-from torchvision import transforms, datasets
 from dataset import studentTeacherDataset
 from pathlib import Path
 
@@ -151,9 +149,10 @@ def create_feature_csv():
     for param in teacher_model.parameters():
         param.requires_grad = False
 
-    retrain_from = config['model_params']['retrain_from']
-    student_model.load_state_dict(torch.load('/home/sameberl/models', retrain_from))
-    teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
+    # TODO: Load model!
+    # retrain_from = config['model_params']['retrain_from']
+    # student_model.load_state_dict(torch.load('/home/sameberl/models', retrain_from))
+    # teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
     student_transform, teacher_transform = get_transforms(config)
     train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)

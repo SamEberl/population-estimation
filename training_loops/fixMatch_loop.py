@@ -1,19 +1,9 @@
-import random
-import datetime
-import torch
 from torch import optim
-from dataset import studentTeacherDataset
-from tensorboardX import SummaryWriter
 from utils import *
-from datetime import datetime
-from logging_utils import *
-from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
-from models.losses import maskedBias, maskedL1Loss, maskedRMSELoss
-from models.losses import MaskedMSELoss
+from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
+from models.losses import MaskedBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from dataset import batch_generator
-
-import matplotlib.pyplot as plt
 
 
 def forward_pass(student_model,
@@ -39,12 +29,10 @@ def forward_pass(student_model,
         supervised_loss = student_model.loss_supervised(student_preds, labels)
         # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
 
-        # maskedMSELoss = MaskedMSELoss()
-        # r2_numerator = maskedMSELoss(student_preds, labels)
-        r2_numerator = supervised_loss  # ONLY valid if maskedMSE is used as supervised loss!
+        r2_numerator = MaskedMSELoss.forward(student_preds, labels)
 
         logger.add_metric('Observe-R2', split, r2_numerator)
-        bias = maskedBias(student_preds, labels)
+        bias = MaskedBias.forward(student_preds, labels)
         logger.add_metric('Observe-Bias', split, bias)
         # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
@@ -52,8 +40,8 @@ def forward_pass(student_model,
     if supervised_loss != -1:
         logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
     # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-    loss_mae = maskedL1Loss(student_preds, labels)
-    loss_rmse = maskedRMSELoss(student_preds, labels)
+    loss_mae = MaskedL1Loss.forward(student_preds, labels)
+    loss_rmse = MaskedRMSELoss.forward(student_preds, labels)
     if loss_mae != -1:
         logger.add_metric('Loss-Compare-L1', split, loss_mae)
         logger.add_metric('Loss-Compare-RMSE', split, loss_rmse)
