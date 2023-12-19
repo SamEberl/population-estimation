@@ -178,15 +178,12 @@ def create_feature_csv():
     df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
     train_path = '/home/sameberl/feature_csv/train_features_23-12-19.csv'
     df_train.to_csv(train_path, index=False)
-    print(f'train_df saved to: {df_train}')
+    print(f'train_df saved to: {train_path}')
 
     df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
     val_path = '/home/sameberl/feature_csv/val_features_23-12-19.csv'
     df_val.to_csv(val_path, index=False)
-    print(f'val_df saved to: {df_val}')
-
-
-create_feature_csv()
+    print(f'val_df saved to: {val_path}')
 
 
 def save_data_as_jpg(reg_config, save_dir):
