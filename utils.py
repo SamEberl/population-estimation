@@ -144,7 +144,7 @@ def fill_feature_df_single_datapoint(dataloader, device, model, cols):
         student_data, teacher_data, label, datapoint_name = data
 
         index = -1
-        for j in len(label):
+        for j in range(len(label)):
             if label[j] > cutoff:
                 index = j
                 break
