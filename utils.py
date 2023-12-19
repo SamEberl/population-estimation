@@ -178,8 +178,12 @@ def create_feature_csv():
     df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
     df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
 
-    df_train.to_csv('/mnt1/sameberl/feature_csv/train_features_23-12-18.csv', index=False)
-    df_val.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
+    train_path = '/mnt1/sameberl/feature_csv/train_features_23-12-18.csv'
+    val_path = '/mnt1/sameberl/feature_csv/val_features_23-12-18.csv'
+    df_train.to_csv(train_path, index=False)
+    print(f'train_df saved to: {df_train}')
+    df_val.to_csv(val_path, index=False)
+    print(f'val_df saved to: {df_val}')
 
 
 create_feature_csv()
