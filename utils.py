@@ -139,13 +139,13 @@ def browse_images_with_mean(directory):
 
 def fill_feature_df(dataloader, device, model, cols):
     feature_list = []
-    for i, data in tqdm(enumerate(dataloader)):
+    for i, data in tqdm(enumerate(dataloader), total=len(dataloader)):
         student_data, teacher_data, label, datapoint_name = data
         teacher_data = teacher_data.to(device)
         label = label.to(device)
         teacher_features = model.model(teacher_data)
-        for j, features in tqdm(enumerate(teacher_features)):
-            feature_list = features.tolist()
+        for j, features in enumerate(teacher_features):
+            features = features.tolist()
             features.append(label[j].item())
             feature_list.append(features)
     feature_df = pd.DataFrame(feature_list, columns=cols)
