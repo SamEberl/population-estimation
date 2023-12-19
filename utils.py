@@ -176,12 +176,12 @@ def create_feature_csv():
     cols.append('PopCount')
 
     df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
-    df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
-
-    train_path = '/mnt1/sameberl/feature_csv/train_features_23-12-18.csv'
-    val_path = '/mnt1/sameberl/feature_csv/val_features_23-12-18.csv'
+    train_path = '/mnt1/sameberl/feature_csv/train_features_23-12-19.csv'
     df_train.to_csv(train_path, index=False)
     print(f'train_df saved to: {df_train}')
+
+    df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
+    val_path = '/mnt1/sameberl/feature_csv/val_features_23-12-19.csv'
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {df_val}')
 
