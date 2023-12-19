@@ -196,7 +196,7 @@ def create_feature_csv():
         param.requires_grad = False
 
     # retrain_from = 'convnextv2_atto.fcmae_2023_12_18-13_22_35.pt'
-    retrain_from = 'convnextv2_atto.fcmae_2023_12_18-22_49_49.pt'
+    retrain_from = 'convnextv2_atto.fcmae_2023_12_19-13_38_13.pt'
     # student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
     teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
@@ -206,15 +206,15 @@ def create_feature_csv():
     cols = list(range(teacher_model.model.num_features))
     cols.append('PopCount')
 
-    # df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
-    df_train = fill_feature_df_single_datapoint(train_dataloader, device, teacher_model, cols)
-    train_path = '/home/sameberl/feature_csv/train_features_single_datapoint_over20k_23-12-19.csv'
+    df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
+    # df_train = fill_feature_df_single_datapoint(train_dataloader, device, teacher_model, cols)
+    train_path = '/home/sameberl/feature_csv/train_features_2023_12_19-13_38_13.csv'
     df_train.to_csv(train_path, index=False)
     print(f'train_df saved to: {train_path}')
 
-    # df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
-    df_val = fill_feature_df_single_datapoint(val_dataloader, device, teacher_model, cols)
-    val_path = '/home/sameberl/feature_csv/val_features_single_datapoint_over20k_23-12-19.csv'
+    df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
+    # df_val = fill_feature_df_single_datapoint(val_dataloader, device, teacher_model, cols)
+    val_path = '/home/sameberl/feature_csv/val_features_2023_12_19-13_38_13.csv'
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {val_path}')
 

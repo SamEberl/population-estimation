@@ -220,10 +220,10 @@ def visualize_features(features, labels=None, method='pca', save_path='feature_v
 
 # Example usage:
 # features = pd.read_csv('/home/sam/Desktop/train_features_full.csv')
-features = pd.read_csv('/home/sam/Desktop/logs_server/feature_csv/train_features_23-12-19.csv')
+features = pd.read_csv('/home/sam/Desktop/logs_server/feature_csv/train_features_single_datapoint_over20k_23-12-19.csv')
 features_val = features.iloc[:, :-1]
 labels = features.iloc[:, -1]
-visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_train_visualization.png')
+visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_train_features_single_datapoint_over20k_23-12-19.png')
 # Note: Replace 'your_feature_array' and 'your_labels' with your actual data.
 
 

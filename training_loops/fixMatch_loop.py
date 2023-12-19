@@ -137,7 +137,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         for i, train_data in enumerate(train_dataloader):
             # step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
 
-            student_inputs, teacher_inputs, labels, datapoint_name = train_data
+            student_inputs, teacher_inputs, labels = train_data
             student_inputs = student_inputs.to(device)
             if use_teacher:
                 teacher_inputs = teacher_inputs.to(device)
@@ -166,7 +166,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
             val_data = next(val_generator)
             if val_data is not None:
-                student_inputs, teacher_inputs, labels, datapoint_name = val_data
+                student_inputs, teacher_inputs, labels = val_data
                 student_inputs = student_inputs.to(device)
                 labels = labels.to(device)
 

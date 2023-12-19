@@ -41,9 +41,6 @@ writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] +
 param_yaml_str = yaml.dump(config, default_flow_style=False)
 param_yaml_str = param_yaml_str.replace('\n', '<br>')
 writer.add_text('Parameters', param_yaml_str, 0)
-model_yaml_str = yaml.dump(student_model.model.default_cfg, default_flow_style=False)
-model_yaml_str = model_yaml_str.replace('false ', '<br>')
-writer.add_text('Model Specs', model_yaml_str, 0)
 
 student_transform, teacher_transform = get_transforms(config)
 train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)

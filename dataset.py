@@ -27,33 +27,34 @@ class studentTeacherDataset(Dataset):
                  nbr_channels=7):
         self.student_transform = student_transform
         self.teacher_transform = teacher_transform
+        self.data_dir = data_dir
         self.split = split
-        self.data_sub_dir = os.path.join(data_dir, split)
         self.data = []
+        self.labels = []
         self.clip_min = 0.0
         self.clip_max = 4000.0
         self.use_teacher = use_teacher
         self.percentage_unlabeled = percentage_unlabeled
         self.nbr_channels = nbr_channels
+        self.use_labeled = True
 
         splits = ['train', 'valid', 'test']
         if split not in splits:
             raise ValueError(f'split: "{split}" not in {splits}')
         else:
             self.get_data_paths()
-            if drop_labels and split == 'train':
-                self.split_labeled_unlabeled()
             if drop_data and split == 'train':
                 self.drop_data()
+            if drop_labels and split == 'train':
+                self.split_labeled_unlabeled()
         logger.info(f'{split}-dataset length: {len(self.data)}')
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        file_path = self.data[idx][0]
-        label = torch.tensor(float(self.data[idx][1]))
-        datapoint_name = self.data[idx][2]
+        file_path = self.data[idx]
+        label = torch.tensor(float(self.labels[idx]))
 
         data = np.empty((self.nbr_channels, 100, 100), dtype=np.float32)
 
@@ -63,7 +64,6 @@ class studentTeacherDataset(Dataset):
         # data[7, :, :] = self.generate_lcz(file_path)
         # data[8, :, :] = self.generate_dem(file_path)
         # data[6:9, :, :] = self.generate_winter_img(file_path)
-
         # data[15, :, :] = self.generate_viirs(file_path)  # viirs
 
         if self.student_transform is not None:
@@ -76,7 +76,7 @@ class studentTeacherDataset(Dataset):
         else:
             student_data = data
 
-        if self.use_teacher == True:
+        if self.use_teacher:
             if self.teacher_transform is not None:
                 teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
             else:
@@ -87,15 +87,16 @@ class studentTeacherDataset(Dataset):
         student_data = student_data.astype(np.float32)
         teacher_data = teacher_data.astype(np.float32)
 
-        return student_data, teacher_data, label, datapoint_name
+        return student_data, teacher_data, label
 
 
     def get_data_paths(self):
         nbr_not_found = 0
         nbr_found = 0
-        for city_folder in os.listdir(self.data_sub_dir):
+        data_sub_dir = os.path.join(self.data_dir, self.split)
+        for city_folder in os.listdir(data_sub_dir):
             # Load the csv file that maps datapoint names to folder names
-            with open(os.path.join(self.data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:
+            with open(os.path.join(data_sub_dir, f'{city_folder}/{city_folder}.csv'), 'r') as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     datapoint_name = row[0]
@@ -103,20 +104,31 @@ class studentTeacherDataset(Dataset):
                     if label == 'POP':  # skip first row which is header of file
                         continue
                     elif int(label) == 0:
-                        Class_nbr = 'Class_0'
+                        class_nbr = 'Class_0'
                     else:
-                        Class_nbr = f'Class_{math.ceil(math.log(int(label), 2)+0.00001)}'
+                        class_nbr = f'Class_{math.ceil(math.log(int(label), 2)+0.00001)}'
 
                     modality = 'sen2spring'
                     file_name = datapoint_name + '_' + modality + '.tif'
-                    file_path = os.path.join(self.data_sub_dir, city_folder, modality, Class_nbr, file_name)
+                    file_path = os.path.join(data_sub_dir, city_folder, modality, class_nbr, file_name)
                     if os.path.isfile(file_path):
                         nbr_found += 1
-                        self.data.append((file_path, label, datapoint_name))
+                        self.data.append(file_path)
+                        self.labels.append(label)
                     else:
                         nbr_not_found += 1
                         # print(f'Could not find file: {file_path}')
-        # print(f'In: {self.data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
+        print(f'In: {data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
+
+    def drop_data(self):
+        # Drop 80% of datapoints
+        random.seed(42)
+        random.shuffle(self.data)
+        total_images = len(self.data)
+        # Calculate the number of images to keep (20% of the total)
+        keep_size = int(0.2 * total_images)
+        # Keep only 20% of the data
+        self.data = self.data[:keep_size]
 
     def split_labeled_unlabeled(self):
         # Simply remove 80% of labels -> Loss has to be adjusted. Sometimes batch has no labels.
@@ -131,15 +143,6 @@ class studentTeacherDataset(Dataset):
 
         self.data = unlabeled_data + labeled_data
 
-    def drop_data(self):
-        # Drop 80% of datapoints
-        random.seed(42)
-        random.shuffle(self.data)
-        total_images = len(self.data)
-        # Calculate the number of images to keep (20% of the total)
-        keep_size = int(0.2 * total_images)
-        # Keep only 20% of the data
-        self.data = self.data[:keep_size]
 
     def generate_rgb_img(self, file_path):
         try:
