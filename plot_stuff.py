@@ -5,6 +5,7 @@ from pathlib import Path
 from tqdm import tqdm
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+import pandas as pd
 
 
 plt.rcParams['font.size'] = 12
@@ -196,7 +197,7 @@ def visualize_features(features, labels=None, method='pca', save_path='feature_v
         reducer = PCA(n_components=2)
         title = 'PCA of Features'
     elif method == 'tsne':
-        reducer = TSNE(n_components=2, perplexity=perplexity, n_iter=n_iter)
+        reducer = TSNE(n_components=2, perplexity=perplexity, n_iter=n_iter, verbose=1)
         title = 't-SNE of Features'
     else:
         raise ValueError("Method must be 'pca' or 'tsne'")
@@ -218,13 +219,11 @@ def visualize_features(features, labels=None, method='pca', save_path='feature_v
     return save_path
 
 # Example usage:
-import pandas as pd
 # features = pd.read_csv('/home/sam/Desktop/train_features_full.csv')
-features = pd.read_csv('/home/sam/Desktop/val_features_sen2spring_full.csv')
-print(features.shape)
+features = pd.read_csv('/home/sam/Desktop/logs_server/feature_csv/train_features_23-12-19.csv')
 features_val = features.iloc[:, :-1]
 labels = features.iloc[:, -1]
-visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_val_visualization.png')
+visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_train_visualization.png')
 # Note: Replace 'your_feature_array' and 'your_labels' with your actual data.
 
 

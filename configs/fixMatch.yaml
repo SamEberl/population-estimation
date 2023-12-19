@@ -1,5 +1,5 @@
 info:
-  info: 'Teacher with full data | Use masked MSE | Sigmoid * 54k'
+  info: 'Teacher with 80% dropped + extra lin layer | Use masked MSE | Sigmoid * 54k'
 
 model_params:
   architecture: 'fixMatch'
@@ -21,7 +21,7 @@ data_params:
   num_workers: 32
   drop_labels: False
   percentage_unlabeled: 0.0
-  drop_data: False  # Drops 80% of the training data
+  drop_data: True  # Drops 80% of the training data
 
 train_params:
   LR: 0.0001

@@ -17,7 +17,8 @@ class fixMatch(nn.Module):
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
-        self.fc_preds = nn.Linear(self.model.num_features, nbr_outputs)
+        self.fc_1 = nn.Linear(self.model.num_features, self.model.num_features//5)
+        self.fc_2 = nn.Linear(self.model.num_features//5, nbr_outputs)
         self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
         # factor to scale unsupervised_loss to be similar to supervised_loss
         self.unsupervised_factor = unsupervised_factor  # 1_000_000 / self.model.num_features
@@ -42,9 +43,10 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
-        prediction = self.fc_preds(features).flatten()
+        out_1 = self.fc_1(features)
+        out_2 = self.fc_2(out_1).flatten()
         # prediction = torch.pow(2, prediction)
-        prediction = torch.sigmoid(prediction) * 54_000
+        prediction = torch.sigmoid(out_2) * 54_000
         uncertainty = self.uncertainty(features).flatten()
         # uncertainty = torch.sigmoid(uncertainty) * 18
         # uncertainty = torch.pow(2, uncertainty)
