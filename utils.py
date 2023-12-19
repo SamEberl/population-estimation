@@ -150,10 +150,7 @@ def fill_feature_df_single_datapoint(dataloader, device, model, cols):
                 break
 
         if index != -1:
-            print('here \n')
-            print(device)
-            teacher_data.to(device)
-            print(teacher_data)
+            teacher_data = teacher_data.to(device)
             label = label.to(device)
 
             # Ensure dropout is active during evaluation
