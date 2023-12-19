@@ -137,6 +137,37 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
+def fill_feature_df_single_datapoint(dataloader, device, model, cols):
+    feature_list = []
+    cutoff = 20_000
+    for i, data in tqdm(enumerate(dataloader), total=len(dataloader)):
+        student_data, teacher_data, label, datapoint_name = data
+
+        index = -1
+        for j in label:
+            if label > cutoff:
+                index = j
+                break
+
+        if index != -1:
+            teacher_data.to(device)
+            label = label.to(device)
+
+            # Ensure dropout is active during evaluation
+            model.train()
+
+            with torch.no_grad():  # Ensure no gradients are computed
+                for _ in range(200):
+                    preds, features, uncertainty = model.model(teacher_data[index])
+                    features = features.tolist()
+                    features.append(label[index].item())
+                    feature_list.append(features)
+            feature_df = pd.DataFrame(feature_list, columns=cols)
+            return feature_df
+    raise ValueError(f"No Label found above: {cutoff}")
+
+
+
 def fill_feature_df(dataloader, device, model, cols):
     feature_list = []
     for i, data in tqdm(enumerate(dataloader), total=len(dataloader)):
@@ -175,15 +206,20 @@ def create_feature_csv():
     cols = list(range(teacher_model.model.num_features))
     cols.append('PopCount')
 
-    df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
-    train_path = '/home/sameberl/feature_csv/train_features_23-12-19.csv'
+    # df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
+    df_train = fill_feature_df_single_datapoint(train_dataloader, device, teacher_model, cols)
+    train_path = '/home/sameberl/feature_csv/train_features_single_datapoint_over20k_23-12-19.csv'
     df_train.to_csv(train_path, index=False)
     print(f'train_df saved to: {train_path}')
 
-    df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
-    val_path = '/home/sameberl/feature_csv/val_features_23-12-19.csv'
+    # df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
+    df_val = fill_feature_df_single_datapoint(val_dataloader, device, teacher_model, cols)
+    val_path = '/home/sameberl/feature_csv/val_features_single_datapoint_over20k_23-12-19.csv'
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {val_path}')
+
+
+create_feature_csv()
 
 
 def save_data_as_jpg(reg_config, save_dir):
