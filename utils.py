@@ -137,6 +137,21 @@ def browse_images_with_mean(directory):
         plt.show()
 
 
+def fill_feature_df(dataloader, device, model, cols):
+    feature_list = []
+    for i, data in tqdm(enumerate(dataloader)):
+        student_data, teacher_data, label, datapoint_name = data
+        teacher_data = teacher_data.to(device)
+        label = label.to(device)
+        teacher_features = model.model(teacher_data)
+        for j, features in tqdm(enumerate(teacher_features)):
+            features.tolist()
+            features.append(label[j].item())
+            feature_list.append(features)
+    feature_df = pd.DataFrame(feature_list, columns=cols)
+    return feature_df
+
+
 def create_feature_csv():
     config = parse_yaml('configs/fixMatch.yaml')
     # Set device
@@ -157,42 +172,19 @@ def create_feature_csv():
     student_transform, teacher_transform = get_transforms(config)
     train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
 
-    df_train = pd.DataFrame(columns=range(teacher_model.model.num_features))
-    df_train['PopCount'] = None
+    cols = list(range(teacher_model.model.num_features))
+    cols.append('PopCount')
 
-    df_val = pd.DataFrame(columns=range(teacher_model.model.num_features))
-    df_val['PopCount'] = None
-
-    with torch.no_grad():
-        for loader in [train_dataloader, val_dataloader]:
-            for i, data in tqdm(enumerate(loader)):
-                student_data, teacher_data, label, datapoint_name = data
-                teacher_data = teacher_data.to(device)
-                label = label.to(device)
-
-                teacher_features = teacher_model.model(teacher_data)
-                df_train_tmp = pd.DataFrame(columns=range(teacher_model.model.num_features))
-                df_train_tmp['PopCount'] = None
-                for j, feature in tqdm(enumerate(teacher_features)):
-                    feature = feature.tolist()
-                    feature.append(label[j].item())
-                    df_feature = pd.DataFrame([feature], columns=df_train.columns, index=[(i+1)*(j+1)])
-                    df_train_tmp = pd.concat([df_train_tmp, df_feature], ignore_index=False)
-                df_train = pd.concat([df_train, df_train_tmp], ignore_index=False)
-
-                df_val_tmp = pd.DataFrame(columns=range(teacher_model.model.num_features))
-                df_val_tmp['PopCount'] = None
-                for j, feature in tqdm(enumerate(teacher_features)):
-                    feature = feature.tolist()
-                    feature.append(label[j].item())
-                    df_feature = pd.DataFrame([feature], columns=df_val.columns, index=[(i+1)*(j+1)])
-                    df_val_tmp = pd.concat([df_val_tmp, df_feature], ignore_index=False)
-                df_val = pd.concat([df_val, df_val_tmp], ignore_index=False)
+    df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
+    df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
 
     df_train.to_csv('/mnt1/sameberl/feature_csv/train_features_23-12-18.csv', index=False)
-    df_train.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
+    df_val.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
 
 create_feature_csv()
+
+
+
 
 def save_data_as_jpg(reg_config, save_dir):
     # Set to utilize tensor cores of GPU
