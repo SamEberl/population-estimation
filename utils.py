@@ -149,10 +149,10 @@ def create_feature_csv():
     for param in teacher_model.parameters():
         param.requires_grad = False
 
-    # TODO: Load model!
-    # retrain_from = config['model_params']['retrain_from']
-    # student_model.load_state_dict(torch.load('/home/sameberl/models', retrain_from))
-    # teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
+    # retrain_from = 'convnextv2_atto.fcmae_2023_12_18-13_22_35.pt'
+    retrain_from = 'convnextv2_atto.fcmae_2023_12_18-22_49_49.pt'
+    # student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
+    teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
     student_transform, teacher_transform = get_transforms(config)
     train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
@@ -191,6 +191,8 @@ def create_feature_csv():
 
     df_train.to_csv('/mnt1/sameberl/feature_csv/train_features_23-12-18.csv', index=False)
     df_train.to_csv('/mnt1/sameberl/feature_csv/val_features_23-12-18.csv', index=False)
+
+create_feature_csv()
 
 def save_data_as_jpg(reg_config, save_dir):
     # Set to utilize tensor cores of GPU
