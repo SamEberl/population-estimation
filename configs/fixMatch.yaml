@@ -1,5 +1,5 @@
 info:
-  info: 'Teacher with 80% dropped + extra lin layer'
+  info: 'No teacher | 80% dropped | extra lin layer | no sigmoid'
 
 model_params:
   architecture: 'fixMatch'
@@ -30,7 +30,7 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  use_teacher: True
+  use_teacher: False
   seed: 42
   num_samples_teacher: 30
 
