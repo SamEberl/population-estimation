@@ -88,7 +88,7 @@ class studentTeacherDataset(Dataset):
 
         return student_data, teacher_data, label
 
-
+# TODO: Turn into own function and create 2 separate datasets
     def get_data_paths(self):
         nbr_not_found = 0
         nbr_found = 0

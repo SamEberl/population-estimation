@@ -1,9 +1,26 @@
+import torch
 from torch import optim
-from utils import *
 from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import MaskedBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from dataset import batch_generator
+from tqdm import tqdm
+import random
+
+
+def derangement_shuffle(tensor):
+    """
+    Shuffle a tensor such that no element remains in its original position.
+
+    :param tensor: A PyTorch tensor to be shuffled.
+    :return: A shuffled tensor.
+    """
+    n = tensor.size(0)
+    indices = list(range(n))
+    while any(i == indices[i] for i in range(n)):
+        random.shuffle(indices)
+
+    return tensor[torch.tensor(indices)]
 
 
 def forward_pass(student_model,
