@@ -219,7 +219,7 @@ def create_feature_csv():
     print(f'val_df saved to: {val_path}')
 
 
-
+create_feature_csv()
 
 
 def save_data_as_jpg(reg_config, save_dir):
