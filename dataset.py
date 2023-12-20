@@ -36,7 +36,6 @@ class studentTeacherDataset(Dataset):
         self.use_teacher = use_teacher
         self.percentage_unlabeled = percentage_unlabeled
         self.nbr_channels = nbr_channels
-        self.use_labeled = True
 
         splits = ['train', 'valid', 'test']
         if split not in splits:
@@ -66,7 +65,7 @@ class studentTeacherDataset(Dataset):
         # data[6:9, :, :] = self.generate_winter_img(file_path)
         # data[15, :, :] = self.generate_viirs(file_path)  # viirs
 
-        if self.student_transform is not None:
+        if self.student_transform is not None and self.split == 'train':
             student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
             student_data = self.add_gaussian_noise(student_data)
             student_data = self.adjust_brightness(student_data)
@@ -77,7 +76,7 @@ class studentTeacherDataset(Dataset):
             student_data = data
 
         if self.use_teacher:
-            if self.teacher_transform is not None:
+            if self.teacher_transform is not None and self.split == 'train':
                 teacher_data = self.teacher_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
             else:
                 teacher_data = data
