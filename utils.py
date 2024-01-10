@@ -217,9 +217,6 @@ def create_feature_csv():
     print(f'val_df saved to: {val_path}')
 
 
-create_feature_csv()
-
-
 def save_data_as_jpg(reg_config, save_dir):
     # Set to utilize tensor cores of GPU
     torch.set_float32_matmul_precision('medium')
