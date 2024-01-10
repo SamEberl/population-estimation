@@ -47,7 +47,7 @@ def get_data(data_dir, split):
     return data
 
 
-def reduce_data(data, percent, seed):
+def reduce_data_func(data, percent, seed):
     random.seed(seed)
     random.shuffle(data)
     keep_size = int((1-percent) * len(data))
@@ -92,7 +92,7 @@ def get_dataloaders(config):
 
     # drop data
     if reduce_data:
-        data['train'] = reduce_data(data['train'], reduce_data_percent, seed)
+        data['train'] = reduce_data_func(data['train'], reduce_data_percent, seed)
 
     # create dataloaders
     train_dataloader_unlabeled = None
