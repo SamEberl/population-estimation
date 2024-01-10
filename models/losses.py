@@ -245,7 +245,10 @@ class TripletLoss(nn.Module):
 
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
-        losses_masked = losses * mask
+        if mask == None:
+            losses_masked = losses
+        else:
+            losses_masked = losses * mask
 
         # Calculate the average loss only for non-zero mask elements
         if torch.sum(mask) != 0:

@@ -1,9 +1,11 @@
+import yaml
 from training_loops.fixMatch_loop import *
-from dataset import get_dataloader, get_transforms
+from dataset import get_dataloaders
 from tensorboardX import SummaryWriter
 from datetime import datetime
 from logging_utils import *
 from models import *
+from utils import parse_yaml
 
 
 
@@ -42,11 +44,16 @@ param_yaml_str = yaml.dump(config, default_flow_style=False)
 param_yaml_str = param_yaml_str.replace('\n', '<br>')
 writer.add_text('Parameters', param_yaml_str, 0)
 
-student_transform, teacher_transform = get_transforms(config)
-train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
+train_dataloader, valid_dataloader, train_dataloader_unlabeled = get_dataloaders(config)
+# TODO: Apply transforms after loading data
 
-
-train_loss, val_loss = train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader)
+train_fix_match(config,
+                writer,
+                student_model,
+                teacher_model,
+                train_dataloader,
+                valid_dataloader,
+                train_dataloader_unlabeled)
 
 save_path = os.path.join(config['save_dirs']['model_save_dir'],
                          f"{config['model_params']['pretrained_weights']}_{current_datetime}.pt")

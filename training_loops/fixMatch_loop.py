@@ -1,11 +1,12 @@
 import torch
+import random
+import statistics
 from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import MaskedBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
-from dataset import batch_generator
 from tqdm import tqdm
-import random
+from dataset import apply_transforms
 
 
 def derangement_shuffle(tensor):
@@ -23,115 +24,113 @@ def derangement_shuffle(tensor):
     return tensor[torch.tensor(indices)]
 
 
-def forward_pass(student_model,
-                 teacher_model,
-                 student_inputs,
-                 teacher_inputs,
-                 labels,
-                 config,
-                 split,
-                 logger):
+def forward_supervised(student_model,
+                       student_inputs,
+                       labels,
+                       supervised_loss_name,
+                       split,
+                       logger):
+    # Set mode to disable dropout for eval
     if split == 'train':
         student_model.train()
     else:
         student_model.eval()
 
+    # Pass inputs through model
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
-    mask_labeled = labels != -1
-    supervised_loss = torch.tensor(0, dtype=torch.float32)
 
-    if torch.cuda.is_available():
-        supervised_loss = supervised_loss.cuda()
-    if torch.sum(mask_labeled) > 0:
-        supervised_loss = student_model.loss_supervised(student_preds, labels)
-        # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+    # Calc Supervised Loss
+    supervised_loss = student_model.loss_supervised(student_preds, labels)
+    # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
+    # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
-        r2_numerator = MaskedMSELoss.forward(student_preds, labels)
-        logger.add_metric('Observe-R2', split, r2_numerator)
-        bias = MaskedBias.forward(student_preds, labels)
-        logger.add_metric('Observe-Bias', split, bias)
-        # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
+    # Log Metrics
+    logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
+    logger.add_metric('Observe-R2', split, MaskedMSELoss.forward(student_preds, labels))  # TODO: Switch out all the losses for non masked
+    logger.add_metric('Observe-Bias', split, MaskedBias.forward(student_preds, labels))
+    logger.add_metric('Loss-Compare-L1', split, MaskedL1Loss.forward(student_preds, labels))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    logger.add_metric('Loss-Compare-RMSE', split, MaskedRMSELoss.forward(student_preds, labels))
+    # logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled) / len(mask_labeled))
 
-    supervised_loss_name = config['model_params']['supervised_criterion']
-    if supervised_loss != -1:
-        logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
-    # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-    loss_mae = MaskedL1Loss.forward(student_preds, labels)
-    loss_rmse = MaskedRMSELoss.forward(student_preds, labels)
-    if loss_mae != -1:
-        logger.add_metric('Loss-Compare-L1', split, loss_mae)
-        logger.add_metric('Loss-Compare-RMSE', split, loss_rmse)
-    logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled)/len(mask_labeled))
+    return supervised_loss
 
-    unsupervised_loss = torch.tensor(0, dtype=torch.float32)
-    if torch.cuda.is_available():
-        unsupervised_loss = unsupervised_loss.cuda()
-    if split == 'train' and config['train_params']['use_teacher']:
-        num_samples = config['train_params']['num_samples_teacher']
 
-        # Ensure dropout is active during evaluation
-        teacher_model.train()
 
-        # Store all predictions
-        n_teacher_preds = []
-        n_teacher_features = []
-        n_teacher_data_uncertainties = []
+def forward_unsupervised(student_model,
+                         teacher_model,
+                         student_inputs,
+                         teacher_inputs,
+                         num_samples_teacher,
+                         logger):
 
-        with torch.no_grad():  # Ensure no gradients are computed
-            for _ in range(num_samples):
-                teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
-                n_teacher_preds.append(teacher_preds)
-                n_teacher_features.append(teacher_features)
-                n_teacher_data_uncertainties.append(teacher_data_uncertainty)
+    student_model.train()
+    # Pass inputs through model
+    student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
 
-        n_teacher_preds = torch.stack(n_teacher_preds)
-        n_teacher_features = torch.stack(n_teacher_features)
-        n_teacher_data_uncertainties = torch.stack(n_teacher_data_uncertainties)
+    # Store all predictions
+    n_teacher_preds = []
+    n_teacher_features = []
+    n_teacher_data_uncertainties = []
 
-        # Compute model uncertainty
-        teacher_model_uncertainty = n_teacher_preds.var(dim=0)
+    teacher_model.train()  # Ensure dropout is active during evaluation
+    with torch.no_grad():  # Ensure no gradients are computed
+        for _ in range(num_samples_teacher):
+            teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
+            n_teacher_preds.append(teacher_preds)
+            n_teacher_features.append(teacher_features)
+            n_teacher_data_uncertainties.append(teacher_data_uncertainty)
 
-        # Compute feature spread
-        teacher_features_mean = n_teacher_features.mean(dim=0)  # Get averaged features
-        l2_distances = torch.sqrt(((n_teacher_features - teacher_features_mean) ** 2).sum(dim=-1))  # Calculate the squared differences
-        l2_distances_var = l2_distances.var(dim=0)  # Get spread
+    n_teacher_preds = torch.stack(n_teacher_preds)
+    n_teacher_features = torch.stack(n_teacher_features)
+    n_teacher_data_uncertainties = torch.stack(n_teacher_data_uncertainties)
 
-        # Compute data uncertainty
-        teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
+    # Compute model uncertainty
+    teacher_model_uncertainty = n_teacher_preds.var(dim=0)
 
-        logger.add_metric('Uncertainty_Var_Regression', split, torch.mean(teacher_model_uncertainty))
-        logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
-        logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
-        logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
+    # Compute feature spread
+    teacher_features_mean = n_teacher_features.mean(dim=0)  # Get averaged features
+    l2_distances = torch.sqrt(((n_teacher_features - teacher_features_mean) ** 2).sum(dim=-1))  # Calculate the squared differences
+    l2_distances_var = l2_distances.var(dim=0)  # Get spread
 
-        # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-        pseudo_label_mask = l2_distances_var < 0.5
-        logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
-        # pseudo_label_mask = teacher_data_uncertainty < ?
-        if torch.sum(pseudo_label_mask) > 0:
-            dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, pseudo_label_mask)
-        logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
+    # Compute data uncertainty
+    teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
 
-    loss = supervised_loss + unsupervised_loss
-    logger.add_metric('Loss-All', split, loss)
+    # TODO: Use pseudo_label_mask
+    # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
+    # pseudo_label_mask = l2_distances_var < 0.5
+    # pseudo_label_mask = teacher_data_uncertainty < ?
+    # if torch.sum(pseudo_label_mask) > 0:
+    pseudo_label_mask = None
+    dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
+    unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, mask=pseudo_label_mask)
+
+    split = 'train'
+    logger.add_metric('Uncertainty_Var_Regression', split, torch.mean(teacher_model_uncertainty))
+    logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
+    logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
+    logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
+    logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
+    logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
 
     # if save_img:
     #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
     #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
     #     # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
 
-    return loss
+    return unsupervised_loss
 
 
-def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, val_dataloader):
+def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader, train_dataloader_unlabeled):
     logger = MetricsLogger(writer)
 
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
-    use_teacher = config['train_params']['use_teacher']
+    unlabeled_data = config['train_params']['unlabeled_data']
+    num_samples_teacher = config['train_params']['num_samples_teacher']
     info = config['info']['info']
+
+    supervised_loss_name = config['model_params']['supervised_criterion']
 
     optimizer = optim.AdamW(student_model.parameters(),
                             lr=config['train_params']['LR'],
@@ -144,68 +143,70 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    total_train_loss = 0
-    total_val_loss = 0
     # Train the model
     for epoch in range(num_epochs):
-        val_generator = batch_generator(val_dataloader)
-        total_train_loss = 0
-        total_val_loss = 0
-        for i, train_data in enumerate(train_dataloader):
-            # step_nbr = epoch * len(train_dataloader.dataset) + (i + 1) * train_dataloader.batch_size
-
-            student_inputs, teacher_inputs, labels = train_data
-            student_inputs = student_inputs.to(device)
-            if use_teacher:
-                teacher_inputs = teacher_inputs.to(device)
+        for train_data in (train_dataloader):
+            inputs, labels = train_data
+            inputs = inputs.to(device)
+            inputs = apply_transforms(inputs, config['transform_params'])
             labels = labels.to(device)
 
-            train_loss = forward_pass(
-                student_model=student_model,
-                teacher_model=teacher_model,
-                student_inputs=student_inputs,
-                teacher_inputs=teacher_inputs,
-                labels=labels,
-                config=config,
-                split='train',
-                logger=logger)
-            total_train_loss += train_loss
+            supervised_loss = forward_supervised(student_model,
+                                                 inputs,
+                                                 labels,
+                                                 supervised_loss_name,
+                                                 split='train',
+                                                 logger=logger)
 
             # Backward pass and optimization
-            if train_loss != 0:
-                optimizer.zero_grad()
-                train_loss.backward()
-                optimizer.step()
+            optimizer.zero_grad()
+            supervised_loss.backward()
+            optimizer.step()
 
             # Update teacher model using exponential moving average
-            for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-                teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
+            if unlabeled_data:
+                for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
+                    teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
-            val_data = next(val_generator)
-            if val_data is not None:
-                student_inputs, teacher_inputs, labels = val_data
+        for train_data_unlabeled in train_dataloader_unlabeled:
+            if not unlabeled_data:
+                break
+            inputs, _ = train_data_unlabeled
+            inputs = inputs.to(device)
+            student_inputs = apply_transforms(inputs, config['transform_params'])
+            unsupervised_loss = forward_unsupervised(student_model,
+                                                     teacher_model,
+                                                     student_inputs=student_inputs,
+                                                     teacher_inputs=inputs,
+                                                     num_samples_teacher=num_samples_teacher,
+                                                     logger=logger)
+
+            # Backward pass and optimization
+            optimizer.zero_grad()
+            unsupervised_loss.backward()
+            optimizer.step()
+
+        for i, valid_data in enumerate(valid_dataloader):
+            if valid_data is not None:
+                student_inputs, teacher_inputs, labels = valid_data
                 student_inputs = student_inputs.to(device)
                 labels = labels.to(device)
 
                 with torch.no_grad():
-                    val_loss = forward_pass(
+                    val_loss = forward_supervised(
                             student_model=student_model,
-                            teacher_model=teacher_model,
                             student_inputs=student_inputs,
-                            teacher_inputs=teacher_inputs,
                             labels=labels,
-                            config=config,
+                            supervised_loss_name=supervised_loss_name,
                             split='valid',
                             logger=logger)
-                    total_val_loss += val_loss
 
             if i % 100 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
                 pbar.update(1)
 
         writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
+        scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}']))
         logger.write(epoch+1)
-        scheduler.step(total_val_loss/len(val_dataloader))
+        logger.clear()
     pbar.close()
-
-    return (total_val_loss / len(val_dataloader)), (total_train_loss / len(train_dataloader))
