@@ -18,6 +18,8 @@ def get_data(data_dir, split):
     data = []
     nbr_not_found = 0
     nbr_found = 0
+    if split == 'valid':  # Because on server the val set is called test :(
+        split = 'test'
     data_sub_dir = os.path.join(data_dir, split)
     for city_folder in os.listdir(data_sub_dir):
         # Load the csv file that maps datapoint names to folder names
