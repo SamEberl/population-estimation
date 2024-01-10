@@ -16,11 +16,11 @@ import pandas as pd
 from tqdm import tqdm
 from ssl_dataset import sslDataset
 
-from dataset import studentTeacherDataset
+from dataset import PopDataset
 from pathlib import Path
 
 from models import *
-from dataset import get_dataloader, get_transforms
+from dataset import get_dataloaders
 
 
 def display_input_output(model, input_tensor):
@@ -199,8 +199,7 @@ def create_feature_csv():
     # student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
     teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
-    student_transform, teacher_transform = get_transforms(config)
-    train_dataloader, val_dataloader = get_dataloader(config, student_transform, teacher_transform)
+    train_dataloader, val_dataloader, train_dataloader_unlabeled = get_dataloaders(config)
 
     cols = list(range(teacher_model.model.num_features))
     cols.append('PopCount')
@@ -299,8 +298,8 @@ def calc_stats_dataset():
     # data_path = "/home/sam/Desktop/so2sat_test/tmp_train"
     nbr_channels = 20
 
-    dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
-    # dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    dataset = PopDataset(data_path, split='train', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    # dataset = PopDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
 
     # Initialize variables
     n_samples = 0
@@ -403,10 +402,10 @@ def calc_r2_denominator():
     data_path = "/home/sam/Desktop/so2sat_test/So2Sat_POP_Part1"
     # data_path = "/home/sam/Desktop/so2sat_test/tmp_train"
     nbr_channels = 20
-    dataset = studentTeacherDataset(data_path, split='train', use_teacher=False, drop_labels=False,
+    dataset = PopDataset(data_path, split='train', use_teacher=False, drop_labels=False,
                                     student_transform=None,
                                     teacher_transform=None, nbr_channels=nbr_channels)
-    # dataset = studentTeacherDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
+    # dataset = PopDataset(data_path, split='test', use_teacher=False, drop_labels=False, student_transform=None, teacher_transform=None, nbr_channels=nbr_channels)
 
     train_mean = 1074.556447 # 883259408384.0     # 7373152.5
     # val_mean = 1158.546960     # 180515012608.0 # 9868522.0
