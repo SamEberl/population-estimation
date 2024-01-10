@@ -126,7 +126,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
-    unlabeled_data = config['train_params']['unlabeled_data']
+    unlabeled_data = config['data_params']['unlabeled_data']
     num_samples_teacher = config['train_params']['num_samples_teacher']
     info = config['info']['info']
 
