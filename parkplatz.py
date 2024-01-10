@@ -22,7 +22,7 @@ def get_transforms(config):
 def do_transforms():
     if self.student_transform is not None and self.split == 'train':
         student_data = self.student_transform(image=data.transpose(1, 2, 0))['image'].transpose(2, 0, 1)
-        student_data = self.add_gaussian_noise(student_data)  # TODO: Move transforms outside of dataloader
+        student_data = self.add_gaussian_noise(student_data)
         student_data = self.adjust_brightness(student_data)
         student_data = self.adjust_contrast(student_data)
         # Clip the values to ensure they are within a valid range
@@ -55,7 +55,6 @@ def check_inputs():
 
 
 # nbr_channels = config['model_params']['in_channels']  # TODO: Model params ???
-# use_teacher = config['train_params']['use_teacher']  # TODO: Move elsewhere
 
 
 

@@ -45,7 +45,6 @@ param_yaml_str = param_yaml_str.replace('\n', '<br>')
 writer.add_text('Parameters', param_yaml_str, 0)
 
 train_dataloader, valid_dataloader, train_dataloader_unlabeled = get_dataloaders(config)
-# TODO: Apply transforms after loading data
 
 train_fix_match(config,
                 writer,

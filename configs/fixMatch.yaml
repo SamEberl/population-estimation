@@ -33,7 +33,6 @@ train_params:
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
-  # use_teacher: True  # TODO: Remove if not needed anymore
   seed: 42
   num_samples_teacher: 30
 
