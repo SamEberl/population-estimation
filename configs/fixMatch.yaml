@@ -26,6 +26,11 @@ data_params:
   reduce_supervised: False
   reduce_supervised_percent: 0.0
   seed: 42
+  use_spring_rgb: True
+  use_lu: False
+  use_lcz: False
+  use_dem: False
+  use_viirs: False
 
 train_params:
   LR: 0.0001
