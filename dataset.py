@@ -367,7 +367,7 @@ def add_gaussian_noise(image_bands, mean=0, std_min=0.01, std_max=0.07, p=0.5):
         std = np.random.uniform(std_min, std_max)
 
         # Generate Gaussian noise
-        noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape)
+        noise = np.random.normal(loc=mean, scale=std, size=image_bands.shape).astype(np.float32)
 
         # Add noise to the input channels
         noisy_channels = image_bands + noise
