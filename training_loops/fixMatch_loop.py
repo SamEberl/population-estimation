@@ -146,8 +146,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     for epoch in range(num_epochs):
         for train_data in (train_dataloader):
             inputs, labels = train_data
-            print(f'inputs: {inputs.shape}')
-            print(f'labels: ', labels.shape)
             inputs = inputs.to(device)
             labels = labels.to(device)
 
