@@ -269,11 +269,16 @@ def apply_transforms(image_bands, transform_params):
     - np.ndarray: Transformed image.
     """
 
+    print(f'type000: {image_bands.dtype}')
+
+
     if transform_params['apply_rot_and_flip']:
         # Apply rotation and flipping
         image_bands = apply_flip_and_rotate_transforms(
             image_bands,
         )
+
+        print(f'type1: {image_bands.dtype}')
 
     if transform_params['apply_noise']:
         # Apply gaussian noise
@@ -284,6 +289,7 @@ def apply_transforms(image_bands, transform_params):
             std_max=transform_params['noise_std_max'],
             p=transform_params['noise_p']
         )
+        print(f'type2: {image_bands.dtype}')
 
     if transform_params['apply_brightness']:
         # Adjust brightness
@@ -292,6 +298,7 @@ def apply_transforms(image_bands, transform_params):
             brightness_range=transform_params['brightness_range'],
             p=transform_params['brightness_p']
         )
+        print(f'type3: {image_bands.dtype}')
 
     if transform_params['apply_contrast']:
         # Adjust contrast
@@ -300,8 +307,9 @@ def apply_transforms(image_bands, transform_params):
             contrast_range=transform_params['contrast_range'],
             p=transform_params['contrast_p']
         )
+        print(f'type4: {image_bands.dtype}')
 
-    print(f'type: {image_bands.dtype}')
+    print(f'type-final: {image_bands.dtype}')
 
     return image_bands
 
