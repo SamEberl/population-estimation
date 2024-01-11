@@ -292,30 +292,36 @@ def apply_transforms(image_bands, transform_params):
     return image_bands
 
 
-def apply_flip_and_rotate_transforms(image_bands):
+
+def apply_flip_and_rotate_transforms(image_bands, probability=0.5):
     """
     Apply horizontal flip, vertical flip, and 90-degree rotation transforms to the image.
     Each transform has a 0.5 probability of being applied.
 
+    This function can handle images with more than three dimensions, assuming the last three dimensions
+    are channels, height, and width.
+
     Args:
-    - image (np.ndarray): Input image with shape (height, width, channels).
+    - image_bands (np.ndarray): Input image with shape (..., channels, height, width).
     - probability (float): Probability of applying each transform.
 
     Returns:
     - np.ndarray: Transformed image.
     """
-    probability = 0.5
-    # Apply horizontal flip with a probability of 0.5
-    if np.random.rand() < probability:
-        image_bands = np.flip(image_bands, axis=1)  # Flipping horizontally
 
-    # Apply vertical flip with a probability of 0.5
+    # Apply the transformations only on the last two dimensions (height and width)
     if np.random.rand() < probability:
-        image_bands = np.flip(image_bands, axis=0)  # Flipping vertically
+        # Flipping horizontally
+        image_bands = np.flip(image_bands, axis=-2)
 
-    # Apply 90-degree rotation with a probability of 0.5
     if np.random.rand() < probability:
-        image_bands = np.rot90(image_bands)  # Rotating by 90 degrees
+        # Flipping vertically
+        image_bands = np.flip(image_bands, axis=-3)
+
+    if np.random.rand() < probability:
+        # Rotating by 90 degrees
+        # This rotation swaps the last two axes (height and width)
+        image_bands = np.rot90(image_bands, axes=(-2, -3))
 
     return image_bands
 
