@@ -159,6 +159,7 @@ class PopDataset(Dataset):
             else:
                 data[counter, :, :] = func(file_path)
                 counter += 1
+        print(f'type: {type(data)}')
         if self.split == 'train':
             return apply_transforms(data, self.transform_params), label
         elif self.split == 'valid':
