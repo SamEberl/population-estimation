@@ -166,23 +166,22 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
-        for train_data_unlabeled in train_dataloader_unlabeled:
-            if not unlabeled_data:
-                break
-            inputs, inputs_transformed = train_data_unlabeled
-            inputs = inputs.to(device)
-            inputs_transformed = inputs_transformed.to(device)
-            unsupervised_loss = forward_unsupervised(student_model,
-                                                     teacher_model,
-                                                     student_inputs=inputs_transformed,
-                                                     teacher_inputs=inputs,
-                                                     num_samples_teacher=num_samples_teacher,
-                                                     logger=logger)
+        if unlabeled_data:
+            for train_data_unlabeled in train_dataloader_unlabeled:
+                inputs, inputs_transformed = train_data_unlabeled
+                inputs = inputs.to(device)
+                inputs_transformed = inputs_transformed.to(device)
+                unsupervised_loss = forward_unsupervised(student_model,
+                                                         teacher_model,
+                                                         student_inputs=inputs_transformed,
+                                                         teacher_inputs=inputs,
+                                                         num_samples_teacher=num_samples_teacher,
+                                                         logger=logger)
 
-            # Backward pass and optimization
-            optimizer.zero_grad()
-            unsupervised_loss.backward()
-            optimizer.step()
+                # Backward pass and optimization
+                optimizer.zero_grad()
+                unsupervised_loss.backward()
+                optimizer.step()
 
         for i, valid_data in enumerate(valid_dataloader):
             inputs, labels = valid_data
