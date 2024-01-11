@@ -55,8 +55,8 @@ def reduce_data_func(data, percent, seed):
     return reduced_data
 
 
-def create_dataloader(data, use_channels, bs, num_workers):
-    dataset = PopDataset(data, use_channels=use_channels)
+def create_dataloader(data, split, transform_params, use_channels, bs, num_workers):
+    dataset = PopDataset(data, split, transform_params, use_channels=use_channels)
     dataloader = DataLoader(dataset,
                             batch_size=bs,
                             shuffle=True,
@@ -84,6 +84,8 @@ def get_dataloaders(config):
                     'use_dem': config['data_params']['use_dem'],
                     'use_viirs': config['data_params']['use_viirs']}
 
+    transform_params = config['transform_params']
+
     data = {'train': [], 'valid': []}
 
     # fill data
@@ -97,11 +99,11 @@ def get_dataloaders(config):
     # create dataloaders
     train_dataloader_unlabeled = None
     if unlabeled_data:
-        train_dataloader_unlabeled = create_dataloader(data['train'], use_channels, bs_train, num_workers)
+        train_dataloader_unlabeled = create_dataloader(data['train'], 'train_unlabeled', transform_params, use_channels, bs_train, num_workers)
     if reduce_supervised:
         data['train'] = reduce_data(data['train'], reduce_supervised_percent, seed)
-    train_dataloader = create_dataloader(data['train'], use_channels, bs_train, num_workers)
-    valid_dataloader = create_dataloader(data['valid'], use_channels, bs_valid, num_workers)
+    train_dataloader = create_dataloader(data['train'], 'train', transform_params, use_channels, bs_train, num_workers)
+    valid_dataloader = create_dataloader(data['valid'], 'valid', transform_params, use_channels, bs_valid, num_workers)
 
     return train_dataloader, valid_dataloader, train_dataloader_unlabeled
 
@@ -109,8 +111,12 @@ def get_dataloaders(config):
 class PopDataset(Dataset):
     def __init__(self,
                  data,
+                 split,
+                 transform_params,
                  use_channels):
         self.data = data
+        self.split = split
+        self.transform_params = transform_params
 
         self.nbr_channels = 0
         self.channel_functions = []
@@ -153,7 +159,13 @@ class PopDataset(Dataset):
             else:
                 data[counter, :, :] = func(file_path)
                 counter += 1
-        return data, label
+        if self.split == 'train':
+            return apply_transforms(data, self.transform_params), label
+        elif self.split == 'valid':
+            return data, label
+        elif self.split == 'train_unlabeled':
+            return data, apply_transforms(data, self.transform_params)
+
 
     def generate_spring_rgb(self, file_path):
         try:
@@ -308,9 +320,6 @@ def apply_flip_and_rotate_transforms(image_bands, probability=0.5):
     Returns:
     - np.ndarray: Transformed image.
     """
-
-    print('shape: \n')
-    print(image_bands.shape)
 
     # Apply the transformations only on the last two dimensions (height and width)
     if np.random.rand() < probability:

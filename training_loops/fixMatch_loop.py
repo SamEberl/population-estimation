@@ -6,7 +6,6 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import MaskedBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
-from dataset import apply_transforms
 
 
 def derangement_shuffle(tensor):
@@ -150,7 +149,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             print(f'inputs: {inputs.shape}')
             print(f'labels: ', labels.shape)
             inputs = inputs.to(device)
-            inputs = apply_transforms(inputs, config['transform_params'])
             labels = labels.to(device)
 
             supervised_loss = forward_supervised(student_model,
@@ -173,12 +171,12 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         for train_data_unlabeled in train_dataloader_unlabeled:
             if not unlabeled_data:
                 break
-            inputs, _ = train_data_unlabeled
+            inputs, inputs_transformed = train_data_unlabeled
             inputs = inputs.to(device)
-            student_inputs = apply_transforms(inputs, config['transform_params'])
+            inputs_transformed = inputs_transformed.to(device)
             unsupervised_loss = forward_unsupervised(student_model,
                                                      teacher_model,
-                                                     student_inputs=student_inputs,
+                                                     student_inputs=inputs_transformed,
                                                      teacher_inputs=inputs,
                                                      num_samples_teacher=num_samples_teacher,
                                                      logger=logger)
@@ -189,19 +187,18 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             optimizer.step()
 
         for i, valid_data in enumerate(valid_dataloader):
-            if valid_data is not None:
-                student_inputs, teacher_inputs, labels = valid_data
-                student_inputs = student_inputs.to(device)
-                labels = labels.to(device)
+            inputs, labels = valid_data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
-                with torch.no_grad():
-                    val_loss = forward_supervised(
-                            student_model=student_model,
-                            student_inputs=student_inputs,
-                            labels=labels,
-                            supervised_loss_name=supervised_loss_name,
-                            split='valid',
-                            logger=logger)
+            with torch.no_grad():
+                val_loss = forward_supervised(
+                        student_model=student_model,
+                        student_inputs=inputs,
+                        labels=labels,
+                        supervised_loss_name=supervised_loss_name,
+                        split='valid',
+                        logger=logger)
 
             if i % 100 == 0:
                 pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
