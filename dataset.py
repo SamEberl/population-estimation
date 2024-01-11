@@ -309,6 +309,9 @@ def apply_flip_and_rotate_transforms(image_bands, probability=0.5):
     - np.ndarray: Transformed image.
     """
 
+    print('shape: \n')
+    print(image_bands.shape)
+
     # Apply the transformations only on the last two dimensions (height and width)
     if np.random.rand() < probability:
         # Flipping horizontally
