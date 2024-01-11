@@ -159,7 +159,6 @@ class PopDataset(Dataset):
             else:
                 data[counter, :, :] = func(file_path)
                 counter += 1
-        print(f'type: {data.dtype}')
         if self.split == 'train':
             return apply_transforms(data, self.transform_params), label
         elif self.split == 'valid':
@@ -301,6 +300,8 @@ def apply_transforms(image_bands, transform_params):
             contrast_range=transform_params['contrast_range'],
             p=transform_params['contrast_p']
         )
+
+    print(f'type: {image_bands.dtype}')
 
     return image_bands
 
