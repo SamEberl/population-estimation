@@ -69,6 +69,7 @@ def forward_supervised(student_model,
         # Save the image
         rand_int = random.randint(0, 100)
         image.save(f"/home/sameberl/img_logs/output_image_{rand_int}.png")
+        print('saved img')
 
     return supervised_loss
 
