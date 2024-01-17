@@ -301,6 +301,8 @@ def apply_transforms(image_bands, transform_params):
             p=transform_params['contrast_p']
         )
 
+    image_bands = np.clip(image_bands, 0, 1)
+
     return image_bands
 
 
