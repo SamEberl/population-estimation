@@ -59,23 +59,14 @@ class AleatoricLinDecayLoss(nn.Module):
         return loss
 
 
-class MaskedBias(nn.Module):
+class CalcBias(nn.Module):
     def __init__(self):
         super().__init__()
 
     @staticmethod
     def forward(pred, actual):
-        mask = actual != -1
         diff = (pred - actual)
-        masked_diff = diff * mask
-        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-        pred_numel = torch.sum(mask)
-        if pred_numel > 0:
-            bias = torch.sum(masked_diff) / pred_numel
-        else:
-            bias = torch.tensor([-1], dtype=torch.float32)
-            if torch.cuda.is_available():
-                bias = bias.cuda()
+        bias = torch.sum(diff) / diff.numel()
         return bias
 
 
@@ -233,6 +224,7 @@ class TripletLoss(nn.Module):
 
     @staticmethod
     def forward(anchor, positive, negative, mask, margin):
+        # TODO: Deal with mask being not needed
         # L2 Normalize the embeddings
         anchor = F.normalize(anchor, p=2, dim=1)
         positive = F.normalize(positive, p=2, dim=1)

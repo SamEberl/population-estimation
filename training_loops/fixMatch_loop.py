@@ -1,11 +1,15 @@
 import torch
 import random
 import statistics
+import torch.nn.functional as F
 from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
-from models.losses import MaskedBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
+from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
+from torchvision.transforms import ToPILImage
+from PIL import Image
+
 
 
 def derangement_shuffle(tensor):
@@ -45,11 +49,26 @@ def forward_supervised(student_model,
 
     # Log Metrics
     logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
-    logger.add_metric('Observe-R2', split, MaskedMSELoss.forward(student_preds, labels))  # TODO: Switch out all the losses for non masked
-    logger.add_metric('Observe-Bias', split, MaskedBias.forward(student_preds, labels))
-    logger.add_metric('Loss-Compare-L1', split, MaskedL1Loss.forward(student_preds, labels))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
-    logger.add_metric('Loss-Compare-RMSE', split, MaskedRMSELoss.forward(student_preds, labels))
+    logger.add_metric('Observe-R2', split, F.mse_loss(student_preds, labels, reduction='mean'))
+    logger.add_metric('Observe-Bias', split, CalcBias.forward(student_preds, labels))
+    logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels, reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
     # logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled) / len(mask_labeled))
+
+    if True:
+        image_tensor = student_inputs[0, :3, :, :]
+
+        # Check if the tensor is on GPU, if so, move it back to CPU
+        if image_tensor.is_cuda:
+            image_tensor = image_tensor.cpu()
+
+        # Convert the tensor to a PIL Image
+        to_pil = ToPILImage()
+        image = to_pil(image_tensor)
+
+        # Save the image
+        rand_int = random.randint(0, 100)
+        image.save(f"/home/sameberl/img_logs/output_image_{rand_int}.png")
 
     return supervised_loss
 
@@ -110,11 +129,6 @@ def forward_unsupervised(student_model,
     logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
     logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
     logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
-
-    # if save_img:
-    #     #sample_nbr = random.randint(0, len(student_inputs[:, 0, 0, 0]-1))
-    #     writer.add_images(f'Panel_Images', student_inputs[0, :3, :, :], global_step=step_nbr, dataformats='CHW')
-    #     # log_regression_plot_to_tensorboard(writer, step_nbr, labels.cpu().flatten(), student_preds.cpu().flatten())
 
     return unsupervised_loss
 

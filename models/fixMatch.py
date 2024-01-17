@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from timm import create_model
 from .losses import *
 
@@ -23,9 +24,9 @@ class fixMatch(nn.Module):
         # factor to scale unsupervised_loss to be similar to supervised_loss
         self.unsupervised_factor = unsupervised_factor  # 1_000_000 / self.model.num_features
 
-        supervised_losses = {'L1': MaskedL1Loss(),
-                             'MSE': MaskedMSELoss(),
-                             'RMSE': MaskedRMSELoss(),
+        supervised_losses = {'L1': F.l1_loss,
+                             'MSE': F.mse_loss,
+                             'RMSE': RMSELoss(),
                              'RMSLE': RMSLELoss(),
                              'Aleatoric': AleatoricLoss(),
                              'AleatoricModified': AleatoricLossModified(),
