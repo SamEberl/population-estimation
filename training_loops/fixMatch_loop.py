@@ -156,9 +156,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                  split='train',
                                                  logger=logger)
 
-            print(f'\n logger.metrics: \n {logger.metrics} \n')
-            exit()
-
             # Backward pass and optimization
             optimizer.zero_grad()
             supervised_loss.backward()
