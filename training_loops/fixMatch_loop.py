@@ -156,6 +156,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                  split='train',
                                                  logger=logger)
 
+            print(f'\n logger.metrics: \n {logger.metrics} \n')
+            exit()
+
             # Backward pass and optimization
             optimizer.zero_grad()
             supervised_loss.backward()
@@ -202,7 +205,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 pbar.update(1)
 
         writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
-        scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}']))
+        scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
         logger.write(epoch+1)
         logger.clear()
     pbar.close()
