@@ -1,5 +1,5 @@
 info:
-  info: 'No teacher | 80% dropped | extra lin layer | no sigmoid'
+  info: 'With sigmoid | with augs | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'

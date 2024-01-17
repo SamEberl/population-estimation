@@ -55,21 +55,14 @@ def forward_supervised(student_model,
     logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
     # logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled) / len(mask_labeled))
 
-    if True:
-        image_tensor = student_inputs[0, :3, :, :]
-
-        # Check if the tensor is on GPU, if so, move it back to CPU
-        if image_tensor.is_cuda:
-            image_tensor = image_tensor.cpu()
-
-        # Convert the tensor to a PIL Image
-        to_pil = ToPILImage()
-        image = to_pil(image_tensor)
-
-        # Save the image
-        rand_int = random.randint(0, 100)
-        image.save(f"/home/sameberl/img_logs/output_image_{rand_int}.png")
-        print('saved img')
+    # if True:
+    #     image_tensor = student_inputs[0, :3, :, :]
+    #     if image_tensor.is_cuda:
+    #         image_tensor = image_tensor.cpu()
+    #     to_pil = ToPILImage()
+    #     image = to_pil(image_tensor)
+    #     rand_int = random.randint(0, 100)
+    #     image.save(f"/home/sameberl/img_logs/output_image_{rand_int}.png")
 
     return supervised_loss
 
