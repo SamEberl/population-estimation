@@ -1,5 +1,5 @@
 info:
-  info: 'no sigmoid | with augs | 80% dropped'
+  info: 'with sigmoid | with augs | 80% dropped | with extra layer'
 
 model_params:
   architecture: 'fixMatch'
@@ -33,7 +33,7 @@ data_params:
   use_viirs: False
 
 train_params:
-  LR: 0.001
+  LR: 0.00001
   max_epochs: 50
   L2_reg: 0.005
   beta1: 0.9
