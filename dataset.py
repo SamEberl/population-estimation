@@ -161,7 +161,7 @@ class PopDataset(Dataset):
                 counter += 1
         if self.split == 'train':
             return apply_transforms(data, self.transform_params), label
-        elif self.split == 'valid':
+        elif self.split == 'valid' or self.split == 'test':
             return data, label
         elif self.split == 'train_unlabeled':
             return data, apply_transforms(data, self.transform_params)
