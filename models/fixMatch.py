@@ -60,6 +60,7 @@ class fixMatch(nn.Module):
 
     def loss_uncertainty(self, predictions, labels, uncertainties):
         loss = self.uncertainty_criterion(predictions, labels, uncertainties)
+        return loss
 
     def loss_supervised_w_uncertainty(self, predictions, labels, log_var):
         loss = self.supervised_criterion(predictions, labels, log_var)
