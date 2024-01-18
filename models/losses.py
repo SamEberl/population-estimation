@@ -164,6 +164,17 @@ class MaskedLinUncertaintyLoss(nn.Module):
         return loss
 
 
+class UncertaintyLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(predictions, labels, uncertainties):
+        diff = torch.abs(predictions - labels)
+        mse = F.mse_loss(uncertainties, diff)
+        return mse
+
+
 class SquaredUncertaintyLoss(nn.Module):
     def __init__(self):
         super().__init__()

@@ -35,6 +35,7 @@ class fixMatch(nn.Module):
                              'SquaredUncertainty': SquaredUncertaintyLoss()}
 
         self.supervised_criterion = supervised_losses[supervised_criterion]
+        self.uncertainty_criterion = UncertaintyLoss()
 
         unsupervised_losses = {'contrastive': ContrastiveLoss(),
                                'triplet': TripletLoss(),
@@ -56,6 +57,9 @@ class fixMatch(nn.Module):
     def loss_supervised(self, predictions, labels):
         loss = self.supervised_criterion(predictions, labels)
         return loss
+
+    def loss_uncertainty(self, predictions, labels, uncertainties):
+        loss = self.uncertainty_criterion(predictions, labels, uncertainties)
 
     def loss_supervised_w_uncertainty(self, predictions, labels, log_var):
         loss = self.supervised_criterion(predictions, labels, log_var)
