@@ -20,7 +20,7 @@ data_params:
   train_batch_size: 32
   val_batch_size: 32
   num_workers: 32
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: False
