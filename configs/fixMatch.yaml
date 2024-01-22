@@ -1,5 +1,5 @@
 info:
-  info: 'with sigmoid | with augs | full data | with extra layer'
+  info: 'with uncertainty | all channels except viirs'
 
 model_params:
   architecture: 'fixMatch'
@@ -27,9 +27,9 @@ data_params:
   reduce_supervised_percent: 0.0
   seed: 42
   use_spring_rgb: True
-  use_lu: False
-  use_lcz: False
-  use_dem: False
+  use_lu: True
+  use_lcz: True
+  use_dem: True
   use_viirs: False
 
 train_params:
