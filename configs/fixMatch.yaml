@@ -1,5 +1,5 @@
 info:
-  info: 'normalize labels | supervised with kendall uncertainty | 80% dropped'
+  info: 'normalize labels & drop 90% zeros | supervised with kendall uncertainty | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
@@ -20,6 +20,8 @@ data_params:
   train_batch_size: 32
   val_batch_size: 32
   num_workers: 32
+  reduce_zeros: True
+  reduce_zeros_percent: 0.9
   reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False

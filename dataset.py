@@ -10,12 +10,12 @@ import math
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 from logging_utils import logger
+from scipy.stats import rankdata
 
 # import albumentations as A
 
 
-def get_data(data_dir, split):
-    # TODO: Drop 95% of datapoints with 0 as label 32177 -> 1609
+def get_data(data_dir, split, reduce_zeros, reduce_zeros_percent):
     data = []
     nbr_not_found = 0
     nbr_found = 0
@@ -29,6 +29,11 @@ def get_data(data_dir, split):
             for row in reader:
                 datapoint_name = row[0]
                 label = row[2]
+
+                if int(label) == 0 and reduce_zeros:
+                    if random.random() < reduce_zeros_percent:
+                        continue
+
                 if label == 'POP':  # skip first row which is header of file
                     continue
                 elif int(label) == 0:
@@ -68,6 +73,8 @@ def create_dataloader(data, split, transform_params, use_channels, bs, num_worke
 
 def get_dataloaders(config):
     data_dir = config['data_params']['data_dir']
+    reduce_zeros = config['data_params']['reduce_zeros']
+    reduce_zeros_percent = config['data_params']['reduce_zeros_percent']
     reduce_data = config['data_params']['reduce_data']
     reduce_data_percent = config['data_params']['reduce_data_percent']
     unlabeled_data = config['data_params']['unlabeled_data']
@@ -91,7 +98,7 @@ def get_dataloaders(config):
 
     # fill data
     for split in data.keys():
-        data[split] = get_data(data_dir, split)
+        data[split] = get_data(data_dir, split, reduce_zeros, reduce_zeros_percent)
 
     # drop data
     if reduce_data:
@@ -465,35 +472,50 @@ def block_out_patch(image_bands, patch_size=(16, 16), probability=0.5):
     return image_bands
 
 
-def normalize_labels(labels):
+def normalize_labels(labels, mean=1068, std=1792):
     """
     Normalizes the labels by applying Z-score normalization.
+    This assumes we drop 90% of the zeros and ignore values above 10k to calc the mean and std
+    """
+    return (labels - mean) / std
+
+
+def unnormalize_preds(preds, mean=1068, std=1792):
+    """
+    UnNormalizes the predictions by reversing Z-score normalization.
+    """
+    return (preds * std) + mean
+
+
+def quantile_normalize_labels(labels):
+    """
+    Performs quantile normalization on the given labels using PyTorch.
 
     Parameters:
-    labels (list or numpy array): The labels to be normalized.
+    labels (Tensor): The labels to be normalized.
 
     Returns:
-    numpy array: The normalized labels.
+    Tensor: The quantile normalized labels.
     """
-    mean = 805  # labels.mean()
-    std_dev = 1622  # labels.std()
+    if not torch.is_tensor(labels):
+        labels = torch.tensor(labels)
 
-    normalized_labels = (labels - mean) / std_dev
+    # Sort labels and get the original indices
+    sorted_labels, sorted_indices = torch.sort(labels)
+
+    # Calculate ranks (average rank for ties)
+    # This method calculates the ranks by counting the occurrences of each value
+    unique_values, inverse_indices, counts = torch.unique_consecutive(sorted_labels, return_inverse=True, return_counts=True)
+    ranks = torch.cumsum(counts, dim=0) - counts / 2.0
+    ranks = ranks[inverse_indices]
+
+    # Normalize ranks to get quantiles
+    quantiles = ranks / (labels.numel() - 1)
+
+    # Create an empty tensor to hold the normalized values
+    normalized_labels = torch.empty_like(labels)
+
+    # Place quantiles back to their original indices
+    normalized_labels.scatter_(0, sorted_indices, quantiles)
+
     return normalized_labels
-
-
-def unnormalize_preds(preds):
-    """
-    Normalizes the labels by applying Z-score normalization.
-
-    Parameters:
-    labels (list or numpy array): The labels to be normalized.
-
-    Returns:
-    numpy array: The normalized labels.
-    """
-    mean = 805  # labels.mean()
-    std_dev = 1622  # labels.std()
-
-    unnormalized_preds = (preds * std_dev) + mean
-    return unnormalized_preds
