@@ -30,16 +30,16 @@ def get_data(data_dir, split, reduce_zeros, reduce_zeros_percent):
                 datapoint_name = row[0]
                 label = row[2]
 
-                if int(label) == 0 and reduce_zeros:
-                    if random.random() < reduce_zeros_percent:
-                        continue
-
                 if label == 'POP':  # skip first row which is header of file
                     continue
                 elif int(label) == 0:
                     class_nbr = 'Class_0'
                 else:
                     class_nbr = f'Class_{math.ceil(math.log(int(label), 2) + 0.00001)}'
+
+                if int(label) == 0 and reduce_zeros:
+                    if random.random() < reduce_zeros_percent:
+                        continue
 
                 modality = 'sen2spring'
                 file_name = datapoint_name + '_' + modality + '.tif'
