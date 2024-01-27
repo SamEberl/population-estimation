@@ -475,13 +475,8 @@ def normalize_labels(labels):
     Returns:
     numpy array: The normalized labels.
     """
-    labels = np.array(labels)  # Ensuring the input is a numpy array
     mean = 805  # labels.mean()
     std_dev = 1622  # labels.std()
-
-    if std_dev == 0:
-        # Handle the case where all values are the same (to avoid division by zero)
-        return np.zeros_like(labels)
 
     normalized_labels = (labels - mean) / std_dev
     return normalized_labels
