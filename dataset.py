@@ -477,14 +477,20 @@ def normalize_labels(labels, mean=1068, std=1792):
     Normalizes the labels by applying Z-score normalization.
     This assumes we drop 90% of the zeros and ignore values above 10k to calc the mean and std
     """
-    return (labels - mean) / std
+    mean = 5.37
+    std = 2.32
+    log_labels = torch.log(labels)
+    return (log_labels - mean) / std
 
 
 def unnormalize_preds(preds, mean=1068, std=1792):
     """
     UnNormalizes the predictions by reversing Z-score normalization.
     """
-    return (preds * std) + mean
+    mean = 5.37
+    std = 2.32
+    exp_preds = torch.exp(preds)
+    return (exp_preds * std) + mean
 
 
 def quantile_normalize_labels(labels):

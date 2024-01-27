@@ -21,7 +21,7 @@ data_params:
   val_batch_size: 32
   num_workers: 32
   reduce_zeros: True
-  reduce_zeros_percent: 0.9
+  reduce_zeros_percent: 0.95
   reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False
