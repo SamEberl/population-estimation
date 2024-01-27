@@ -15,6 +15,7 @@ from logging_utils import logger
 
 
 def get_data(data_dir, split):
+    # TODO: Drop 95% of datapoints with 0 as label 32177 -> 1609
     data = []
     nbr_not_found = 0
     nbr_found = 0
@@ -137,6 +138,7 @@ class PopDataset(Dataset):
             self.nbr_channels += 1
 
         logger.info(f'dataset length: {len(self.data)}')
+        # TODO: Maybe try Quantile normalization for targets if z-score normalization doesnt work well
 
     def __len__(self):
         return len(self.data)
@@ -463,3 +465,23 @@ def block_out_patch(image_bands, patch_size=(16, 16), probability=0.5):
     return image_bands
 
 
+def normalize_labels(labels):
+    """
+    Normalizes the labels by applying Z-score normalization.
+
+    Parameters:
+    labels (list or numpy array): The labels to be normalized.
+
+    Returns:
+    numpy array: The normalized labels.
+    """
+    labels = np.array(labels)  # Ensuring the input is a numpy array
+    mean = 805  # labels.mean()
+    std_dev = 1622  # labels.std()
+
+    if std_dev == 0:
+        # Handle the case where all values are the same (to avoid division by zero)
+        return np.zeros_like(labels)
+
+    normalized_labels = (labels - mean) / std_dev
+    return normalized_labels

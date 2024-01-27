@@ -1,11 +1,11 @@
 info:
-  info: 'with uncertainty | all channels except viirs'
+  info: 'normalize labels | supervised with kendall uncertainty | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'MSE'
+  supervised_criterion: 'Aleatoric'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
   retrain: False
@@ -20,16 +20,16 @@ data_params:
   train_batch_size: 32
   val_batch_size: 32
   num_workers: 32
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: False
   reduce_supervised_percent: 0.0
   seed: 42
   use_spring_rgb: True
-  use_lu: True
-  use_lcz: True
-  use_dem: True
+  use_lu: False
+  use_lcz: False
+  use_dem: False
   use_viirs: False
 
 train_params:

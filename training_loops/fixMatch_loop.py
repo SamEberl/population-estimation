@@ -7,6 +7,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
+from dataset import normalize_labels
 from torchvision.transforms import ToPILImage
 from PIL import Image
 
@@ -42,13 +43,13 @@ def forward_supervised(student_model,
     # Pass inputs through model
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
 
-    # Calc Supervised Loss
-    supervised_loss = student_model.loss_supervised(student_preds, labels)
-    uncertainty_loss = student_model.loss_uncertainty(student_preds, labels, student_data_uncertainty)
-    # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels, student_data_uncertainty)
-    # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
+    labels_normalized = normalize_labels(labels)
 
-    loss = supervised_loss + uncertainty_loss
+    # Calc Supervised Loss
+    # supervised_loss = student_model.loss_supervised(student_preds, labels)
+    # uncertainty_loss = student_model.loss_uncertainty(student_preds, labels, student_data_uncertainty)
+    supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
+    # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
 
     # Log Metrics
     logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
@@ -56,7 +57,7 @@ def forward_supervised(student_model,
     logger.add_metric('Observe-Bias', split, CalcBias.forward(student_preds, labels))
     logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels, reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
     logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
-    logger.add_metric('Loss-Uncertainty', split, uncertainty_loss)
+    # logger.add_metric('Loss-Uncertainty', split, uncertainty_loss)
     # logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled) / len(mask_labeled))
 
     # if True:
@@ -68,7 +69,7 @@ def forward_supervised(student_model,
     #     rand_int = random.randint(0, 100)
     #     image.save(f"/home/sameberl/img_logs/output_image_{rand_int}.png")
 
-    return loss
+    return supervised_loss
 
 
 def forward_unsupervised(student_model,
