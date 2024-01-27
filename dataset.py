@@ -480,3 +480,20 @@ def normalize_labels(labels):
 
     normalized_labels = (labels - mean) / std_dev
     return normalized_labels
+
+
+def unnormalize_preds(preds):
+    """
+    Normalizes the labels by applying Z-score normalization.
+
+    Parameters:
+    labels (list or numpy array): The labels to be normalized.
+
+    Returns:
+    numpy array: The normalized labels.
+    """
+    mean = 805  # labels.mean()
+    std_dev = 1622  # labels.std()
+
+    unnormalized_preds = (preds * std_dev) + mean
+    return unnormalized_preds

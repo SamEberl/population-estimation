@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
-from dataset import normalize_labels
+from dataset import normalize_labels, unnormalize_preds
 from torchvision.transforms import ToPILImage
 from PIL import Image
 
@@ -50,6 +50,8 @@ def forward_supervised(student_model,
     # uncertainty_loss = student_model.loss_uncertainty(student_preds, labels, student_data_uncertainty)
     supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
     # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
+
+    student_preds = unnormalize_preds(student_preds)
 
     # Log Metrics
     logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
