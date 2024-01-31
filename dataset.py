@@ -252,13 +252,13 @@ class PopDataset(Dataset):
                     padding_height = max(0, 100 - height)
                     padding_width = max(0, 100 - width)
 
-                    padded_image = np.pad(
+                    image_bands = np.pad(
                         image_bands,
                         ((0, 0), (0, padding_height), (0, padding_width)),
                         mode='constant',
                         constant_values=image_bands.mean()
                     )
-                return padded_image
+                return image_bands
         except rasterio.RasterioIOError:
             print(f'Image could not be created from: {file_path}')
             return None
