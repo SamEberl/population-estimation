@@ -8,9 +8,6 @@ from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
 from dataset import normalize_labels, unnormalize_preds, quantile_normalize_labels
-from torchvision.transforms import ToPILImage
-from PIL import Image
-
 
 
 def derangement_shuffle(tensor):
@@ -159,7 +156,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Train the model
     for epoch in range(num_epochs):
         pbar.set_description(f"Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
-        for train_data in (train_dataloader):
+        for train_data in train_dataloader:
             inputs, labels = train_data
             inputs = inputs.to(device)
             labels = labels.to(device)
