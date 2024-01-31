@@ -1,5 +1,5 @@
 info:
-  info: 'drop 50% zeros | 80% dropped'
+  info: 'Dont drop zeros | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
@@ -20,7 +20,7 @@ data_params:
   train_batch_size: 32
   val_batch_size: 32
   num_workers: 32
-  reduce_zeros: True
+  reduce_zeros: False
   reduce_zeros_percent: 0.50
   reduce_data: True
   reduce_data_percent: 0.8
