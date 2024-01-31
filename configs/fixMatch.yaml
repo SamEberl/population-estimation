@@ -1,5 +1,5 @@
 info:
-  info: 'Dont drop zeros | 80% dropped'
+  info: 'Full data | 9 channels'
 
 model_params:
   architecture: 'fixMatch'
@@ -10,7 +10,7 @@ model_params:
   unsupervised_factor: 1_000_000
   retrain: False
   retrain_from: 'convnextv2_nano.fcmae_2023_10_08-17_25_51.pt'
-  in_channels: 3
+  in_channels: 9
   nbr_outputs: 1
   drop_rate: 0.2
   #  drop_rate_teacher: 0.4
@@ -21,22 +21,22 @@ data_params:
   val_batch_size: 32
   num_workers: 32
   reduce_zeros: False
-  reduce_zeros_percent: 0.50
-  reduce_data: True
+  reduce_zeros_percent: 0.5
+  reduce_data: False
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: False
   reduce_supervised_percent: 0.0
   seed: 42
   use_spring_rgb: True
-  use_lu: False
-  use_lcz: False
-  use_dem: False
+  use_lu: True
+  use_lcz: True
+  use_dem: True
   use_viirs: False
 
 train_params:
   LR: 0.0001
-  max_epochs: 50
+  max_epochs: 80
   L2_reg: 0.01
   beta1: 0.9
   beta2: 0.999
