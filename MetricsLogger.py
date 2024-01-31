@@ -18,10 +18,9 @@ def calc_r2(numbers, split):
     r2 = 0
     if split == 'train':
         r2 = 1-(mean/7373152.5)
-    elif split == 'test' or split == 'val':
+    elif split == 'test' or split == 'val' or split == 'valid':
         r2 = 1-(mean/9868522.0)
-    else:
-        print('wrong split when computing r2')
+
     return r2
 
 
@@ -62,17 +61,18 @@ class MetricsLogger:
     def write(self, step_nbr):
         """Write all accumulated metrics to TensorBoard."""
         for metric_name, values in self.metrics.items():
-            print(f'metric_name: {metric_name}')
             if 'Observe-Bias' in metric_name:
-                if 'train' in metric_name:
-                    calc_bias(values)
-                elif 'val' in metric_name:
-                    calc_bias(values)
+                bias = calc_bias(values)
+                self.writer.add_scalar(metric_name, bias, step_nbr)
             elif 'Observe-R2' in metric_name:
                 if 'train' in metric_name:
-                    calc_r2(values, 'train')
-                elif 'val' in metric_name:
-                    calc_r2(values, 'val')
+                    r2 = calc_r2(values, 'train')
+                    self.writer.add_scalar(metric_name, r2, step_nbr)
+                elif 'valid' in metric_name:
+                    r2 = calc_r2(values, 'valid')
+                    self.writer.add_scalar(metric_name, r2, step_nbr)
+                else:
+                    print('wrong split when computing r2')
             else:
                 mean_value = sum(values) / len(values)
                 self.writer.add_scalar(metric_name, mean_value, step_nbr)
