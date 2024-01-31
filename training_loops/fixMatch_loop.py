@@ -155,7 +155,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     # Train the model
     for epoch in range(num_epochs):
-        pbar.set_description(f"Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
+        print(f"Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
         for train_data in tqdm(train_dataloader):
             inputs, labels = train_data
             inputs = inputs.to(device)
@@ -179,7 +179,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
         if unlabeled_data:
-            for train_data_unlabeled in train_dataloader_unlabeled:
+            for train_data_unlabeled in tqdm(train_dataloader_unlabeled):
                 inputs, inputs_transformed = train_data_unlabeled
                 inputs = inputs.to(device)
                 inputs_transformed = inputs_transformed.to(device)
@@ -195,7 +195,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 unsupervised_loss.backward()
                 optimizer.step()
 
-        for i, valid_data in enumerate(valid_dataloader):
+        for i, valid_data in tqdm(enumerate(valid_dataloader)):
             inputs, labels = valid_data
             inputs = inputs.to(device)
             labels = labels.to(device)
