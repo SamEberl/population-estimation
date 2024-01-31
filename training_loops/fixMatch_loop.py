@@ -156,7 +156,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Train the model
     for epoch in range(num_epochs):
         pbar.set_description(f"Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
-        for train_data in train_dataloader:
+        for train_data in tqdm(train_dataloader):
             inputs, labels = train_data
             inputs = inputs.to(device)
             labels = labels.to(device)
