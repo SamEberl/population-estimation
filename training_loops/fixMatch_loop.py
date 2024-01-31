@@ -158,7 +158,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     # Train the model
     for epoch in range(num_epochs):
-        pbar.set_description(f"Epoch: [{epoch + 1}/{num_epochs}] | Info: {info}")
+        pbar.set_description(f"Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
         for train_data in (train_dataloader):
             inputs, labels = train_data
             inputs = inputs.to(device)
@@ -212,7 +212,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                         split='valid',
                         logger=logger)
 
-        writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
+        #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
         logger.write(epoch+1)
         logger.clear()
