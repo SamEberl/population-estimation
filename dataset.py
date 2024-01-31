@@ -227,7 +227,7 @@ class PopDataset(Dataset):
         try:
             with rasterio.open(file_path, 'r') as data:
                 image_bands = data.read()
-                image_bands[np.logical_and(image_bands > 0, image_bands <= 10)] = (image_bands[np.logical_and(image_bands > 0, image_bands <= 10)] + 1) / 10
+                image_bands[np.logical_and(image_bands > 0, image_bands <= 9)] = (image_bands[np.logical_and(image_bands > 0, image_bands <= 9)] + 1) / 10
                 image_bands[image_bands > 9] = 0
                 return image_bands
         except rasterio.errors.RasterioIOError as e:
