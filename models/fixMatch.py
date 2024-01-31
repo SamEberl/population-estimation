@@ -52,7 +52,6 @@ class fixMatch(nn.Module):
         uncertainty = self.uncertainty(features).flatten()
         # uncertainty = torch.sigmoid(uncertainty) * 18
         # uncertainty = torch.pow(2, uncertainty)
-        print(f'predction: {prediction.mean()}')
         return prediction, features, uncertainty
 
     def loss_supervised(self, predictions, labels):
