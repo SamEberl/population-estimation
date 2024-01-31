@@ -1,11 +1,11 @@
 info:
-  info: 'normalize labels & drop 90% zeros | supervised with kendall uncertainty | 80% dropped'
+  info: 'normalize labels & drop 90% zeros | NO kendall uncertainty | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'Aleatoric'
+  supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
   retrain: False

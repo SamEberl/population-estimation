@@ -46,10 +46,10 @@ def forward_supervised(student_model,
     labels_normalized = normalize_labels(labels)
 
     # Calc Supervised Loss
-    # supervised_loss = student_model.loss_supervised(student_preds, labels)
-    # uncertainty_loss = student_model.loss_uncertainty(student_preds, labels, student_data_uncertainty)
-    supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
-    # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels, student_data_uncertainty, step_nbr, total_step)
+    supervised_loss = student_model.loss_supervised(student_preds, labels_normalized)
+    # uncertainty_loss = student_model.loss_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
+    # supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
+    # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels_normalized, student_data_uncertainty, step_nbr, total_step)
 
     student_preds = unnormalize_preds(student_preds)
 
