@@ -60,7 +60,7 @@ class MetricsLogger:
 
     def write(self, step_nbr):
         print(f'step_nbr: {step_nbr}')
-        print(f'metric: {self.metrics[0]}')
+        print(f'metric: {self.metrics.items()}')
         """Write all accumulated metrics to TensorBoard."""
         for metric_name, values in self.metrics.items():
             if 'Observe-Bias' in metric_name:
