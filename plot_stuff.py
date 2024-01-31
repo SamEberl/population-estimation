@@ -218,16 +218,80 @@ def visualize_features(features, labels=None, method='pca', save_path='feature_v
 
     return save_path
 
+
+def plot_gaussian(mean, std, lower_limit, upper_limit, linewidth=2.5):
+    # Define the x values (number line)
+    x = np.linspace(lower_limit, upper_limit, 1000)
+
+    # Calculate the Gaussian function
+    y = (1 / (std * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std)**2)
+
+    # Plotting
+    plt.figure(figsize=(18, 12))
+    plt.plot(x, y, label=None, lw=linewidth)
+    # plt.axvline(x=mean, color='r', linestyle='--', label=f'Mean = {mean}', lw=linewidth)
+
+    # Mark one standard deviation on either side of the mean
+    # plt.axvline(x=mean + std, color='g', linestyle='--', label=f'Std = {std}', lw=linewidth)
+    # plt.axvline(x=mean - std, color='g', linestyle='--', label=None, lw=linewidth)
+
+    # Optionally, add a shaded area to represent the standard deviation range
+    plt.fill_between(x, y, where=((x > mean - std) & (x < mean + std)), color='gray', alpha=0.2)
+
+    # Draw a solid black line at 0
+    plt.axvline(x=50, color='black', linestyle='-', label='True value (x)')
+
+    # Shade the area below 0 to indicate it's not applicable
+    #plt.fill_between(x, y, where=(x < 0), color='lightcoral', alpha=0.5, label='Invalid Area')
+
+    plt.title('Modeling Uncertainty with Gaussian', fontsize=25, fontweight='bold', y=1.05)
+    plt.xlabel('Population Prediction', fontsize=20)
+    plt.ylabel('Probability Density', fontsize=20)
+    plt.ylim(0, 0.018)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+def plot_kendal_loss(mse_losses):
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def f(s, mse_loss):
+        return 0.5 * np.exp(-s) * mse_loss + 0.5 * s
+
+    # Generate a range of values for s
+    s_values = np.linspace(0, 10, 400)
+
+    # Plotting setup
+    plt.figure(figsize=(18, 12))
+
+    # Plot for each mse_loss value
+    for mse_loss in mse_losses:
+        function_values = f(s_values, mse_loss)
+        plt.plot(s_values, function_values, label=f"mse_loss={mse_loss}", lw=2.5)
+
+    # Finalize plot
+    plt.title("f(s) = 0.5 * exp(-s) * mse_loss + 0.5 * s", fontsize=24, fontweight='bold')
+    plt.xlabel("s", fontsize=24)
+    plt.ylabel("f(s)", fontsize=24)
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+#plot_kendal_loss([1, 100, 10_000])
+
+
+plot_gaussian(mean=100, std=75, lower_limit=0, upper_limit=200)
+
+
+
 # Example usage:
 # features = pd.read_csv('/home/sam/Desktop/train_features_full.csv')
-features = pd.read_csv('/home/sam/Desktop/logs_server/feature_csv/train_features_single_datapoint_over20k_23-12-19.csv')
-features_val = features.iloc[:, :-1]
-labels = features.iloc[:, -1]
-visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_train_features_single_datapoint_over20k_23-12-19.png')
-# Note: Replace 'your_feature_array' and 'your_labels' with your actual data.
-
-
-# plot_percentiles()
+# features = pd.read_csv('/home/sam/Desktop/logs_server/feature_csv/val_features_2023_12_19-13_38_13.csv')
+# features_val = features.iloc[:, :-1]
+# labels = features.iloc[:, -1]
+# visualize_features(features, labels=labels, method='tsne', save_path='/home/sam/Desktop/so2sat_test/tsne_val_features_2023_12_19-13_38_13.csv.png')
 
 
 # teacher_mean_flat = np.load('/home/sam/Desktop/logs/figs/computed_numpy/teacher_mean_flat.npy')
