@@ -216,8 +216,6 @@ def create_feature_csv():
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {val_path}')
 
-create_feature_csv()
-
 
 def save_data_as_jpg(reg_config, save_dir):
     # Set to utilize tensor cores of GPU
