@@ -195,7 +195,7 @@ def create_feature_csv():
         param.requires_grad = False
 
     # retrain_from = 'convnextv2_atto.fcmae_2023_12_18-13_22_35.pt'
-    retrain_from = 'convnextv2_atto.fcmae_2023_12_19-13_38_13.pt'
+    retrain_from = 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
     # student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
     teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
@@ -215,6 +215,8 @@ def create_feature_csv():
     val_path = '/home/sameberl/feature_csv/val_features_2023_12_19-13_38_13.csv'
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {val_path}')
+
+create_feature_csv()
 
 
 def save_data_as_jpg(reg_config, save_dir):
