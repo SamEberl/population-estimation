@@ -170,10 +170,10 @@ def fill_feature_df_single_datapoint(dataloader, device, model, cols):
 def fill_feature_df(dataloader, device, model, cols):
     feature_list = []
     for i, data in tqdm(enumerate(dataloader), total=len(dataloader)):
-        student_data, teacher_data, label = data
-        teacher_data = teacher_data.to(device)
+        inputs, label = data
+        inputs = inputs.to(device)
         label = label.to(device)
-        teacher_features = model.model(teacher_data)
+        teacher_features = model.model(inputs)
         for j, features in enumerate(teacher_features):
             features = features.tolist()
             features.append(label[j].item())
