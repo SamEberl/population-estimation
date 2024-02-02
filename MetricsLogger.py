@@ -83,7 +83,7 @@ class MetricsLogger:
     def clear(self):
         # Clear metrics after logging
         self.metrics.clear()
-        # self.uncertainties.clear()
+        self.uncertainties.clear()
 
     def add_uncertainty(self, uncertainty_name, uncertainty):
         uncertainty = torch.from_numpy(uncertainty)
@@ -92,7 +92,7 @@ class MetricsLogger:
         self.uncertainties[uncertainty_name].append(uncertainty)
 
     def save_uncertainties(self):
-        path = '/home/sameberl/logs/computed_numpy'
+        path = '/home/sameberl/computed_numpy'
         for uncertainty_name, uncertainty in self.uncertainties.items():
             np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
