@@ -89,7 +89,7 @@ class MetricsLogger:
         uncertainty = uncertainty.to('cpu').detach().numpy()
         if uncertainty_name not in self.uncertainties:
             self.uncertainties[uncertainty_name] = np.array([])
-        self.uncertainties[uncertainty_name].append(uncertainty)
+        np.concatenate(self.uncertainties[uncertainty_name], uncertainty)
 
     def save_uncertainties(self):
         path = '/home/sameberl/computed_numpy'

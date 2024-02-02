@@ -23,10 +23,10 @@ data_params:
   reduce_zeros: False
   reduce_zeros_percent: 0.5
   reduce_data: True
-  reduce_data_percent: 0.8
+  reduce_data_percent: 0.9
   unlabeled_data: True
   reduce_supervised: True
-  reduce_supervised_percent: 0.5
+  reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
   use_lu: False
