@@ -132,7 +132,7 @@ def forward_unsupervised(student_model,
     predictions = n_teacher_preds.mean(dim=0)
     logger.add_uncertainty('pred', predictions)
     logger.add_uncertainty('label', labels)
-    logger.add_uncertainty('loss', student_model.loss_supervised(predictions, labels))
+    logger.add_uncertainty('loss', (predictions-labels)**2)
     logger.add_uncertainty('pred_var', teacher_data_uncertainty)
     logger.add_uncertainty('calc_var', teacher_model_uncertainty)
     logger.add_uncertainty('features_l2', l2_distances_var)
