@@ -93,6 +93,6 @@ class MetricsLogger:
 
     def save_uncertainties(self):
         path = '/home/sameberl/logs/computed_numpy'
-        for uncertainty_name, uncertainty in self.metrics.items():
+        for uncertainty_name, uncertainty in self.uncertainties.items():
             np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
