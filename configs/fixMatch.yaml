@@ -1,10 +1,10 @@
 info:
-  info: 'See if ssl works'
+  info: 'Without pretraining'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
-  pretrained: True
+  pretrained: False
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
@@ -22,10 +22,10 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.9
-  unlabeled_data: True
-  reduce_supervised: True
+  unlabeled_data: False
+  reduce_supervised: False
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
@@ -36,7 +36,7 @@ data_params:
 
 train_params:
   LR: 0.0001
-  max_epochs: 50
+  max_epochs: 200
   L2_reg: 0.001
   beta1: 0.9
   beta2: 0.999
