@@ -125,7 +125,7 @@ def forward_unsupervised(student_model,
     logger.add_metric('Uncertainty_Calculated', split, torch.mean(teacher_model_uncertainty))
     logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
     logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
-    logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
+    # logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
     logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
 
     # # Uncertainties to log
