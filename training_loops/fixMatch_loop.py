@@ -194,6 +194,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 inputs, inputs_transformed, labels = train_data_unlabeled
                 inputs = inputs.to(device)
                 inputs_transformed = inputs_transformed.to(device)
+                labels = labels.to(device)
                 unsupervised_loss = forward_unsupervised(student_model,
                                                          teacher_model,
                                                          student_inputs=inputs_transformed,
