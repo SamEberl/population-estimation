@@ -109,7 +109,7 @@ def get_dataloaders(config):
     if unlabeled_data:
         train_dataloader_unlabeled = create_dataloader(data['train'], 'train_unlabeled', transform_params, use_channels, bs_train, num_workers)
     if reduce_supervised:
-        data['train'] = reduce_data(data['train'], reduce_supervised_percent, seed)
+        data['train'] = reduce_data_func(data['train'], reduce_supervised_percent, seed)
     train_dataloader = create_dataloader(data['train'], 'train', transform_params, use_channels, bs_train, num_workers)
     valid_dataloader = create_dataloader(data['valid'], 'valid', transform_params, use_channels, bs_valid, num_workers)
 
