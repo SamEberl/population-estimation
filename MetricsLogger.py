@@ -86,7 +86,7 @@ class MetricsLogger:
         self.uncertainties.clear()
 
     def add_uncertainty(self, uncertainty_name, uncertainty):
-        uncertainty = torch.from_numpy(uncertainty)
+        uncertainty = uncertainty.detach().numpy()
         if uncertainty_name not in self.uncertainties:
             self.uncertainties[uncertainty_name] = np.array([])
         self.uncertainties[uncertainty_name].append(uncertainty)
