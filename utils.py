@@ -194,8 +194,10 @@ def create_feature_csv():
     for param in teacher_model.parameters():
         param.requires_grad = False
 
+    date = '2024_01_31-16_56_34'
+
     # retrain_from = 'convnextv2_atto.fcmae_2023_12_18-13_22_35.pt'
-    retrain_from = 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
+    retrain_from = f'convnextv2_atto.fcmae_{date}.pt'
     # student_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
     teacher_model.load_state_dict(torch.load(os.path.join(config['save_dirs']['model_save_dir'], retrain_from)))
 
@@ -206,13 +208,13 @@ def create_feature_csv():
 
     df_train = fill_feature_df(train_dataloader, device, teacher_model, cols)
     # df_train = fill_feature_df_single_datapoint(train_dataloader, device, teacher_model, cols)
-    train_path = '/home/sameberl/feature_csv/train_features_2023_12_19-13_38_13.csv'
+    train_path = f'/home/sameberl/feature_csv/train_features_{date}.csv'
     df_train.to_csv(train_path, index=False)
     print(f'train_df saved to: {train_path}')
 
     df_val = fill_feature_df(val_dataloader, device, teacher_model, cols)
     # df_val = fill_feature_df_single_datapoint(val_dataloader, device, teacher_model, cols)
-    val_path = '/home/sameberl/feature_csv/val_features_2023_12_19-13_38_13.csv'
+    val_path = f'/home/sameberl/feature_csv/val_features_{date}.csv'
     df_val.to_csv(val_path, index=False)
     print(f'val_df saved to: {val_path}')
 
@@ -415,6 +417,9 @@ def calc_r2_denominator():
     print(f'total_sum: {total_sum}')
     print(len(dataset))
     print(f'specific_sum: {total_sum/len(dataset)}')
+
+
+
 
 
 

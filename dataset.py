@@ -173,7 +173,7 @@ class PopDataset(Dataset):
         elif self.split == 'valid' or self.split == 'test':
             return data, label
         elif self.split == 'train_unlabeled':
-            return data, apply_transforms(data, self.transform_params)
+            return data, apply_transforms(data, self.transform_params), label
 
 
     def generate_spring_rgb(self, file_path):

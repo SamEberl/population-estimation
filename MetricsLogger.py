@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+import os
 
 def calc_r2(numbers, split):
     # Filtering out the zeros and calculating the sum of the remaining numbers
@@ -48,6 +50,7 @@ class MetricsLogger:
     def __init__(self, writer):
         self.metrics = {}
         self.writer = writer
+        self.uncertainties = {}
 
     def add_metric(self, metric_name, split, value):
         """Accumulate train metrics."""
@@ -80,4 +83,16 @@ class MetricsLogger:
     def clear(self):
         # Clear metrics after logging
         self.metrics.clear()
+        # self.uncertainties.clear()
+
+    def add_uncertainty(self, uncertainty_name, uncertainty):
+        uncertainty = torch.from_numpy(uncertainty)
+        if uncertainty_name not in self.uncertainties:
+            self.uncertainties[uncertainty_name] = np.array([])
+        self.uncertainties[uncertainty_name].append(uncertainty)
+
+    def save_uncertainties(self):
+        path = '/home/sameberl/logs/computed_numpy'
+        for uncertainty_name, uncertainty in self.metrics.items():
+            np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 

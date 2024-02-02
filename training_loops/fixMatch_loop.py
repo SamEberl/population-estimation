@@ -8,6 +8,7 @@ from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
 from tqdm import tqdm
 from dataset import normalize_labels, unnormalize_preds, quantile_normalize_labels
+from logging_utils import UncertaintySaver
 
 
 def derangement_shuffle(tensor):
@@ -76,6 +77,7 @@ def forward_unsupervised(student_model,
                          student_inputs,
                          teacher_inputs,
                          num_samples_teacher,
+                         labels,
                          logger):
 
     student_model.train()
@@ -108,7 +110,7 @@ def forward_unsupervised(student_model,
     l2_distances_var = l2_distances.var(dim=0)  # Get spread
 
     # Compute data uncertainty
-    teacher_data_uncertainty = n_teacher_data_uncertainties.var(dim=0)
+    teacher_data_uncertainty = n_teacher_data_uncertainties.mean(dim=0)  # TODO: before var() but should probably be mean
 
     # TODO: Use pseudo_label_mask
     # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
@@ -120,12 +122,21 @@ def forward_unsupervised(student_model,
     unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, mask=pseudo_label_mask)
 
     split = 'train'
-    logger.add_metric('Uncertainty_Var_Regression', split, torch.mean(teacher_model_uncertainty))
-    logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
     logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
+    logger.add_metric('Uncertainty_Calculated', split, torch.mean(teacher_model_uncertainty))
+    logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
     logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
     logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
     logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
+
+    # # Uncertainties to log
+    # predictions = n_teacher_preds.mean(dim=0)
+    # logger.add_uncertainty('pred', predictions)
+    # logger.add_uncertainty('label', labels)
+    # logger.add_uncertainty('loss', student_model.loss_supervised(predictions, labels))
+    # logger.add_uncertainty('pred_var', teacher_data_uncertainty)
+    # logger.add_uncertainty('calc_var', teacher_model_uncertainty)
+    # logger.add_uncertainty('features_l2', l2_distances_var)
 
     return unsupervised_loss
 
@@ -178,9 +189,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
+        # TODO: Interweave unsupervised training with supervised training
         if unlabeled_data:
             for train_data_unlabeled in tqdm(train_dataloader_unlabeled):
-                inputs, inputs_transformed = train_data_unlabeled
+                inputs, inputs_transformed, labels = train_data_unlabeled
                 inputs = inputs.to(device)
                 inputs_transformed = inputs_transformed.to(device)
                 unsupervised_loss = forward_unsupervised(student_model,
@@ -188,6 +200,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                          student_inputs=inputs_transformed,
                                                          teacher_inputs=inputs,
                                                          num_samples_teacher=num_samples_teacher,
+                                                         labels=labels,
                                                          logger=logger)
 
                 # Backward pass and optimization
@@ -212,5 +225,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
         logger.write(epoch+1)
+        logger.save_uncertainties()
         logger.clear()
     pbar.close()
