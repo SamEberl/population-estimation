@@ -8,7 +8,7 @@ model_params:
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
-  retrain: True
+  retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
   in_channels: 3
   nbr_outputs: 1
