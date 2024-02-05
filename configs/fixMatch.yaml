@@ -1,5 +1,5 @@
 info:
-  info: 'Without pretraining'
+  info: 'SSL model to get uncertainties | only 50% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -8,9 +8,9 @@ model_params:
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
-  retrain: True
+  retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
-  in_channels: 9
+  in_channels: 3
   nbr_outputs: 1
   drop_rate: 0.2
   #  drop_rate_teacher: 0.4
@@ -25,13 +25,13 @@ data_params:
   reduce_data: False
   reduce_data_percent: 0.9
   unlabeled_data: True
-  reduce_supervised: False
-  reduce_supervised_percent: 0.8
+  reduce_supervised: True
+  reduce_supervised_percent: 0.5
   seed: 42
   use_spring_rgb: True
-  use_lu: True
-  use_lcz: True
-  use_dem: True
+  use_lu: False
+  use_lcz: False
+  use_dem: False
   use_viirs: False
 
 train_params:
