@@ -1,5 +1,5 @@
 info:
-  info: 'SSL model to get uncertainties | only 50% supervised'
+  info: 'test saving numpy uncertainties'
 
 model_params:
   architecture: 'fixMatch'
@@ -8,7 +8,7 @@ model_params:
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
-  retrain: False
+  retrain: True
   retrain_from: 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
   in_channels: 3
   nbr_outputs: 1
@@ -22,7 +22,7 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: True
   reduce_supervised: True

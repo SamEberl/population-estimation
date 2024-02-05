@@ -87,14 +87,16 @@ class MetricsLogger:
         # self.uncertainties.clear()
 
     def add_uncertainty(self, uncertainty_name, uncertainty):
+        # print(f'adding uncertainty: {uncertainty_name}')
         uncertainty = uncertainty.to('cpu').detach().numpy()
         if uncertainty_name not in self.uncertainties:
             self.uncertainties[uncertainty_name] = np.array([])
         # print(f'\nname: {uncertainty_name}')
         # print(f'new: {uncertainty.shape}  |  old: {self.uncertainties[uncertainty_name].shape}')
-        np.concatenate((self.uncertainties[uncertainty_name], uncertainty))
+        self.uncertainties[uncertainty_name] = np.concatenate((self.uncertainties[uncertainty_name], uncertainty), axis=0)
 
     def save_uncertainties(self):
         path = '/home/sameberl/computed_numpy'
         for uncertainty_name, uncertainty in self.uncertainties.items():
             np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
+        print(f'done saving uncertainties')
