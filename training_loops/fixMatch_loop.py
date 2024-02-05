@@ -128,14 +128,15 @@ def forward_unsupervised(student_model,
     # logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
     logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
 
-    # # Uncertainties to log
-    predictions = n_teacher_preds.mean(dim=0)
-    logger.add_uncertainty('pred', predictions)
-    logger.add_uncertainty('label', labels)
-    logger.add_uncertainty('loss', (predictions-labels)**2)
-    logger.add_uncertainty('pred_var', teacher_data_uncertainty)
-    logger.add_uncertainty('calc_var', teacher_model_uncertainty)
-    logger.add_uncertainty('features_l2', l2_distances_var)
+    if logger.last_epoch:
+        # Uncertainties to log
+        predictions = n_teacher_preds.mean(dim=0)
+        logger.add_uncertainty('pred', predictions)
+        logger.add_uncertainty('label', labels)
+        logger.add_uncertainty('loss', (predictions-labels)**2)
+        logger.add_uncertainty('pred_var', teacher_data_uncertainty)
+        logger.add_uncertainty('calc_var', teacher_model_uncertainty)
+        logger.add_uncertainty('features_l2', l2_distances_var)
 
     return unsupervised_loss
 
@@ -166,6 +167,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # Train the model
     for epoch in range(num_epochs):
         print(f"\n Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
+        if epoch == (num_epochs-1):
+            logger.last_epoch = True
         for train_data in tqdm(train_dataloader):
             inputs, labels = train_data
             inputs = inputs.to(device)
@@ -225,6 +228,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
         logger.write(epoch+1)
-        logger.save_uncertainties()
+        if logger.last_epoch:
+            logger.save_uncertainties()
         logger.clear()
     pbar.close()

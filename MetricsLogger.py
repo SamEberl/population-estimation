@@ -51,6 +51,7 @@ class MetricsLogger:
         self.metrics = {}
         self.writer = writer
         self.uncertainties = {}
+        self.last_epoch = False
 
     def add_metric(self, metric_name, split, value):
         """Accumulate train metrics."""
@@ -83,7 +84,7 @@ class MetricsLogger:
     def clear(self):
         # Clear metrics after logging
         self.metrics.clear()
-        self.uncertainties.clear()
+        # self.uncertainties.clear()
 
     def add_uncertainty(self, uncertainty_name, uncertainty):
         uncertainty = uncertainty.to('cpu').detach().numpy()
@@ -97,4 +98,3 @@ class MetricsLogger:
         path = '/home/sameberl/computed_numpy'
         for uncertainty_name, uncertainty in self.uncertainties.items():
             np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
-
