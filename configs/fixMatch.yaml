@@ -9,7 +9,7 @@ model_params:
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1_000_000
   retrain: True
-  retrain_from: 'convnextv2_atto.fcmae-2024_01_31-16_56_34.pt'
+  retrain_from: 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
   in_channels: 9
   nbr_outputs: 1
   drop_rate: 0.2
