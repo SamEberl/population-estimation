@@ -1,5 +1,5 @@
 info:
-  info: 'test saving numpy uncertainties'
+  info: 'SSL model to get uncertainties | only 50% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -36,7 +36,7 @@ data_params:
 
 train_params:
   LR: 0.0001
-  max_epochs: 1
+  max_epochs: 80
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
