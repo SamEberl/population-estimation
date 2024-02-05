@@ -169,6 +169,27 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         print(f"\n Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
         if epoch == (num_epochs-1):
             logger.last_epoch = True
+
+        # TODO: Interweave unsupervised training with supervised training
+        if unlabeled_data:
+            for train_data_unlabeled in tqdm(train_dataloader_unlabeled):
+                inputs, inputs_transformed, labels = train_data_unlabeled
+                inputs = inputs.to(device)
+                inputs_transformed = inputs_transformed.to(device)
+                labels = labels.to(device)
+                unsupervised_loss = forward_unsupervised(student_model,
+                                                         teacher_model,
+                                                         student_inputs=inputs_transformed,
+                                                         teacher_inputs=inputs,
+                                                         num_samples_teacher=num_samples_teacher,
+                                                         labels=labels,
+                                                         logger=logger)
+
+                # Backward pass and optimization
+                optimizer.zero_grad()
+                unsupervised_loss.backward()
+                optimizer.step()
+
         for train_data in tqdm(train_dataloader):
             inputs, labels = train_data
             inputs = inputs.to(device)
@@ -190,26 +211,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             if unlabeled_data:
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
-
-        # TODO: Interweave unsupervised training with supervised training
-        if unlabeled_data:
-            for train_data_unlabeled in tqdm(train_dataloader_unlabeled):
-                inputs, inputs_transformed, labels = train_data_unlabeled
-                inputs = inputs.to(device)
-                inputs_transformed = inputs_transformed.to(device)
-                labels = labels.to(device)
-                unsupervised_loss = forward_unsupervised(student_model,
-                                                         teacher_model,
-                                                         student_inputs=inputs_transformed,
-                                                         teacher_inputs=inputs,
-                                                         num_samples_teacher=num_samples_teacher,
-                                                         labels=labels,
-                                                         logger=logger)
-
-                # Backward pass and optimization
-                optimizer.zero_grad()
-                unsupervised_loss.backward()
-                optimizer.step()
 
         for i, valid_data in tqdm(enumerate(valid_dataloader)):
             inputs, labels = valid_data
