@@ -184,8 +184,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                          labels=labels,
                                                          logger=logger)
                 unsupervised_loss.backward()
-                inputs_transformed = None
-                torch.cuda.empty_cache()
 
             inputs, labels = train_data
             inputs = inputs.to(device)

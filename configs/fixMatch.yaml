@@ -17,8 +17,8 @@ model_params:
 
 data_params:
   data_dir: "/home/pop-dens/data/So2Sat_POP_Part1"
-  train_batch_size: 32
-  val_batch_size: 32
+  train_batch_size: 16
+  val_batch_size: 16
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
