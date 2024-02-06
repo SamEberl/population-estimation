@@ -205,7 +205,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
-        print(f"\n Start Validation: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
+        print(f"Start Validation: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         for i, valid_data in enumerate(valid_dataloader):
             inputs, labels = valid_data
             inputs = inputs.to(device)
