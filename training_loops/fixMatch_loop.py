@@ -6,8 +6,7 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
-from tqdm import tqdm
-from dataset import normalize_labels, unnormalize_preds, quantile_normalize_labels
+from datetime import datetime
 
 
 def derangement_shuffle(tensor):
@@ -160,8 +159,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     # scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
-    pbar = tqdm(total=len(train_dataloader), ncols=140)
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if unlabeled_data:
@@ -169,11 +166,12 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     # Train the model
     for epoch in range(num_epochs):
-        print(f"\n Start Epoch: [{epoch + 1}/{num_epochs}] | {info}")
+        print()
+        print(f"\n Start Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         if epoch == (num_epochs-1):
             logger.last_epoch = True
 
-        for train_data in tqdm(train_dataloader):
+        for train_data in train_dataloader:
             # TODO: Interweave unsupervised training with supervised training
             if unlabeled_data:
                 train_data_unlabeled = next(iter_unlabeled)
@@ -209,8 +207,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
 
-
-        for i, valid_data in tqdm(enumerate(valid_dataloader)):
+        print(f"\n Start Validation: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
+        for i, valid_data in enumerate(valid_dataloader):
             inputs, labels = valid_data
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -230,4 +228,3 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         if logger.last_epoch:
             logger.save_uncertainties()
         logger.clear()
-    pbar.close()
