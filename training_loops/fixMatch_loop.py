@@ -170,7 +170,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             iter_unlabeled = iter(train_dataloader_unlabeled)
 
         for train_data in train_dataloader:
-            # TODO: Interweave unsupervised training with supervised training
             if unlabeled_data:
                 train_data_unlabeled = next(iter_unlabeled)
                 inputs, inputs_transformed, labels = train_data_unlabeled
@@ -185,6 +184,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                          labels=labels,
                                                          logger=logger)
                 unsupervised_loss.backward()
+                inputs_transformed = None
+                torch.cuda.empty_cache()
 
             inputs, labels = train_data
             inputs = inputs.to(device)
