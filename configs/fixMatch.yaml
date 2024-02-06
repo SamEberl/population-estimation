@@ -42,7 +42,7 @@ train_params:
   beta2: 0.999
   ema_alpha: 0.95
   seed: 42
-  num_samples_teacher: 1
+  num_samples_teacher: 3
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
