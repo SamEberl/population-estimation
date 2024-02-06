@@ -1,5 +1,5 @@
 info:
-  info: 'SSL model to get uncertainties | drop 80% | only 50% supervised'
+  info: 'SSL model to get uncertainties | only 50% supervised'
 
 model_params:
   architecture: 'fixMatch'
