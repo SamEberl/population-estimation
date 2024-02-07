@@ -161,7 +161,7 @@ class PopDataset(Dataset):
         counter = 0
         for func in self.channel_functions:
             if func == self.generate_spring_rgb:
-                data[counter:counter + 3, :, :] = func(file_path)  # RGB occupies 3 channels
+                data[counter:counter+3, :, :] = func(file_path)  # RGB occupies 3 channels
                 counter += 3
             elif func == self.generate_lu:
                 data[counter:counter+4, :, :] = func(file_path)
