@@ -36,7 +36,7 @@ data_params:
 
 train_params:
   LR: 0.00001
-  max_epochs: 80
+  max_epochs: 50
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
