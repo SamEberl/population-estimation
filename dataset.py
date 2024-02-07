@@ -37,10 +37,6 @@ def get_data(data_dir, split, reduce_zeros, reduce_zeros_percent):
                 else:
                     class_nbr = f'Class_{math.ceil(math.log(int(label), 2) + 0.00001)}'
 
-                if int(label) == 0 and reduce_zeros:
-                    if random.random() < reduce_zeros_percent:
-                        continue
-
                 modality = 'sen2spring'
                 file_name = datapoint_name + '_' + modality + '.tif'
                 input_path = os.path.join(data_sub_dir, city_folder, modality, class_nbr, file_name)
@@ -49,6 +45,11 @@ def get_data(data_dir, split, reduce_zeros, reduce_zeros_percent):
                     data.append((input_path, label))
                 else:
                     nbr_not_found += 1
+    if split == 'train':
+        for i, data_point in enumerate(data):
+            _, label = data_point
+            if int(label) == 0 and reduce_zeros:
+                del data[i]
     print(f'In: {data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
     return data
 
