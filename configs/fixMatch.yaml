@@ -1,5 +1,5 @@
 info:
-  info: 'Try no uncertainty + no augs | 80% dropped'
+  info: 'Try no uncertainty + no augs + no sigmoid | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'

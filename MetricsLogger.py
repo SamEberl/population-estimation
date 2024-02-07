@@ -93,6 +93,7 @@ class MetricsLogger:
         self.uncertainties[uncertainty_name] = np.concatenate((self.uncertainties[uncertainty_name], uncertainty), axis=0)
 
     def save_uncertainties(self):
-        path = '/home/sameberl/computed_numpy'
-        for uncertainty_name, uncertainty in self.uncertainties.items():
-            np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
+        if bool(self.uncertainties):
+            path = '/home/sameberl/computed_numpy'
+            for uncertainty_name, uncertainty in self.uncertainties.items():
+                np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
