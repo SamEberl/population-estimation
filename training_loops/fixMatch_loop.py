@@ -221,8 +221,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
         #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
         scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
-        for key, value in logger.metrics.items():
-            print(f"Number of items in list for {key}: {len(value)}")
+        # for key, value in logger.metrics.items():
+        #     print(f"Number of items in list for {key}: {len(value)}")
         logger.write(epoch+1)
         if logger.last_epoch:
             logger.save_uncertainties()
