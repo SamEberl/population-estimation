@@ -1,5 +1,5 @@
 info:
-  info: 'Try no uncertainty + no augs + no sigmoid | 80% dropped'
+  info: 'fix flip | no uncertainty + only rot/flip aug + sigmoid | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
@@ -49,7 +49,7 @@ save_dirs:
   model_save_dir: "/home/sameberl/models"
 
 transform_params:
-  apply_rot_and_flip: False
+  apply_rot_and_flip: True
   apply_noise: False
   noise_mean: 0
   noise_std_min: 0.01

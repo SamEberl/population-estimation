@@ -336,12 +336,12 @@ def apply_flip_and_rotate_transforms(image_bands, probability=0.5):
 
     # Apply the transformations only on the last two dimensions (height and width)
     if np.random.rand() < probability:
-        # Flipping horizontally
-        image_bands = np.flip(image_bands, axis=-2).copy()
+        # Flipping vertically
+        image_bands = np.flip(image_bands, axis=-1).copy()
 
     if np.random.rand() < probability:
-        # Flipping vertically
-        image_bands = np.flip(image_bands, axis=-3).copy()
+        # Flipping horizontally
+        image_bands = np.flip(image_bands, axis=-2).copy()
 
     if np.random.rand() < probability:
         # Rotating by 90 degrees
