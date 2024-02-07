@@ -1,11 +1,11 @@
 info:
-  info: 'SSL model to get uncertainties | only 50% supervised'
+  info: 'SSL model to get pred. uncertainties'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'MSE'
+  supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
   retrain: False
@@ -22,10 +22,10 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
-  unlabeled_data: True
-  reduce_supervised: True
+  unlabeled_data: False
+  reduce_supervised: False
   reduce_supervised_percent: 0.5
   seed: 42
   use_spring_rgb: True

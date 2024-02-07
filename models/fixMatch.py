@@ -31,6 +31,7 @@ class fixMatch(nn.Module):
                              'Aleatoric': AleatoricLoss(),
                              'AleatoricModified': AleatoricLossModified(),
                              'AleatoricLinDecay': AleatoricLinDecayLoss(),
+                             'L1UncertaintyLoss': L1UncertaintyLoss(),
                              'LinUncertainty': MaskedLinUncertaintyLoss(),
                              'SquaredUncertainty': SquaredUncertaintyLoss()}
 

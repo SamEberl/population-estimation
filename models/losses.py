@@ -59,6 +59,19 @@ class AleatoricLinDecayLoss(nn.Module):
         return loss
 
 
+class L1UncertaintyLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(pred, actual, var):
+        mse_loss = (pred - actual)**2
+        uncertainty_loss = (mse_loss - var)**2
+        loss = mse_loss + uncertainty_loss
+        loss = torch.sum(loss) / pred.numel()
+        return loss
+
+
 class CalcBias(nn.Module):
     def __init__(self):
         super().__init__()
