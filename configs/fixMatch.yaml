@@ -1,11 +1,11 @@
 info:
-  info: 'no augs + sigmoid*54k + smaller LR + no LR scheduler | 80% dropped'
+  info: 'with l1 uncertainty | no augs + sigmoid*54k + smaller LR + no LR scheduler | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'MSE'
+  supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
   retrain: False
