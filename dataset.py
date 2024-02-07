@@ -312,7 +312,15 @@ def apply_transforms(image_bands, transform_params):
             p=transform_params['contrast_p']
         )
 
+    print("Minimum value:", np.min(image_bands))
+    print("Maximum value:", np.max(image_bands))
+    print("Shape: ", image_bands.shape)
     image_bands = np.clip(image_bands, 0, 1)
+    print('after')
+    print("Minimum value:", np.min(image_bands))
+    print("Maximum value:", np.max(image_bands))
+    print("Shape: ", image_bands.shape)
+    exit()
 
     return image_bands
 
