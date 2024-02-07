@@ -1,5 +1,5 @@
 info:
-  info: 'SSL model to get pred. uncertainties'
+  info: 'Try no uncertainty + no augs | 80% dropped'
 
 model_params:
   architecture: 'fixMatch'
@@ -50,17 +50,17 @@ save_dirs:
 
 transform_params:
   apply_rot_and_flip: True
-  apply_noise: True
+  apply_noise: False
   noise_mean: 0
   noise_std_min: 0.01
   noise_std_max: 0.07
   noise_p: 0.5
-  apply_brightness: True
+  apply_brightness: False
   brightness_range:
     - 0.8
     - 1.2
   brightness_p: 0.5
-  apply_contrast: True
+  apply_contrast: False
   contrast_range:
     - 0.8
     - 1.2
