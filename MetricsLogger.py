@@ -67,23 +67,24 @@ class MetricsLogger:
         for metric_name, values in self.metrics.items():
             if 'Observe-Bias' in metric_name:
                 bias = calc_bias(values)
-                self.writer.add_scalar(metric_name, bias, step_nbr)
+                self.writer.add_scalar(metric_name, bias, global_step=step_nbr)
             elif 'Observe-R2' in metric_name:
                 if 'train' in metric_name:
                     r2 = calc_r2(values, 'train')
-                    self.writer.add_scalar(metric_name, r2, step_nbr)
+                    self.writer.add_scalar(metric_name, r2, global_step=step_nbr)
                 elif 'valid' in metric_name:
                     r2 = calc_r2(values, 'valid')
-                    self.writer.add_scalar(metric_name, r2, step_nbr)
+                    self.writer.add_scalar(metric_name, r2, global_step=step_nbr)
                 else:
                     print('wrong split when computing r2')
             else:
                 mean_value = sum(values) / len(values)
-                self.writer.add_scalar(metric_name, mean_value, step_nbr)
+                self.writer.add_scalar(metric_name, mean_value, global_step=step_nbr)
 
     def clear(self):
         # Clear metrics after logging
-        self.metrics.clear()
+        self.metrics = {}
+        # self.metrics.clear()
         # self.uncertainties.clear()
 
     def add_uncertainty(self, uncertainty_name, uncertainty):
