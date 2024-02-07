@@ -157,7 +157,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
     # scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
+    #scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -220,7 +220,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                         logger=logger)
 
         #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
-        scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
+        #scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
         # for key, value in logger.metrics.items():
         #     print(f"Number of items in list for {key}: {len(value)}")
         logger.write(epoch+1)
