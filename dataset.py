@@ -114,7 +114,7 @@ def get_dataloaders(config):
     train_dataloader = create_dataloader(data['train'], 'train', transform_params, use_channels, bs_train, num_workers)
     valid_dataloader = create_dataloader(data['valid'], 'valid', transform_params, use_channels, bs_valid, num_workers)
 
-    print(f'# samples -> train:{len(train_dataloader)} - val:{len(valid_dataloader)} - unlabeled:{train_dataloader_unlabeled}')
+    print(f'batches in train:{len(train_dataloader)} / val:{len(valid_dataloader)} / unlabeled:{len(train_dataloader_unlabeled)}')
 
     return train_dataloader, valid_dataloader, train_dataloader_unlabeled
 
