@@ -225,5 +225,5 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         #     print(f"Number of items in list for {key}: {len(value)}")
         logger.write(epoch+1)
         if logger.last_epoch:
-            logger.save_uncertainties()
+            logger.save_uncertainties(config)
         logger.clear()
