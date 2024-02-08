@@ -101,5 +101,9 @@ class MetricsLogger:
                 path = f"/home/sameberl/computed_numpy/{config['model_params']['retrain_from']}"
             else:
                 path = f"/home/sameberl/computed_numpy/{datetime.now().strftime('%Y_%m_%d-%H_%M_%S')}"
+
+            if not os.path.exists(path):
+                os.makedirs(path)
+
             for uncertainty_name, uncertainty in self.uncertainties.items():
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)

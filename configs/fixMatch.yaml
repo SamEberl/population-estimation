@@ -1,5 +1,5 @@
 info:
-  info: 'with l1 uncertainty | full augs + sigmoid*54k + smaller LR + no LR scheduler | full data'
+  info: 'with l1 uncertainty | get uncertainties | full data'
 
 model_params:
   architecture: 'fixMatch'
@@ -42,7 +42,7 @@ train_params:
   beta2: 0.999
   ema_alpha: 0.95
   seed: 42
-  num_samples_teacher: 200
+  num_samples_teacher: 100
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
@@ -50,20 +50,20 @@ save_dirs:
 
 transform_params:
   apply_rot_and_flip: True
-  apply_noise: True
+  apply_noise: False
   noise_mean: 0
-  noise_std_min: 0.01
+  noise_std_min: 0.001
   noise_std_max: 0.07
-  noise_p: 0.5
-  apply_brightness: True
+  noise_p: 0.3
+  apply_brightness: False
   brightness_range:
     - 0.8
     - 1.2
-  brightness_p: 0.5
-  apply_contrast: True
+  brightness_p: 0.3
+  apply_contrast: False
   contrast_range:
     - 0.8
     - 1.2
-  contrast_p: 0.5
+  contrast_p: 0.3
 
 
