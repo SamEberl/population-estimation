@@ -1,4 +1,3 @@
-import yaml
 from training_loops.fixMatch_loop import *
 from dataset import get_dataloaders
 from tensorboardX import SummaryWriter
@@ -40,9 +39,6 @@ print(f'--- Start training at {current_datetime} ---')
 
 # Create a SummaryWriter for TensorBoard
 writer = SummaryWriter(logdir=log_dir + config['model_params']['architecture'] + '-' + current_datetime)
-param_yaml_str = yaml.dump(config, default_flow_style=False)
-param_yaml_str = param_yaml_str.replace('\n', '<br>')
-writer.add_text('Parameters', param_yaml_str, 0)
 
 train_dataloader, valid_dataloader, train_dataloader_unlabeled = get_dataloaders(config)
 

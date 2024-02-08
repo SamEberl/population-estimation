@@ -1,5 +1,6 @@
 import torch
 import random
+import yaml
 import statistics
 import torch.nn.functional as F
 from torch import optim
@@ -156,8 +157,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             lr=config['train_params']['LR'],
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
-    # scheduler = CosineAnnealingLR(optimizer, T_max=len(train_dataloader)*num_epochs, eta_min=0.00001)
-    #scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -219,11 +218,11 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                         split='valid',
                         logger=logger)
 
-        #writer.add_scalar(f'Observe-LR', optimizer.defaults['lr'], epoch)
-        #scheduler.step(statistics.mean(logger.metrics[f'Loss-Supervised-{supervised_loss_name}/train']))
-        # for key, value in logger.metrics.items():
-        #     print(f"Number of items in list for {key}: {len(value)}")
         logger.write(epoch+1)
+        if epoch == 0:
+            param_yaml_str = yaml.dump(config, default_flow_style=False)
+            param_yaml_str = param_yaml_str.replace('\n', '<br>')
+            writer.add_text('Parameters', param_yaml_str, 0)
         if logger.last_epoch:
             logger.save_uncertainties(config)
         logger.clear()
