@@ -84,6 +84,7 @@ class MetricsLogger:
     def clear(self):
         # Clear metrics after logging
         self.metrics = {}
+        self.uncertainties = {}
         # self.metrics.clear()
         # self.uncertainties.clear()
 

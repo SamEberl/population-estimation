@@ -8,8 +8,8 @@ model_params:
   supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
-  retrain: False
-  retrain_from: 'convnextv2_atto.fcmae_2024_01_31-16_56_34.pt'
+  retrain: True
+  retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
   in_channels: 3
   nbr_outputs: 1
   drop_rate: 0.2
@@ -24,7 +24,7 @@ data_params:
   reduce_zeros_percent: 0.5
   reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: False
+  unlabeled_data: True
   reduce_supervised: False
   reduce_supervised_percent: 0.5
   seed: 42
@@ -36,13 +36,13 @@ data_params:
 
 train_params:
   LR: 0.00001
-  max_epochs: 80
+  max_epochs: 1
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
   seed: 42
-  num_samples_teacher: 3
+  num_samples_teacher: 200
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
