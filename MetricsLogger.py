@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import os
+from datetime import datetime
 
 def calc_r2(numbers, split):
     # Filtering out the zeros and calculating the sum of the remaining numbers
@@ -94,8 +95,11 @@ class MetricsLogger:
             self.uncertainties[uncertainty_name] = np.array([])
         self.uncertainties[uncertainty_name] = np.concatenate((self.uncertainties[uncertainty_name], uncertainty), axis=0)
 
-    def save_uncertainties(self):
+    def save_uncertainties(self, config):
         if bool(self.uncertainties):
-            path = '/home/sameberl/computed_numpy'
+            if config['model_params']['retrain']:
+                path = f"/home/sameberl/computed_numpy/{config['model_params']['retrain_from']}"
+            else:
+                path = f"/home/sameberl/computed_numpy/{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}"
             for uncertainty_name, uncertainty in self.uncertainties.items():
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
