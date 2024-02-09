@@ -65,6 +65,7 @@ class L1UncertaintyLoss(nn.Module):
 
     @staticmethod
     def forward(pred, actual, var):
+        # TODO separate mse and uncertainty for better logging?
         mse_loss = (pred - actual)**2
         uncertainty_loss = (torch.sqrt(mse_loss) - var)**2
         loss = mse_loss + uncertainty_loss

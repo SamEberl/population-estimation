@@ -282,6 +282,12 @@ def apply_transforms(image_bands, transform_params):
     - np.ndarray: Transformed image.
     """
 
+    nan_count = np.sum(np.isnan(image_bands))
+    inf_count = np.sum(np.isinf(image_bands))
+    if nan_count > 0 or inf_count > 0:
+        print("Number of NaN values:", nan_count)
+        print("Number of INF values:", inf_count)
+
     if transform_params['apply_rot_and_flip']:
         # Apply rotation and flipping
         image_bands = apply_flip_and_rotate_transforms(
@@ -315,6 +321,15 @@ def apply_transforms(image_bands, transform_params):
         )
 
     image_bands = np.clip(image_bands, 0, 1)
+
+
+    # Count the number of NaN and INF values
+    nan_count = np.sum(np.isnan(image_bands))
+    inf_count = np.sum(np.isinf(image_bands))
+    if nan_count > 0 or inf_count > 0:
+        print("Number of NaN values:", nan_count)
+        print("Number of INF values:", inf_count)
+        exit()
 
     return image_bands
 

@@ -1,5 +1,5 @@
 info:
-  info: 'with l1 uncertainty | get uncertainties | full data'
+  info: 'with l1 uncertainty sig*20k | augs p=0.3 | full data'
 
 model_params:
   architecture: 'fixMatch'
@@ -24,7 +24,7 @@ data_params:
   reduce_zeros_percent: 0.5
   reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: True
+  unlabeled_data: False
   reduce_supervised: False
   reduce_supervised_percent: 0.5
   seed: 42
@@ -36,7 +36,7 @@ data_params:
 
 train_params:
   LR: 0.00001
-  max_epochs: 1
+  max_epochs: 80
   L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
