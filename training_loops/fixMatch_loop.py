@@ -236,7 +236,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             if unlabeled_data:
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
-                judge.calc_threshold_func()
+        if unlabeled_data:
+            judge.calc_threshold_func()
 
         print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         for i, valid_data in enumerate(valid_dataloader):
