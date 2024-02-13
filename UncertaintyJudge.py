@@ -26,7 +26,7 @@ class UncertaintyJudge:
         uncertainties_log = sm.add_constant(np.log10(np.array(self.uncertainties)))
 
         model = sm.QuantReg(preds_log, uncertainties_log)
-        result = model.fit(q=q)
+        result = model.fit(q=q, maxiter=2000)
         intercept, slope = result.params
 
         a = 10 ** intercept
