@@ -12,9 +12,11 @@ class UncertaintyJudge:
     def power_law(x, a, b):
         return a * x ** (b)
 
-    def add_pred_var_pair(self, pred, uncertainty):
-        self.preds.append(pred.cpu().detach().numpy())
-        self.uncertainties.append(uncertainty.cpu().detach().numpy())
+    def add_pred_var_pair(self, preds, uncertainties):
+        for pred in preds:
+            self.preds.append(pred.cpu().detach().numpy())
+        for uncertainty in uncertainties:
+            self.uncertainties.append(uncertainty.cpu().detach().numpy())
 
     def calc_threshold_func(self, q=0.6):
         """
