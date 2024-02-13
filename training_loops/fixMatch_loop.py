@@ -7,6 +7,7 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau  # CosineAnnealingLR
 from models.losses import CalcBias, MaskedL1Loss, MaskedRMSELoss, MaskedMSELoss
 from MetricsLogger import MetricsLogger
+from UncertaintyJudge import UncertaintyJudge
 from datetime import datetime
 
 
@@ -72,6 +73,37 @@ def forward_supervised(student_model,
 
 
 def forward_unsupervised(student_model,
+                         teacher_model,
+                         student_inputs,
+                         teacher_inputs,
+                         judge,
+                         logger):
+
+    if judge.threshold_func is None:
+        # In the first epoch don't do SSL just get threshold func
+        teacher_model.eval()
+        teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
+        judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
+        return None
+    else:
+        student_model.train()
+        student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
+
+        teacher_model.eval()
+        teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
+        logger.add_metric('Uncertainty_Predicted', 'train', torch.mean(teacher_data_uncertainty))
+
+        pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
+        if torch.sum(pseudo_label_mask) > 0:
+            dearanged_teacher_features = derangement_shuffle(teacher_features)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
+            logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
+            return unsupervised_loss
+        else:
+            return None
+
+
+def forward_unsupervised_archive(student_model,
                          teacher_model,
                          student_inputs,
                          teacher_inputs,
@@ -143,12 +175,13 @@ def forward_unsupervised(student_model,
 
 def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader, train_dataloader_unlabeled):
     logger = MetricsLogger(writer)
+    judge = UncertaintyJudge()
 
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
     unlabeled_data = config['data_params']['unlabeled_data']
-    num_samples_teacher = config['train_params']['num_samples_teacher']
+    #num_samples_teacher = config['train_params']['num_samples_teacher']
     info = config['info']['info']
 
     supervised_loss_name = config['model_params']['supervised_criterion']
@@ -174,15 +207,14 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 inputs, inputs_transformed, labels = train_data_unlabeled
                 inputs = inputs.to(device)
                 inputs_transformed = inputs_transformed.to(device)
-                labels = labels.to(device)
                 unsupervised_loss = forward_unsupervised(student_model,
                                                          teacher_model,
                                                          student_inputs=inputs_transformed,
                                                          teacher_inputs=inputs,
-                                                         num_samples_teacher=num_samples_teacher,
-                                                         labels=labels,
+                                                         judge=judge,
                                                          logger=logger)
-                unsupervised_loss.backward()
+                if unsupervised_loss is not None:
+                    unsupervised_loss.backward()
 
             inputs, labels = train_data
             inputs = inputs.to(device)
@@ -202,6 +234,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             if unlabeled_data:
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
+                judge.calc_threshold_func()
 
         print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         for i, valid_data in enumerate(valid_dataloader):

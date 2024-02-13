@@ -8,7 +8,7 @@ model_params:
   supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
-  retrain: True
+  retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
   in_channels: 3
   nbr_outputs: 1
