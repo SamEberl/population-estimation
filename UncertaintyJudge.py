@@ -13,14 +13,15 @@ class UncertaintyJudge:
         return a * x ** (b)
 
     def add_pred_var_pair(self, pred, uncertainty):
-        self.preds.append(pred)
-        self.uncertainties.append(uncertainty)
+        self.preds.append(pred.cpu())
+        self.uncertainties.append(uncertainty.cpu())
 
     def calc_threshold_func(self, q=0.6):
         """
         Fit a quantile regression model with a quantile value of 0.6.
         Meaning 60% of the datapoints are larger than what the function predicts.
         """
+
         preds_log = np.log10(np.array(self.preds))
         uncertainties_log = sm.add_constant(np.log10(np.array(self.uncertainties)))
 

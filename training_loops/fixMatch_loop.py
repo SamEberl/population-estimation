@@ -91,6 +91,8 @@ def forward_unsupervised(student_model,
 
         teacher_model.eval()
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
+        judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
+
         logger.add_metric('Uncertainty_Predicted', 'train', torch.mean(teacher_data_uncertainty))
 
         pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
