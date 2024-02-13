@@ -13,8 +13,8 @@ class UncertaintyJudge:
         return a * x ** (b)
 
     def add_pred_var_pair(self, preds, uncertainties):
-            self.preds.extend(preds.cpu().numpy().flatten())
-            self.uncertainties.extend(uncertainties.cpu().numpy().flatten())
+            self.preds.extend(preds.cpu().detach().numpy().flatten())
+            self.uncertainties.extend(uncertainties.cpu().detach().numpy().flatten())
 
     def calc_threshold_func(self, q=0.6):
         """
