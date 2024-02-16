@@ -1,5 +1,5 @@
 info:
-  info: 'try new confidence based filtering | augs p=0.3 | full% data'
+  info: 'try new confidence based filtering | augs p=0.3 | 80% data dropped'
 
 model_params:
   architecture: 'fixMatch'
