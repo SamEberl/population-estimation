@@ -216,6 +216,21 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             supervised_loss.backward()
             optimizer.step()
 
+        print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
+        for i, valid_data in enumerate(valid_dataloader):
+            inputs, labels = valid_data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            with torch.no_grad():
+                val_loss = forward_supervised(
+                        student_model=student_model,
+                        student_inputs=inputs,
+                        labels=labels,
+                        supervised_loss_name=supervised_loss_name,
+                        split='valid',
+                        logger=logger)
+
         if unlabeled_data:
             # Update teacher model using exponential moving average
             for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
@@ -235,21 +250,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     unsupervised_loss.backward()
                     optimizer.step()
             judge.calc_threshold_func()
-
-        print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
-        for i, valid_data in enumerate(valid_dataloader):
-            inputs, labels = valid_data
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-
-            with torch.no_grad():
-                val_loss = forward_supervised(
-                        student_model=student_model,
-                        student_inputs=inputs,
-                        labels=labels,
-                        supervised_loss_name=supervised_loss_name,
-                        split='valid',
-                        logger=logger)
 
         logger.write(epoch+1)
         if epoch == 0:
