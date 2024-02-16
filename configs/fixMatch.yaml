@@ -1,5 +1,5 @@
 info:
-  info: 'split ssl from supervised + val after sup | augs p=0.3 | 80% data dropped'
+  info: 'split ssl from supervised + val after sup | augs p=0.3 | full data'
 
 model_params:
   architecture: 'fixMatch'
@@ -22,7 +22,7 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.8
   unlabeled_data: True
   reduce_supervised: False

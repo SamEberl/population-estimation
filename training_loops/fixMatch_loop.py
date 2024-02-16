@@ -221,7 +221,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             inputs, labels = valid_data
             inputs = inputs.to(device)
             labels = labels.to(device)
-
             with torch.no_grad():
                 val_loss = forward_supervised(
                         student_model=student_model,
