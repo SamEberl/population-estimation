@@ -178,7 +178,7 @@ class PopDataset(Dataset):
         elif self.split == 'valid' or self.split == 'test':
             return data, label
         elif self.split == 'train_unlabeled':
-            return data, apply_transforms(data, self.transform_params), label
+            return data, apply_transforms(data, self.transform_params)
 
 
     def generate_spring_rgb(self, file_path):
@@ -275,20 +275,11 @@ def apply_transforms(image_bands, transform_params):
 
     Args:
     - image_bands (np.ndarray): Input image tensor with shape (channels, height, width).
-    - noise_params (dict): Parameters for adding Gaussian noise.
-    - brightness_params (dict): Parameters for adjusting brightness.
-    - contrast_params (dict): Parameters for adjusting contrast.
-    - patch_params (dict): Parameters for blocking out a patch.
+    - transform_params (dict): Parameters for adding transforms.
 
     Returns:
     - np.ndarray: Transformed image.
     """
-
-    nan_count = np.sum(np.isnan(image_bands))
-    inf_count = np.sum(np.isinf(image_bands))
-    if nan_count > 0 or inf_count > 0:
-        print("Number of NaN values:", nan_count)
-        print("Number of INF values:", inf_count)
 
     if transform_params['apply_rot_and_flip']:
         # Apply rotation and flipping
@@ -324,17 +315,7 @@ def apply_transforms(image_bands, transform_params):
 
     image_bands = np.clip(image_bands, 0, 1)
 
-
-    # Count the number of NaN and INF values
-    nan_count = np.sum(np.isnan(image_bands))
-    inf_count = np.sum(np.isinf(image_bands))
-    if nan_count > 0 or inf_count > 0:
-        print("Number of NaN values:", nan_count)
-        print("Number of INF values:", inf_count)
-        exit()
-
     return image_bands
-
 
 
 def apply_flip_and_rotate_transforms(image_bands, probability=0.5):

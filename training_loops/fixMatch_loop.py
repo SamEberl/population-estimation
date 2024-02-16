@@ -204,13 +204,13 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
         for train_data, train_data_unlabeled in zip(train_dataloader, train_dataloader_unlabeled):
             if unlabeled_data:
-                inputs, inputs_transformed, labels = train_data_unlabeled
-                inputs = inputs.to(device)
-                inputs_transformed = inputs_transformed.to(device)
+                inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
+                inputs_ssl = inputs_ssl.to(device)
+                inputs_ssl_transformed = inputs_ssl_transformed.to(device)
                 unsupervised_loss = forward_unsupervised(student_model,
                                                          teacher_model,
-                                                         student_inputs=inputs_transformed,
-                                                         teacher_inputs=inputs,
+                                                         student_inputs=inputs_ssl_transformed,
+                                                         teacher_inputs=inputs_ssl,
                                                          judge=judge,
                                                          logger=logger)
                 if unsupervised_loss is not None:
