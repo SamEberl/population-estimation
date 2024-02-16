@@ -203,6 +203,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             logger.last_epoch = True
 
         for train_data, train_data_unlabeled in zip(train_dataloader, train_dataloader_unlabeled):
+            optimizer.zero_grad()
             if unlabeled_data:
                 inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
                 inputs_ssl = inputs_ssl.to(device)
@@ -226,7 +227,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                  split='train',
                                                  logger=logger)
             # Backward pass and optimization
-            optimizer.zero_grad()
             supervised_loss.backward()
             optimizer.step()
 
