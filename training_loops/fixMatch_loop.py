@@ -79,7 +79,6 @@ def forward_unsupervised(student_model,
                          teacher_inputs,
                          judge,
                          logger):
-
     if judge.threshold_func is None:
         # In the first epoch don't do SSL just get threshold func
         teacher_model.eval()
@@ -202,21 +201,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         if epoch == (num_epochs-1):
             logger.last_epoch = True
 
-        for train_data, train_data_unlabeled in zip(train_dataloader, train_dataloader_unlabeled):
-            optimizer.zero_grad()
-            if unlabeled_data:
-                inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
-                inputs_ssl = inputs_ssl.to(device)
-                inputs_ssl_transformed = inputs_ssl_transformed.to(device)
-                unsupervised_loss = forward_unsupervised(student_model,
-                                                         teacher_model,
-                                                         student_inputs=inputs_ssl_transformed,
-                                                         teacher_inputs=inputs_ssl,
-                                                         judge=judge,
-                                                         logger=logger)
-                if unsupervised_loss is not None:
-                    unsupervised_loss.backward()
-
+        for train_data in train_dataloader:
             inputs, labels = train_data
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -227,14 +212,28 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                  split='train',
                                                  logger=logger)
             # Backward pass and optimization
+            optimizer.zero_grad()
             supervised_loss.backward()
             optimizer.step()
 
-            # Update teacher model using exponential moving average
-            if unlabeled_data:
-                for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-                    teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
         if unlabeled_data:
+            # Update teacher model using exponential moving average
+            for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
+                teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
+            for train_data_unlabeled in train_dataloader_unlabeled:
+                inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
+                inputs_ssl = inputs_ssl.to(device)
+                inputs_ssl_transformed = inputs_ssl_transformed.to(device)
+                unsupervised_loss = forward_unsupervised(student_model,
+                                                         teacher_model,
+                                                         student_inputs=inputs_ssl_transformed,
+                                                         teacher_inputs=inputs_ssl,
+                                                         judge=judge,
+                                                         logger=logger)
+                if unsupervised_loss is not None:
+                    optimizer.zero_grad()
+                    unsupervised_loss.backward()
+                    optimizer.step()
             judge.calc_threshold_func()
 
         print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
