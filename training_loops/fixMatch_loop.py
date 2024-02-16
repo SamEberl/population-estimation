@@ -196,22 +196,14 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    unlabeled_indices = np.arange(len(train_dataloader_unlabeled))
-
     # Train the model
     for epoch in range(num_epochs):
         print(f"\nStart Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         if epoch == (num_epochs-1):
             logger.last_epoch = True
-        # if unlabeled_data:
-        #     iter_unlabeled = iter(train_dataloader_unlabeled)
-        unlabeled_indices = shuffle(unlabeled_indices)
 
-        for train_data, unlabeled_index in zip(train_dataloader, unlabeled_indices):
+        for train_data, train_data_unlabeled in zip(train_dataloader, train_dataloader_unlabeled):
             if unlabeled_data:
-                train_data_unlabeled = train_dataloader_unlabeled[unlabeled_index]
-
-                #train_data_unlabeled = next(iter_unlabeled)
                 inputs, inputs_transformed, labels = train_data_unlabeled
                 inputs = inputs.to(device)
                 inputs_transformed = inputs_transformed.to(device)
