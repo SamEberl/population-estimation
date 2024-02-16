@@ -201,8 +201,10 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         print(f"\nStart Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
         if epoch == (num_epochs-1):
             logger.last_epoch = True
-
+        counter = 0
         for train_data, train_data_unlabeled in zip(train_dataloader, train_dataloader_unlabeled):
+            print(f'{counter}| ', end=' ')
+            counter += 1
             if unlabeled_data:
                 inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
                 inputs_ssl = inputs_ssl.to(device)
