@@ -97,8 +97,7 @@ def forward_unsupervised(student_model,
         pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features)
-            #unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, pseudo_label_mask)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
             logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
             return unsupervised_loss
         else:
