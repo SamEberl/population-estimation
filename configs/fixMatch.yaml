@@ -1,12 +1,12 @@
 info:
-  info: 'contrastive without normalize | augs p=0.3 | full data'
+  info: 'triplet without normalize | augs p=0.3 | full data'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
   supervised_criterion: 'L1UncertaintyLoss'
-  unsupervised_criterion: 'contrastive'
+  unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
