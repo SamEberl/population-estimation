@@ -249,9 +249,9 @@ class TripletLoss(nn.Module):
     def forward(anchor, positive, negative, mask, margin):
         # TODO: Deal with mask being not needed
         # L2 Normalize the embeddings
-        anchor = F.normalize(anchor, p=2, dim=1)
-        positive = F.normalize(positive, p=2, dim=1)
-        negative = F.normalize(negative, p=2, dim=1)
+        #anchor = F.normalize(anchor, p=2, dim=1)
+        #positive = F.normalize(positive, p=2, dim=1)
+        #negative = F.normalize(negative, p=2, dim=1)
 
         # Compute the Euclidean distance between anchor and positive
         positive_distance = (anchor - positive).pow(2).sum(1)
