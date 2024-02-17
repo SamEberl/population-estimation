@@ -215,30 +215,28 @@ class ContrastiveLoss(nn.Module):
         super().__init__()
 
     @staticmethod
-    def forward(student_features, teacher_features, mask, Y, margin=1.0):
+    def forward(anchor, positive, negative, mask, margin=1.0):
         """
         Compute the Contrastive Loss for batches of vectors P1 and P2 with a feature mask,
         using only the unmasked features for the distance calculation.
 
-        :param P1: Batch of vectors (PyTorch tensor)
-        :param P2: Batch of vectors (PyTorch tensor)
-        :param Y: Batch of binary labels (1 for positive pairs, 0 for negative pairs)
         :param mask: Tensor of the same shape as P1 and P2, with 1s for features to use and 0s for features to ignore
         :param margin: Margin for the loss (default is 1.0)
         :return: Masked contrastive loss for the batch
         """
         # Calculate Euclidean distances
-        euclidean_distance = torch.sqrt(torch.sum(torch.pow(student_features - teacher_features, 2), dim=1))
+        euclidean_distance_pos = torch.sqrt(torch.sum(torch.pow(anchor - positive, 2), dim=1))
+        euclidean_distance_neg = torch.sqrt(torch.sum(torch.pow(anchor - negative, 2), dim=1))
 
         # Apply the mask to the squared differences
-        masked_distance = euclidean_distance * mask
+        masked_distance_pos = euclidean_distance_pos * mask
 
         # Compute loss for each pair and then average over the batch
-        loss_contrastive = (torch.sum(Y * torch.pow(masked_distance, 2) +
-                                      (1 - Y) * torch.pow(torch.clamp(margin - masked_distance, min=0.0), 2)) / torch.sum(mask))
+        loss_contrastive_pos = torch.sum(torch.pow(masked_distance_pos, 2))
+        loss_contrastive_neg = torch.sum(torch.pow(torch.clamp(margin - euclidean_distance_neg, min=0.0), 2))
 
         # Scale to be on the same magnitude as the supervised loss
-        loss = loss_contrastive #* self.unsupervised_factor
+        loss = loss_contrastive_pos + loss_contrastive_neg
 
         return loss
 

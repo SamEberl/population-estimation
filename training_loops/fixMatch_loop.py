@@ -58,6 +58,7 @@ def forward_supervised(student_model,
     logger.add_metric('Observe-Bias', split, CalcBias.forward(student_preds, labels))
     logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels, reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
     logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
+    logger.add_metric('Uncertainty_Predicted', split, torch.mean(student_data_uncertainty))
     # logger.add_metric('Loss-Uncertainty', split, uncertainty_loss)
     # logger.add_metric('Observe-Percent-Labeled', split, torch.sum(mask_labeled) / len(mask_labeled))
 
@@ -93,12 +94,11 @@ def forward_unsupervised(student_model,
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
         judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
 
-        logger.add_metric('Uncertainty_Predicted', 'train', torch.mean(teacher_data_uncertainty))
-
         pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
+            #unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, mask)
             logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
             return unsupervised_loss
         else:
