@@ -1,5 +1,5 @@
 info:
-  info: 'ssl + 20% supervised | sig*30k | 20% data'
+  info: 'ssl + 20% supervised | sig*40k | 20% data'
 
 model_params:
   architecture: 'fixMatch'
