@@ -1,5 +1,5 @@
 info:
-  info: 'supervised only | sig*30k | 20% data'
+  info: 'ssl + 20% supervised | sig*30k | 20% data'
 
 model_params:
   architecture: 'fixMatch'
@@ -24,9 +24,9 @@ data_params:
   reduce_zeros_percent: 0.5
   reduce_data: True
   reduce_data_percent: 0.8
-  unlabeled_data: False
-  reduce_supervised: False
-  reduce_supervised_percent: 0.5
+  unlabeled_data: True
+  reduce_supervised: True
+  reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
   use_lu: False
