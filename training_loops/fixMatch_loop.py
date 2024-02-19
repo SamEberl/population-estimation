@@ -96,7 +96,7 @@ def forward_unsupervised(student_model,
             judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
             pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
         else:
-            pseudo_label_mask = torch.ones(student_inputs.shape[0])
+            pseudo_label_mask = torch.ones(student_inputs.shape[0]).to(student_inputs.device)
 
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features)
