@@ -80,7 +80,7 @@ def forward_unsupervised(student_model,
                          teacher_inputs,
                          judge,
                          logger):
-    if judge.threshold_func is None:
+    if judge.use_judge and judge.threshold_func is None:
         # In the first epoch don't do SSL just get threshold func
         teacher_model.eval()
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
@@ -92,9 +92,12 @@ def forward_unsupervised(student_model,
 
         teacher_model.eval()
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
-        judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
+        if judge.use_judge:
+            judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
+            pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
+        else:
+            pseudo_label_mask = np.ones(student_inputs.shape[0], dtype=int)
 
-        pseudo_label_mask = judge.evaluate_threshold_func(teacher_preds, teacher_data_uncertainty)
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features)
             unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
@@ -176,7 +179,7 @@ def forward_unsupervised_archive(student_model,
 
 def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader, train_dataloader_unlabeled):
     logger = MetricsLogger(writer)
-    judge = UncertaintyJudge()
+    judge = UncertaintyJudge(config["train_params"]["use_judge"])
 
     # Get params from config
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
@@ -247,7 +250,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                     optimizer.zero_grad()
                     unsupervised_loss.backward()
                     optimizer.step()
-            judge.calc_threshold_func()
+            if judge.use_judge:
+                judge.calc_threshold_func()
 
         logger.write(epoch+1)
         if epoch == 0:

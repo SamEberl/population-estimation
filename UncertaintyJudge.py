@@ -3,10 +3,11 @@ import numpy as np
 from functools import partial
 
 class UncertaintyJudge:
-    def __init__(self):
+    def __init__(self, use_judge):
         self.preds = []
         self.uncertainties = []
         self.threshold_func = None
+        self.use_judge = use_judge
 
     @staticmethod
     def power_law(x, a, b):
