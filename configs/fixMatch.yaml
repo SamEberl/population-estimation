@@ -1,5 +1,5 @@
 info:
-  info: 'ssl & judge + 20% supervised | sig*40k | full data'
+  info: 'only 20% supervised | sig*40k | full data'
 
 model_params:
   architecture: 'fixMatch'
@@ -24,7 +24,7 @@ data_params:
   reduce_zeros_percent: 0.5
   reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: True
+  unlabeled_data: False
   reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
@@ -43,7 +43,7 @@ train_params:
   ema_alpha: 0.95
   seed: 42
   num_samples_teacher: 100
-  use_judge: True
+  use_judge: False
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
