@@ -481,17 +481,19 @@ def normalize_labels(labels, mean=1068, std=1792):
     mean = 4
     std = 3
     log_labels = torch.log1p(labels)
-    return (log_labels - mean) / std
+    log_norm_labels = (log_labels - mean) / std
+    return log_norm_labels
 
 
-def unnormalize_preds(preds, mean=1068, std=1792):
+def unnormalize_preds(log_norm_preds, mean=1068, std=1792):
     """
     UnNormalizes the predictions by reversing Z-score normalization.
     """
     mean = 4
     std = 3
-    exp_preds = torch.exp(preds) - 1
-    return (exp_preds * std) + mean
+    log_preds = (log_norm_preds * std) + mean
+    preds = torch.exp(log_preds) - 1
+    return preds
 
 
 def quantile_normalize_labels(labels):
