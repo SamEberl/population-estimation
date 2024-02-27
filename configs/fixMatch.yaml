@@ -1,5 +1,5 @@
 info:
-  info: 'only 20% supervised | try normalize labels no sig | full data'
+  info: 'only 20% supervised | try normalize labels no sig | 20% data'
 
 model_params:
   architecture: 'fixMatch'
@@ -22,7 +22,7 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: True
@@ -35,7 +35,7 @@ data_params:
   use_viirs: False
 
 train_params:
-  LR: 0.00001
+  LR: 0.001
   max_epochs: 100
   L2_reg: 0.005
   beta1: 0.9
