@@ -35,7 +35,7 @@ data_params:
   use_viirs: False
 
 train_params:
-  LR: 0.001
+  LR: 0.1
   max_epochs: 100
   L2_reg: 0.005
   beta1: 0.9
