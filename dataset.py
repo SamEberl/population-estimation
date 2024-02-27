@@ -477,11 +477,10 @@ def block_out_patch(image_bands, patch_size=(16, 16), probability=0.5):
 def normalize_labels(labels, mean=1068, std=1792):
     """
     Normalizes the labels by applying Z-score normalization.
-    This assumes we drop 90% of the zeros and ignore values above 10k to calc the mean and std
     """
-    mean = 5.37
-    std = 2.32
-    log_labels = torch.log(labels)
+    mean = 4
+    std = 3
+    log_labels = torch.log1p(labels)
     return (log_labels - mean) / std
 
 
@@ -489,9 +488,9 @@ def unnormalize_preds(preds, mean=1068, std=1792):
     """
     UnNormalizes the predictions by reversing Z-score normalization.
     """
-    mean = 5.37
-    std = 2.32
-    exp_preds = torch.exp(preds)
+    mean = 4
+    std = 3
+    exp_preds = torch.exp(preds) - 1
     return (exp_preds * std) + mean
 
 

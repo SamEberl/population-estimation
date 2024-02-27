@@ -1,5 +1,5 @@
 info:
-  info: 'only 20% supervised | sig*40k | full data'
+  info: 'only 20% supervised | try normalize labels no sig | full data'
 
 model_params:
   architecture: 'fixMatch'
