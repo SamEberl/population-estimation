@@ -1,5 +1,5 @@
 info:
-  info: 'aleatoric loss | try normalize labels no sig | 20% data | 20% supervised'
+  info: 'aleatoric loss | try normalize labels no sig | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
