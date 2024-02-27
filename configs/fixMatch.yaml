@@ -1,11 +1,11 @@
 info:
-  info: 'only 20% supervised | try normalize labels no sig | 20% data'
+  info: 'aleatoric loss | try normalize labels no sig | 20% data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'L1UncertaintyLoss'
+  supervised_criterion: 'Aleatoric'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 100_000
   retrain: False
