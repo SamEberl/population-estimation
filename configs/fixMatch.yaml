@@ -1,5 +1,5 @@
 info:
-  info: 'augs p=0.5 | try normalize labels no sig | 20% data | full supervised'
+  info: 'higher drop_rate, lr, aug_p | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -12,7 +12,7 @@ model_params:
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
   in_channels: 3
   nbr_outputs: 1
-  drop_rate: 0.2
+  drop_rate: 0.3
   #  drop_rate_teacher: 0.4
 
 data_params:
@@ -37,7 +37,7 @@ data_params:
 train_params:
   LR: 0.00001
   max_epochs: 100
-  L2_reg: 0.005
+  L2_reg: 0.5
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
