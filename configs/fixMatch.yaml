@@ -1,5 +1,5 @@
 info:
-  info: 'even higher l2_reg | try normalize labels no sig | 20% data | full supervised'
+  info: 'augs p=0.5 | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -37,7 +37,7 @@ data_params:
 train_params:
   LR: 0.00001
   max_epochs: 100
-  L2_reg: 0.5
+  L2_reg: 0.005
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
@@ -55,16 +55,16 @@ transform_params:
   noise_mean: 0
   noise_std_min: 0.001
   noise_std_max: 0.07
-  noise_p: 0.3
+  noise_p: 0.5
   apply_brightness: False
   brightness_range:
     - 0.8
     - 1.2
-  brightness_p: 0.3
+  brightness_p: 0.5
   apply_contrast: False
   contrast_range:
     - 0.8
     - 1.2
-  contrast_p: 0.3
+  contrast_p: 0.5
 
 
