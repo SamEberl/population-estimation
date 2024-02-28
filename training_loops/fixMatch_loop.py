@@ -83,15 +83,12 @@ def forward_unsupervised(student_model,
                          logger):
     if judge.use_judge and judge.threshold_func is None:
         # In the first epoch don't do SSL just get threshold func
-        teacher_model.eval()
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
         judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
         return None
     else:
-        student_model.train()
         student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
 
-        teacher_model.eval()
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
         if judge.use_judge:
             judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)
@@ -106,76 +103,6 @@ def forward_unsupervised(student_model,
             return unsupervised_loss
         else:
             return None
-
-
-def forward_unsupervised_archive(student_model,
-                         teacher_model,
-                         student_inputs,
-                         teacher_inputs,
-                         num_samples_teacher,
-                         labels,
-                         logger):
-
-    student_model.train()
-    # Pass inputs through model
-    student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
-
-    # Store all predictions
-    n_teacher_preds = []
-    n_teacher_features = []
-    n_teacher_data_uncertainties = []
-
-    teacher_model.train()  # Ensure dropout is active during evaluation
-    with torch.no_grad():  # Ensure no gradients are computed
-        for _ in range(num_samples_teacher):
-            teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
-            n_teacher_preds.append(teacher_preds)
-            n_teacher_features.append(teacher_features)
-            n_teacher_data_uncertainties.append(teacher_data_uncertainty)
-
-    n_teacher_preds = torch.stack(n_teacher_preds)
-    n_teacher_features = torch.stack(n_teacher_features)
-    n_teacher_data_uncertainties = torch.stack(n_teacher_data_uncertainties)
-
-    # Compute model uncertainty
-    teacher_model_uncertainty = n_teacher_preds.var(dim=0)
-
-    # Compute feature spread
-    teacher_features_mean = n_teacher_features.mean(dim=0)  # Get averaged features
-    l2_distances = torch.sqrt(((n_teacher_features - teacher_features_mean) ** 2).sum(dim=-1))  # Calculate the squared differences
-    l2_distances_var = l2_distances.var(dim=0)  # Get spread
-
-    # Compute data uncertainty
-    teacher_data_uncertainty = n_teacher_data_uncertainties.mean(dim=0)  # TODO: before var() but should probably be mean
-
-    # TODO: Use pseudo_label_mask
-    # pseudo_label_mask = (np.sqrt(teacher_model_uncertainty) / n_teacher_preds.mean(dim=0)) > 0.15  # Use CV as threshold
-    # pseudo_label_mask = l2_distances_var < 0.5
-    # pseudo_label_mask = teacher_data_uncertainty < ?
-    # if torch.sum(pseudo_label_mask) > 0:
-    pseudo_label_mask = None
-    dearanged_teacher_features = derangement_shuffle(teacher_features_mean)
-    unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features_mean, dearanged_teacher_features, mask=pseudo_label_mask)
-
-    split = 'train'
-    logger.add_metric('Uncertainty_Predicted', split, torch.mean(teacher_data_uncertainty))
-    logger.add_metric('Uncertainty_Calculated', split, torch.mean(teacher_model_uncertainty))
-    logger.add_metric('Uncertainty-Features-L2-Var', split, torch.mean(l2_distances_var))
-    logger.add_metric('Uncertainty-Features-L2', split, torch.mean(l2_distances))
-    # logger.add_metric(f'Observe-Percent-used-unsupervised', split, torch.sum(pseudo_label_mask)/len(pseudo_label_mask))
-    logger.add_metric(f'Loss-Unsupervised', split, unsupervised_loss.item())
-
-    if logger.last_epoch:
-        # Uncertainties to log
-        predictions = n_teacher_preds.mean(dim=0)
-        logger.add_uncertainty('pred', predictions)
-        logger.add_uncertainty('label', labels)
-        logger.add_uncertainty('loss', (predictions-labels)**2)
-        logger.add_uncertainty('pred_var', teacher_data_uncertainty)
-        logger.add_uncertainty('calc_var', teacher_model_uncertainty)
-        logger.add_uncertainty('features_l2', l2_distances_var)
-
-    return unsupervised_loss
 
 
 def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader, train_dataloader_unlabeled):
@@ -208,6 +135,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             inputs, labels = train_data
             inputs = inputs.to(device)
             labels = labels.to(device)
+            student_model.train()
             supervised_loss = forward_supervised(student_model,
                                                  inputs,
                                                  labels,
@@ -224,6 +152,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             inputs, labels = valid_data
             inputs = inputs.to(device)
             labels = labels.to(device)
+            student_model.eval()
             with torch.no_grad():
                 val_loss = forward_supervised(
                         student_model=student_model,
@@ -238,6 +167,8 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                 teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
             for train_data_unlabeled in train_dataloader_unlabeled:
+                student_model.train()
+                teacher_model.eval()
                 inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
                 inputs_ssl = inputs_ssl.to(device)
                 inputs_ssl_transformed = inputs_ssl_transformed.to(device)
