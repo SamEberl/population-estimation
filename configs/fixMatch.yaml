@@ -1,5 +1,5 @@
 info:
-  info: 'use augs | try normalize labels no sig | 20% data | full supervised'
+  info: 'try model.model.eval() and l2_reg=0.3 | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -37,7 +37,7 @@ data_params:
 train_params:
   LR: 0.00001
   max_epochs: 100
-  L2_reg: 0.005
+  L2_reg: 0.3
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95

@@ -53,6 +53,7 @@ train_fix_match(config,
 save_path = os.path.join(config['save_dirs']['model_save_dir'],
                          f"{config['model_params']['pretrained_weights']}_{current_datetime}.pt")
 student_model.eval()
+student_model.model.eval()
 print(f'Saving model under {save_path}')
 torch.save(student_model.state_dict(), save_path)
 

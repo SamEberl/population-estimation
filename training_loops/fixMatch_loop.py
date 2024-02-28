@@ -34,12 +34,6 @@ def forward_supervised(student_model,
                        supervised_loss_name,
                        split,
                        logger):
-    # Set mode to disable dropout for eval
-    if split == 'train':
-        student_model.train()
-    else:
-        student_model.eval()
-
     # Pass inputs through model
     student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
 
@@ -153,6 +147,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             inputs = inputs.to(device)
             labels = labels.to(device)
             student_model.eval()
+            student_model.model.eval()
             with torch.no_grad():
                 val_loss = forward_supervised(
                         student_model=student_model,
@@ -168,7 +163,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                 teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
             for train_data_unlabeled in train_dataloader_unlabeled:
                 student_model.train()
+                student_model.model.train()
                 teacher_model.eval()
+                teacher_model.model.eval()
                 inputs_ssl, inputs_ssl_transformed = train_data_unlabeled
                 inputs_ssl = inputs_ssl.to(device)
                 inputs_ssl_transformed = inputs_ssl_transformed.to(device)
