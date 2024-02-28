@@ -1,5 +1,5 @@
 info:
-  info: 'higher l2_reg | try normalize labels no sig | 20% data | full supervised'
+  info: 'even higher l2_reg | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -37,7 +37,7 @@ data_params:
 train_params:
   LR: 0.00001
   max_epochs: 100
-  L2_reg: 0.05
+  L2_reg: 0.5
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
