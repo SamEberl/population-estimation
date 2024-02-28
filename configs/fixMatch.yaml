@@ -1,5 +1,5 @@
 info:
-  info: 'try model.model.eval() and l2_reg=0.3 | try normalize labels no sig | 20% data | full supervised'
+  info: 'dropout=0.3 , l2_reg=0.3 & augs=0.3 | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -12,7 +12,7 @@ model_params:
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
   in_channels: 3
   nbr_outputs: 1
-  drop_rate: 0.2
+  drop_rate: 0.3
   #  drop_rate_teacher: 0.4
 
 data_params:
@@ -55,16 +55,16 @@ transform_params:
   noise_mean: 0
   noise_std_min: 0.001
   noise_std_max: 0.07
-  noise_p: 0.5
+  noise_p: 0.3
   apply_brightness: False
   brightness_range:
     - 0.8
     - 1.2
-  brightness_p: 0.5
+  brightness_p: 0.3
   apply_contrast: False
   contrast_range:
     - 0.8
     - 1.2
-  contrast_p: 0.5
+  contrast_p: 0.3
 
 
