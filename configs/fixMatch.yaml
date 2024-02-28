@@ -1,5 +1,5 @@
 info:
-  info: 'higher dropout | try normalize labels no sig | full data | full supervised'
+  info: 'higher dropout | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -22,7 +22,7 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: False
