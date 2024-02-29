@@ -246,9 +246,9 @@ class TripletLoss(nn.Module):
     @staticmethod
     def forward(anchor, positive, negative, mask, margin):
         # L2 Normalize the embeddings
-        anchor = F.normalize(anchor, p=2, dim=1)
-        positive = F.normalize(positive, p=2, dim=1)
-        negative = F.normalize(negative, p=2, dim=1)
+        #anchor = F.normalize(anchor, p=2, dim=1)
+        #positive = F.normalize(positive, p=2, dim=1)
+        #negative = F.normalize(negative, p=2, dim=1)
 
         # Compute the Euclidean distance between anchor and positive/negative
         positive_distance = (anchor - positive).pow(2).sum(1)
@@ -269,7 +269,6 @@ class TripletLoss(nn.Module):
                     triplet_loss = triplet_loss.cuda()
 
         return triplet_loss
-
 
 
 class TripletLossModified(nn.Module):
@@ -298,3 +297,29 @@ class TripletLossModified(nn.Module):
 
         loss = triplet_loss + new_term
         return loss
+
+
+class CosineSimilarity(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def forward(vector1, vector2):
+        """
+        Compute the cosine similarity between two vectors.
+
+        Args:
+            vector1 (torch.Tensor): The first vector.
+            vector2 (torch.Tensor): The second vector.
+
+        Returns:
+            torch.Tensor: The cosine similarity between the two vectors.
+        """
+        dot_product = torch.dot(vector1, vector2)
+        norm_vector1 = torch.norm(vector1)
+        norm_vector2 = torch.norm(vector2)
+
+        loss = dot_product / (norm_vector1 * norm_vector2 + 1e-8)  # Avoid division by zero
+
+        return loss
+
