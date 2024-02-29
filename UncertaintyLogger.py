@@ -31,7 +31,7 @@ class UncertaintyLogger:
                                                     supervised_criterion='Aleatoric',
                                                     unsupervised_criterion='triplet',
                                                     unsupervised_factor=1,
-                                                    drop_rate=0).to(self.device)
+                                                    drop_rate=0.3).to(self.device)
         # Retrain from checkpoint
         self.teacher_model.load_state_dict(torch.load(os.path.join('/home/sameberl/models', self.retrain_from + '.pt')))
 
@@ -106,8 +106,8 @@ class UncertaintyLogger:
             n_teacher_preds = torch.stack(n_teacher_preds)
             n_teacher_features = torch.stack(n_teacher_features)
 
-            print(f'n_teacher_preds: {n_teacher_preds}')
-            print(f'n_teacher_features: {n_teacher_features}')
+            # print(f'n_teacher_preds: {n_teacher_preds}')
+            # print(f'n_teacher_features: {n_teacher_features}')
 
             # Compute model uncertainty
             teacher_model_uncertainty = n_teacher_preds.var(dim=0)
@@ -115,8 +115,8 @@ class UncertaintyLogger:
             # Compute spread: Variance of L2-Distances between features
             spread = torch.sqrt((n_teacher_features - n_teacher_features.mean(dim=0)).pow(2).sum(dim=-1)).var(dim=0)
 
-            print(f'teacher_model_uncertainty: {teacher_model_uncertainty}')
-            print(f'spread: {spread}')
+            # print(f'teacher_model_uncertainty: {teacher_model_uncertainty}')
+            # print(f'spread: {spread}')
 
             # Compute data uncertainty
             self.teacher_model.eval()
