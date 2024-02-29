@@ -97,6 +97,9 @@ class UncertaintyLogger:
             with torch.no_grad():  # Ensure no gradients are computed
                 for _ in range(self.num_samples_teacher):
                     teacher_preds, teacher_features, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
+                    print(f'teacher_preds: {teacher_preds}')
+                    print(f'teacher_features: {teacher_features}')
+                    print(f'teacher_data_uncert: {teacher_data_uncertainty}')
                     n_teacher_preds.append(unnormalize_preds(teacher_preds))
                     n_teacher_features.append(teacher_features)
             n_teacher_preds = torch.stack(n_teacher_preds)
