@@ -40,7 +40,7 @@ class UncertaintyLogger:
         nbr_not_found = 0
         nbr_found = 0
         #for split in ['train', 'test']:
-        for split in ['test']
+        for split in ['test']:
             data_sub_dir = os.path.join(self.data_dir, split)
             for city_folder in os.listdir(data_sub_dir):
                 # Load the csv file that maps datapoint names to folder names
