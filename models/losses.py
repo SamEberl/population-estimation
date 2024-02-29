@@ -301,25 +301,28 @@ class TripletLossModified(nn.Module):
 
 class CosineSimilarity(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(CosineSimilarity, self).__init__()
 
-    @staticmethod
-    def forward(vector1, vector2):
-        """
-        Compute the cosine similarity between two vectors.
+    def forward(self, anchor, positive, negative, mask, margin):
+        # Cosine similarity
+        sim_pos = F.cosine_similarity(anchor, positive, dim=1)
+        sim_neg = F.cosine_similarity(anchor, negative, dim=1)
 
-        Args:
-            vector1 (torch.Tensor): The first vector.
-            vector2 (torch.Tensor): The second vector.
+        # Compute the loss
+        losses = torch.relu(sim_neg - sim_pos + margin)
 
-        Returns:
-            torch.Tensor: The cosine similarity between the two vectors.
-        """
-        dot_product = torch.dot(vector1, vector2)
-        norm_vector1 = torch.norm(vector1)
-        norm_vector2 = torch.norm(vector2)
+        if mask is not None:
+            losses_masked = losses * mask
+            # Calculate the average loss only for non-zero mask elements
+            if torch.sum(mask) != 0:
+                cos_similarity_loss = torch.sum(losses_masked) / torch.sum(mask)
+            else:
+                cos_similarity_loss = torch.tensor([0], dtype=torch.float32)
+                if torch.cuda.is_available():
+                    cos_similarity_loss = cos_similarity_loss.cuda()
+        else:
+            # If mask is not provided, calculate the average loss
+            cos_similarity_loss = torch.mean(losses)
 
-        loss = dot_product / (norm_vector1 * norm_vector2 + 1e-8)  # Avoid division by zero
-
-        return loss
+        return cos_similarity_loss
 
