@@ -129,5 +129,7 @@ class UncertaintyLogger:
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
 
-uncertainty_logger = UncertaintyLogger(retrain_from='convnextv2_atto.fcmae_2024_02_28-14_18_29.pt')
+retrain_from = 'convnextv2_atto.fcmae_2024_02_28-14_18_29.pt'
+print(f'Get uncertainties from {retrain_from}')
+uncertainty_logger = UncertaintyLogger(retrain_from=retrain_from)
 uncertainty_logger.get_uncertainties()
