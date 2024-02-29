@@ -156,6 +156,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                         logger=logger)
 
         if unlabeled_data:
+            print(f"Start SSL: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
             # Update teacher model using exponential moving average
             for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                 teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
