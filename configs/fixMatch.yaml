@@ -7,7 +7,7 @@ model_params:
   pretrained: True
   supervised_criterion: 'Aleatoric'
   unsupervised_criterion: 'triplet'
-  unsupervised_factor: 100_000
+  unsupervised_factor: 1
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
   in_channels: 3

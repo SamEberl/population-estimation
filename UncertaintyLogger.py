@@ -30,7 +30,7 @@ class UncertaintyLogger:
                                                     nbr_outputs=1,
                                                     supervised_criterion='Aleatoric',
                                                     unsupervised_criterion='triplet',
-                                                    unsupervised_factor=100_000,
+                                                    unsupervised_factor=1,
                                                     drop_rate=0).to(self.device)
         # Retrain from checkpoint
         self.teacher_model.load_state_dict(torch.load(os.path.join('/home/sameberl/models', self.retrain_from)))
