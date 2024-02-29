@@ -1,5 +1,5 @@
 info:
-  info: 'ssl cosine + no judge | try normalize labels no sig | 20% data | full supervised'
+  info: 'ssl cosine + no judge | try separate optimizers | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'

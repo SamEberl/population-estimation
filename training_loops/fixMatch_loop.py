@@ -42,7 +42,8 @@ def forward_supervised(student_model,
     # Calc Supervised Loss
     # supervised_loss = student_model.loss_supervised(student_preds, labels)
     # uncertainty_loss = student_model.loss_uncertainty(student_preds, labels, student_data_uncertainty)
-    supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized, student_data_uncertainty)
+    supervised_loss = student_model.loss_supervised_w_uncertainty(student_preds, labels_normalized,
+                                                                  student_data_uncertainty)
     # supervised_loss = student_model.loss_supervised_w_uncertainty_decay(student_preds, labels_normalized, student_data_uncertainty, step_nbr, total_step)
 
     student_preds = unnormalize_preds(student_preds)
@@ -51,7 +52,8 @@ def forward_supervised(student_model,
     logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
     logger.add_metric('Observe-R2', split, F.mse_loss(student_preds, labels, reduction='mean'))
     logger.add_metric('Observe-Bias', split, CalcBias.forward(student_preds, labels))
-    logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels, reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels,
+                                                          reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
     logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
     logger.add_metric('Uncertainty_Predicted', split, torch.mean(student_data_uncertainty))
     # logger.add_metric('Loss-Uncertainty', split, uncertainty_loss)
@@ -91,14 +93,16 @@ def forward_unsupervised(student_model,
 
         if torch.sum(pseudo_label_mask) > 0:
             dearanged_teacher_features = derangement_shuffle(teacher_features)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features,
+                                                                dearanged_teacher_features, mask=pseudo_label_mask)
             logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
             return unsupervised_loss
         else:
             return None
 
 
-def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader, train_dataloader_unlabeled):
+def train_fix_match(config, writer, student_model, teacher_model, train_dataloader, valid_dataloader,
+                    train_dataloader_unlabeled):
     logger = MetricsLogger(writer)
     judge = UncertaintyJudge(config["train_params"]["use_judge"])
 
@@ -106,7 +110,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
     ema_alpha = config["train_params"]["ema_alpha"]  # Exponential moving average decay factor
     num_epochs = config['train_params']['max_epochs']
     unlabeled_data = config['data_params']['unlabeled_data']
-    #num_samples_teacher = config['train_params']['num_samples_teacher']
+    # num_samples_teacher = config['train_params']['num_samples_teacher']
     info = config['info']['info']
 
     supervised_loss_name = config['model_params']['supervised_criterion']
@@ -116,12 +120,17 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
 
+    optimizer_ssl = optim.AdamW(student_model.parameters(),
+                                lr=config['train_params']['LR'],
+                                betas=(config['train_params']['beta1'], config['train_params']['beta2']),
+                                weight_decay=config['train_params']['L2_reg'] * 2)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Train the model
     for epoch in range(num_epochs):
         print(f"\nStart Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
-        if epoch == (num_epochs-1):
+        if epoch == (num_epochs - 1):
             logger.last_epoch = True
 
         for train_data in train_dataloader:
@@ -173,13 +182,13 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                          judge=judge,
                                                          logger=logger)
                 if unsupervised_loss is not None:
-                    optimizer.zero_grad()
+                    optimizer_ssl.zero_grad()
                     unsupervised_loss.backward()
-                    optimizer.step()
+                    optimizer_ssl.step()
             if judge.use_judge:
                 judge.calc_threshold_func()
 
-        logger.write(epoch+1)
+        logger.write(epoch + 1)
         if epoch == 0:
             param_yaml_str = yaml.dump(config, default_flow_style=False)
             param_yaml_str = param_yaml_str.replace('\n', '<br>')
