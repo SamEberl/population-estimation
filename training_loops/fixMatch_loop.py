@@ -120,11 +120,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                             betas=(config['train_params']['beta1'], config['train_params']['beta2']),
                             weight_decay=config['train_params']['L2_reg'] * 2)
 
-    optimizer_ssl = optim.AdamW(student_model.parameters(),
-                                lr=config['train_params']['LR'],
-                                betas=(config['train_params']['beta1'], config['train_params']['beta2']),
-                                weight_decay=config['train_params']['L2_reg'] * 2)
-
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Train the model
@@ -182,9 +177,9 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
                                                          judge=judge,
                                                          logger=logger)
                 if unsupervised_loss is not None:
-                    optimizer_ssl.zero_grad()
+                    optimizer.zero_grad()
                     unsupervised_loss.backward()
-                    optimizer_ssl.step()
+                    optimizer.step()
             if judge.use_judge:
                 judge.calc_threshold_func()
 

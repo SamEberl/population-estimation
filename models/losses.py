@@ -144,40 +144,6 @@ class MaskedRMSELoss(nn.Module):
         return loss
 
 
-class MaskedLinUncertaintyLoss(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    @staticmethod
-    def forward(pred, actual, log_var):
-        mask = actual != -1
-        squared_diff = (pred - actual) ** 2
-        #uncertainty_loss = torch.abs(log_var - squared_diff)
-        uncertainty_loss = torch.sqrt(torch.sum(torch.pow(log_var - squared_diff, 2)))
-        masked_squared_diff = squared_diff * mask
-        masked_uncertainty_loss = uncertainty_loss * mask
-        # To ensure that we compute the mean correctly, we should divide by the number of '1's in the mask.
-        pred_numel = torch.sum(mask)
-        if pred_numel > 0:
-            loss = (torch.sum(masked_squared_diff) + uncertainty_loss) / pred_numel
-        else:
-            loss = torch.tensor([-1], dtype=torch.float32)
-            if torch.cuda.is_available():
-                loss = loss.cuda()
-        # if pred_numel == 39:
-            # print(f'\n---------------')
-            # print(f'log_var     : {log_var}')
-            # print(f'squared_diff: {squared_diff}')
-            # print(f'log_var-diff: {log_var-squared_diff}')
-            # print(f'uncertainty : {uncertainty_loss}')
-            # print(f'pred_numel: {pred_numel}')
-            # print(f'pred: {torch.sum(pred)} | actual: {torch.sum(actual)} | log_var: {torch.sum(log_var)}')
-            # print(f'mse   : {torch.sum(masked_squared_diff)}')
-            # print(f'uncert: {torch.sum(uncertainty_loss)}')
-            # print(f'loss: {loss} \n')
-        return loss
-
-
 class UncertaintyLoss(nn.Module):
     def __init__(self):
         super().__init__()

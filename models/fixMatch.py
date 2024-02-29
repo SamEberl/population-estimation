@@ -32,7 +32,6 @@ class fixMatch(nn.Module):
                              'AleatoricModified': AleatoricLossModified(),
                              'AleatoricLinDecay': AleatoricLinDecayLoss(),
                              'L1UncertaintyLoss': L1UncertaintyLoss(),
-                             'LinUncertainty': MaskedLinUncertaintyLoss(),
                              'SquaredUncertainty': SquaredUncertaintyLoss()}
 
         self.supervised_criterion = supervised_losses[supervised_criterion]
