@@ -5,6 +5,7 @@ import os
 from models import *
 from dataset import PopDataset
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
 class UncertaintyLogger:
@@ -85,7 +86,7 @@ class UncertaintyLogger:
                                                               axis=0)
 
     def get_uncertainties(self):
-        for data in self.dataloader:
+        for data in tqdm(self.dataloader):
             teacher_inputs, labels = data
             teacher_inputs = teacher_inputs.to(self.device)
             labels = labels.to(self.device)
@@ -121,9 +122,9 @@ class UncertaintyLogger:
 
         if bool(self.uncertainties):
             path = f"/home/sameberl/computed_numpy/{self.retrain_from}"
+            print(f'saving to: {path}')
             if not os.path.exists(path):
                 os.makedirs(path)
-
             for uncertainty_name, uncertainty in self.uncertainties.items():
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
