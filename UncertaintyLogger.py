@@ -3,7 +3,7 @@ import csv
 import numpy as np
 import os
 from models import *
-from dataset import PopDataset
+from dataset import PopDataset, unnormalize_preds
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -97,7 +97,7 @@ class UncertaintyLogger:
             with torch.no_grad():  # Ensure no gradients are computed
                 for _ in range(self.num_samples_teacher):
                     teacher_preds, teacher_features, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
-                    n_teacher_preds.append(teacher_preds)
+                    n_teacher_preds.append(unnormalize_preds(teacher_preds))
                     n_teacher_features.append(teacher_features)
             n_teacher_preds = torch.stack(n_teacher_preds)
             n_teacher_features = torch.stack(n_teacher_features)
@@ -112,6 +112,7 @@ class UncertaintyLogger:
             self.teacher_model.eval()
             with torch.no_grad():
                 teacher_preds, _, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
+                teacher_preds = unnormalize_preds(teacher_preds)
 
             self.add_uncertainty('pred', teacher_preds)
             self.add_uncertainty('label', labels)
