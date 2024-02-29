@@ -17,7 +17,7 @@ class UncertaintyLogger:
         self.teacher_model = None
         self.data_dir = data_dir
         self.dataloader = None
-        self.num_samples_teacher = 100
+        self.num_samples_teacher = 50
         self.uncertainties = {}
 
         self.create_model()
