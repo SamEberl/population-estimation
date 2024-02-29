@@ -1,5 +1,5 @@
 info:
-  info: 'dropout=0.3 , l2_reg=0.3 & augs=0.3 | try normalize labels no sig | 20% data | full supervised'
+  info: 'ssl + judge | try normalize labels no sig | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -22,10 +22,10 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: False
-  reduce_supervised: False
+  unlabeled_data: True
+  reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
@@ -42,8 +42,8 @@ train_params:
   beta2: 0.999
   ema_alpha: 0.95
   seed: 42
-  num_samples_teacher: 100
-  use_judge: False
+  num_samples_teacher: 50
+  use_judge: True
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
