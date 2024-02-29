@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 class UncertaintyLogger:
     def __init__(self,
-                 retrain_from='convnextv2_atto.fcmae_2024_02_07-19_30_14.pt',
+                 retrain_from='convnextv2_atto.fcmae_2024_02_07-19_30_14',
                  data_dir="/home/pop-dens/data/So2Sat_POP_Part1"):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.retrain_from = retrain_from
@@ -33,7 +33,7 @@ class UncertaintyLogger:
                                                     unsupervised_factor=1,
                                                     drop_rate=0).to(self.device)
         # Retrain from checkpoint
-        self.teacher_model.load_state_dict(torch.load(os.path.join('/home/sameberl/models', self.retrain_from)))
+        self.teacher_model.load_state_dict(torch.load(os.path.join('/home/sameberl/models', self.retrain_from + '.pt')))
 
     def create_dataloader(self):
         data = []
@@ -129,7 +129,7 @@ class UncertaintyLogger:
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
 
-retrain_from = 'convnextv2_atto.fcmae_2024_02_28-14_18_29.pt'
+retrain_from = 'convnextv2_atto.fcmae_2024_02_28-14_18_29'
 print(f'Get uncertainties from {retrain_from}')
 uncertainty_logger = UncertaintyLogger(retrain_from=retrain_from)
 uncertainty_logger.get_uncertainties()
