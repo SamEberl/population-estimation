@@ -1,5 +1,5 @@
 info:
-  info: 'ssl + no judge | try normalize labels no sig | 20% data | 20% supervised'
+  info: 'ssl + no judge | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -25,7 +25,7 @@ data_params:
   reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: True
-  reduce_supervised: True
+  reduce_supervised: False
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
