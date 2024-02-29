@@ -82,7 +82,6 @@ def forward_unsupervised(student_model,
         return None
     else:
         student_preds, student_features, student_data_uncertainty = student_model(student_inputs)
-
         teacher_preds, teacher_features, teacher_data_uncertainty = teacher_model(teacher_inputs)
         if judge.use_judge:
             judge.add_pred_var_pair(teacher_preds, teacher_data_uncertainty)

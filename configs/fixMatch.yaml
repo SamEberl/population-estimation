@@ -1,5 +1,5 @@
 info:
-  info: 'ssl + judge | try normalize labels no sig | full data | 20% supervised'
+  info: 'ssl + no judge | try normalize labels no sig | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -43,7 +43,7 @@ train_params:
   ema_alpha: 0.95
   seed: 42
   num_samples_teacher: 50
-  use_judge: True
+  use_judge: False
 
 save_dirs:
   log_save_dir: "/home/sameberl/logs/"
