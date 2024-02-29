@@ -1,5 +1,5 @@
 info:
-  info: 'ssl + no judge | try normalize labels no sig | 20% data | full supervised'
+  info: 'ssl norm triplet + no judge | try normalize labels no sig | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
