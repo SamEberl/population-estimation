@@ -1,5 +1,5 @@
 info:
-  info: 'ssl cosine + no judge + augs | Aleatoric + all channels | full data | full supervised'
+  info: 'ssl cosine + no judge + augs | L1Uncertainty + all channels | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
