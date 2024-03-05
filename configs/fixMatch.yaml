@@ -5,7 +5,7 @@ model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'Aleatoric'
+  supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'cosine'
   unsupervised_factor: 1
   retrain: False
