@@ -1,5 +1,5 @@
 info:
-  info: 'bigger head | ssl cosine + no judge + no augs | L1Uncertainty + RGB only | 20% data | full supervised'
+  info: 'bigger head | ssl cosine + no augs | L1Uncertainty + RGB only | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
