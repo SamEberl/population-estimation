@@ -1,5 +1,5 @@
 info:
-  info: 'ssl cosine + no judge + augs | L1Uncertainty + all channels | full data | full supervised'
+  info: 'bigger head | ssl cosine + no judge + augs | L1Uncertainty + RGB only | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -10,7 +10,7 @@ model_params:
   unsupervised_factor: 1
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
-  in_channels: 9
+  in_channels: 3
   nbr_outputs: 1
   drop_rate: 0.3
   #  drop_rate_teacher: 0.4
@@ -22,16 +22,16 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.5
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: True
   reduce_supervised: False
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
-  use_lu: True
-  use_lcz: True
-  use_dem: True
+  use_lu: False
+  use_lcz: False
+  use_dem: False
   use_viirs: False
 
 train_params:
