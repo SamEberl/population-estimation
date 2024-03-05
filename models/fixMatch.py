@@ -29,7 +29,17 @@ class fixMatch(nn.Module):
             nn.Dropout(p=0.1),
             nn.Linear(self.model.num_features // 4, nbr_outputs)
         )
-        self.uncertainty = nn.Linear(self.model.num_features, nbr_outputs)
+        self.fc_uncertainty = nn.Sequential(
+            nn.Linear(self.model.num_features, self.model.num_features // 2),
+            nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
+            nn.ReLU(),
+            nn.Dropout(p=0.2),
+            nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
+            nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
+            nn.ReLU(),
+            nn.Dropout(p=0.1),
+            nn.Linear(self.model.num_features // 4, nbr_outputs)
+        )
         # factor to scale unsupervised_loss to be similar to supervised_loss
         self.unsupervised_factor = unsupervised_factor  # 1_000_000 / self.model.num_features
 
@@ -58,7 +68,7 @@ class fixMatch(nn.Module):
         prediction = self.fc(features).flatten()
         # prediction = torch.pow(2, prediction)
         #prediction = torch.sigmoid(prediction) * 40_000
-        uncertainty = self.uncertainty(features).flatten()
+        uncertainty = self.fc_uncertainty(features).flatten()
         #uncertainty = torch.sigmoid(uncertainty) * 5_000
         # uncertainty = torch.pow(2, uncertainty)
         return prediction, features, uncertainty
