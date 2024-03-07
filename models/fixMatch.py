@@ -61,6 +61,7 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
+        print(f'shape: {features.shape}   mean: {features.mean()}')
         prediction = self.fc(features).flatten()
         # prediction = torch.pow(2, prediction)
         #prediction = torch.sigmoid(prediction) * 40_000
