@@ -18,6 +18,8 @@ class fixMatch(nn.Module):
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
+        self.fc_1 = nn.Linear(self.model.num_features, self.model.num_features//5)
+        self.fc_2 = nn.Linear(self.model.num_features//5, nbr_outputs)
         self.fc = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features // 2),
             nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
@@ -65,7 +67,8 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
-        prediction = self.fc(features).flatten()
+        prediction = self.fc_2(torch.relu(self.fc_1(features))).flatten()
+        ##prediction = self.fc(features).flatten()
         # prediction = torch.pow(2, prediction)
         #prediction = torch.sigmoid(prediction) * 40_000
         uncertainty = self.fc_uncertainty(features).flatten()
