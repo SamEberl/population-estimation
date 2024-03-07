@@ -18,36 +18,22 @@ class fixMatch(nn.Module):
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
-        # self.fc_1 = nn.Linear(self.model.num_features, self.model.num_features//5)
-        # self.fc_2 = nn.Linear(self.model.num_features//5, nbr_outputs)
         self.fc = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features),
-            #nn.BatchNorm1d(self.model.num_features),  # Add Batch Normalization
             nn.ReLU(),
-            # nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features, self.model.num_features // 2),
-            #nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
             nn.ReLU(),
-            #nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            #nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
             nn.ReLU(),
-            #nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features // 4, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features),
-            #nn.BatchNorm1d(self.model.num_features),  # Add Batch Normalization
             nn.ReLU(),
-            # nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features, self.model.num_features // 2),
-            #nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
             nn.ReLU(),
-            #nn.Dropout(p=0.2),
             nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            #nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
             nn.ReLU(),
-            #nn.Dropout(p=0.1),
             nn.Linear(self.model.num_features // 4, nbr_outputs)
         )
         # factor to scale unsupervised_loss to be similar to supervised_loss
@@ -75,7 +61,6 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
-        ##prediction = self.fc_2(torch.relu(self.fc_1(features))).flatten()
         prediction = self.fc(features).flatten()
         # prediction = torch.pow(2, prediction)
         #prediction = torch.sigmoid(prediction) * 40_000
