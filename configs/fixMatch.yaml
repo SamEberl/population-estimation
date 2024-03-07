@@ -1,12 +1,12 @@
 info:
-  info: 'bigger head | no ssl + no augs | L1Uncertainty + RGB only | 20% data | full supervised'
+  info: 'bigger head | triplet ssl + no augs | L1Uncertainty + RGB only | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models
   pretrained: True
   supervised_criterion: 'L1UncertaintyLoss'
-  unsupervised_criterion: 'cosine'
+  unsupervised_criterion: 'triplet'
   unsupervised_factor: 1
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
@@ -24,7 +24,7 @@ data_params:
   reduce_zeros_percent: 0.5
   reduce_data: True
   reduce_data_percent: 0.8
-  unlabeled_data: False
+  unlabeled_data: True
   reduce_supervised: False
   reduce_supervised_percent: 0.8
   seed: 42
