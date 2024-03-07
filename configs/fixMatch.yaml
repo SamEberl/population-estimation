@@ -1,5 +1,5 @@
 info:
-  info: 'try old head | no ssl + no augs | L1Uncertainty | 20% data | full supervised'
+  info: 'try bigger head no dropout | no ssl + no augs | L1Uncertainty | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
