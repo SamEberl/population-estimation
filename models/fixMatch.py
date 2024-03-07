@@ -21,23 +21,31 @@ class fixMatch(nn.Module):
         # self.fc_1 = nn.Linear(self.model.num_features, self.model.num_features//5)
         # self.fc_2 = nn.Linear(self.model.num_features//5, nbr_outputs)
         self.fc = nn.Sequential(
+            nn.Linear(self.model.num_features, self.model.num_features),
+            #nn.BatchNorm1d(self.model.num_features),  # Add Batch Normalization
+            nn.ReLU(),
+            # nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features, self.model.num_features // 2),
-            nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
+            #nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
             nn.ReLU(),
             #nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
+            #nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
             nn.ReLU(),
             #nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features // 4, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
+            nn.Linear(self.model.num_features, self.model.num_features),
+            #nn.BatchNorm1d(self.model.num_features),  # Add Batch Normalization
+            nn.ReLU(),
+            # nn.Dropout(p=0.0),
             nn.Linear(self.model.num_features, self.model.num_features // 2),
-            nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
+            #nn.BatchNorm1d(self.model.num_features // 2),  # Add Batch Normalization
             nn.ReLU(),
             #nn.Dropout(p=0.2),
             nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
+            #nn.BatchNorm1d(self.model.num_features // 4),  # Add Batch Normalization
             nn.ReLU(),
             #nn.Dropout(p=0.1),
             nn.Linear(self.model.num_features // 4, nbr_outputs)
