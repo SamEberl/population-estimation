@@ -3,7 +3,7 @@ info:
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'efficientnet_b0.fcmae'  # choose from timm models
+  pretrained_weights: 'efficientnet_b0'  # choose from timm models
   pretrained: True
   supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
