@@ -1,5 +1,5 @@
 info:
-  info: 'try efficientnet | no ssl + augs | L1Uncertainty | 20% data | full supervised'
+  info: 'try efficientnet + diff norm | no ssl + augs | L1Uncertainty | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'

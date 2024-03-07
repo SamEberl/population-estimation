@@ -52,8 +52,7 @@ def forward_supervised(student_model,
     logger.add_metric(f'Loss-Supervised-{supervised_loss_name}', split, supervised_loss)
     logger.add_metric('Observe-R2', split, F.mse_loss(student_preds, labels, reduction='mean'))
     logger.add_metric('Observe-Bias', split, CalcBias.forward(student_preds, labels))
-    logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels,
-                                                          reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
+    logger.add_metric('Loss-Compare-L1', split, F.l1_loss(student_preds, labels, reduction='mean'))  # loss_mae = torch.nn.functional.l1_loss(student_preds, labels)
     logger.add_metric('Loss-Compare-RMSE', split, torch.sqrt(F.mse_loss(student_preds, labels, reduction='mean')))
     logger.add_metric('Uncertainty_Predicted', split, torch.mean(student_data_uncertainty))
     # logger.add_metric('Loss-Uncertainty', split, uncertainty_loss)
