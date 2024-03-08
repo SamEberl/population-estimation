@@ -1,5 +1,5 @@
 info:
-  info: 'efficientnet + 10k normalize | no ssl + augs | Aleatoric | 20% data | full supervised'
+  info: 'efficientnet + 1k normalize | no ssl + augs | Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
