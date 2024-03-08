@@ -18,6 +18,7 @@ class fixMatch(nn.Module):
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
+        self.add_dropout_to_convnext(drop_rate)
         self.fc = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features // 2),
             nn.ReLU(),
@@ -58,6 +59,18 @@ class fixMatch(nn.Module):
                                'cosine': CosineSimilarity()}
 
         self.unsupervised_criterion = unsupervised_losses[unsupervised_criterion]
+
+    def add_dropout_to_convnext(self, drop_rate):
+        # Loop through modules
+        for name, module in self.model.named_modules():
+            # Check if module is a bottleneck layer (might involve specific class names)
+            print(f'name: {name} - module: {module}')
+        exit()
+            """
+            if isinstance(module, Bottleneck):  # Replace with appropriate class name
+                # Insert dropout layer after the activation (e.g., ReLU) within the block
+                module.relu = torch.nn.Sequential(module.relu, torch.nn.Dropout(p=drop_rate))  # Adjust dropout rate (p)
+            """
 
     def forward(self, x):
         features = self.model(x)
