@@ -2,6 +2,7 @@ import math
 import csv
 import numpy as np
 import os
+import random
 from models import *
 from dataset import PopDataset, unnormalize_preds
 from torch.utils.data import DataLoader
@@ -37,7 +38,7 @@ class UncertaintyLogger:
         # Retrain from checkpoint
         self.teacher_model.load_state_dict(torch.load(os.path.join('/home/sameberl/models', self.retrain_from + '.pt')))
 
-    def create_dataloader(self):
+    def create_dataloader(self, reduce_zeros=False, reduce_zeros_percent=0.93):
         data = []
         nbr_not_found = 0
         nbr_found = 0
@@ -67,6 +68,12 @@ class UncertaintyLogger:
                         else:
                             nbr_not_found += 1
         print(f'In: {data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
+        if reduce_zeros:
+            for i, data_point in reversed(list(enumerate(data))):
+                _, label = data_point
+                if int(label) == 0:
+                    if random.random() <= reduce_zeros_percent:
+                        del data[i]
 
         use_channels = {'use_spring_rgb': True,
                         'use_lu': False,

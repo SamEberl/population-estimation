@@ -45,11 +45,12 @@ def get_data(data_dir, split, reduce_zeros, reduce_zeros_percent):
                     data.append((input_path, label))
                 else:
                     nbr_not_found += 1
-    if split == 'train':
-        for i, data_point in enumerate(data):
+    if split == 'train' and reduce_zeros:
+        for i, data_point in reversed(list(enumerate(data))):
             _, label = data_point
-            if int(label) == 0 and reduce_zeros:
-                del data[i]
+            if int(label) == 0:
+                if random.random() <= reduce_zeros_percent:
+                    del data[i]
     print(f'In: {data_sub_dir} \n  #found: {nbr_found} \n  #notFound: {nbr_not_found}')
     return data
 
