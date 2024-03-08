@@ -110,22 +110,15 @@ class UncertaintyLogger:
                     # print(f'teacher_preds: {teacher_preds}')
                     # print(f'teacher_features: {teacher_features}')
                     # print(f'teacher_data_uncert: {teacher_data_uncertainty}')
-                    n_teacher_preds.append(unnormalize_preds(teacher_preds))
+                    n_teacher_preds.append(teacher_preds)
                     n_teacher_features.append(teacher_features)
-            n_teacher_preds = torch.stack(n_teacher_preds)
-            n_teacher_features = torch.stack(n_teacher_features)
-
-            # print(f'n_teacher_preds: {n_teacher_preds}')
-            # print(f'n_teacher_features: {n_teacher_features}')
-
             # Compute model uncertainty
+            n_teacher_preds = torch.stack(n_teacher_preds)
             teacher_model_uncertainty = n_teacher_preds.var(dim=0)
 
             # Compute spread: Variance of L2-Distances between features
+            n_teacher_features = torch.stack(n_teacher_features)
             spread = torch.sqrt((n_teacher_features - n_teacher_features.mean(dim=0)).pow(2).sum(dim=-1)).var(dim=0)
-
-            # print(f'teacher_model_uncertainty: {teacher_model_uncertainty}')
-            # print(f'spread: {spread}')
 
             # Compute data uncertainty
             self.teacher_model.eval()
