@@ -66,7 +66,7 @@ class fixMatch(nn.Module):
 
     def add_dropout_to_convnext(self, drop_rate):
         # Loop through modules
-        for module in model.modules():
+        for module in self.model.modules():
             if isinstance(module, torch.nn.Dropout):
                 module.p = 0.9
         for name, module in self.model.named_modules():
