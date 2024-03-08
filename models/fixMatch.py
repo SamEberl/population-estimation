@@ -4,10 +4,6 @@ import torch.nn.functional as F
 from timm import create_model
 from .losses import *
 
-# model = create_model('convnextv2_atto.fcmae', pretrained=False, drop_rate=0.3, num_classes=0,
-#                           in_chans=3)
-# print('here')
-
 
 class fixMatch(nn.Module):
     def __init__(self,
@@ -22,7 +18,7 @@ class fixMatch(nn.Module):
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
-        self.add_dropout_to_convnext(drop_rate)
+        self.set_dropout(drop_rate)
         self.fc = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features // 2),
             nn.ReLU(),
@@ -64,23 +60,11 @@ class fixMatch(nn.Module):
 
         self.unsupervised_criterion = unsupervised_losses[unsupervised_criterion]
 
-    def add_dropout_to_convnext(self, drop_rate):
+    def set_dropout(self, drop_rate):
         # Loop through modules
         for module in self.model.modules():
             if isinstance(module, torch.nn.Dropout):
-                module.p = 0.9
-        for name, module in self.model.named_modules():
-            # Check if module is a bottleneck layer (might involve specific class names)
-            # if isinstance(module, torch.nn.Dropout):
-            #     module.p = 0.9
-            self.model.eval()
-            print(f'module: {module}')
-            """
-            if isinstance(module, Bottleneck):  # Replace with appropriate class name
-                # Insert dropout layer after the activation (e.g., ReLU) within the block
-                module.relu = torch.nn.Sequential(module.relu, torch.nn.Dropout(p=drop_rate))  # Adjust dropout rate (p)
-            """
-        exit()
+                module.p = drop_rate
 
 
     def forward(self, x):
