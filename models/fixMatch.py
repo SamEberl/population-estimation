@@ -65,12 +65,13 @@ class fixMatch(nn.Module):
         for name, module in self.model.named_modules():
             # Check if module is a bottleneck layer (might involve specific class names)
             print(f'name: {name} - module: {module}')
-        exit()
             """
             if isinstance(module, Bottleneck):  # Replace with appropriate class name
                 # Insert dropout layer after the activation (e.g., ReLU) within the block
                 module.relu = torch.nn.Sequential(module.relu, torch.nn.Dropout(p=drop_rate))  # Adjust dropout rate (p)
             """
+        exit()
+
 
     def forward(self, x):
         features = self.model(x)
