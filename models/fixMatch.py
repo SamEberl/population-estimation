@@ -64,8 +64,8 @@ class fixMatch(nn.Module):
         # Loop through modules
         for module in self.model.modules():
             if isinstance(module, torch.nn.Dropout):
-                module.p = drop_rate
-
+                #module.p = drop_rate
+                print(f'drop_rate: {module.p}')
 
     def forward(self, x):
         features = self.model(x)
