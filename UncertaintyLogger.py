@@ -73,7 +73,7 @@ class UncertaintyLogger:
                         'use_lcz': False,
                         'use_dem': False,
                         'use_viirs': False}
-        data = data[:4000]
+        #data = data[:4000]
         dataset = PopDataset(data, split='valid', transform_params=None, use_channels=use_channels)
         self.dataloader = DataLoader(dataset,
                                      batch_size=32,
