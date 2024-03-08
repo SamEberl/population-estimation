@@ -4,6 +4,10 @@ import torch.nn.functional as F
 from timm import create_model
 from .losses import *
 
+# model = create_model('convnextv2_atto.fcmae', pretrained=False, drop_rate=0.3, num_classes=0,
+#                           in_chans=3)
+# print('here')
+
 
 class fixMatch(nn.Module):
     def __init__(self,
@@ -62,6 +66,9 @@ class fixMatch(nn.Module):
 
     def add_dropout_to_convnext(self, drop_rate):
         # Loop through modules
+        for module in model.modules():
+            if isinstance(module, torch.nn.Dropout):
+                module.p = 0.9
         for name, module in self.model.named_modules():
             # Check if module is a bottleneck layer (might involve specific class names)
             # if isinstance(module, torch.nn.Dropout):
