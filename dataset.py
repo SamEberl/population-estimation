@@ -478,8 +478,8 @@ def normalize_labels(labels, mean=1085, std=2800):
     """
     Normalizes the labels by applying Z-score normalization.
     """
-    # mean = 4
-    # std = 3
+    mean = 10_000
+    std = 10_000
     # log_labels = torch.log1p(labels)
     # log_norm_labels = (log_labels - mean) / std
     norm_labels = (labels-mean) / std
@@ -490,8 +490,8 @@ def unnormalize_preds(norm_preds, mean=1085, std=2800):
     """
     UnNormalizes the predictions by reversing Z-score normalization.
     """
-    # mean = 4
-    # std = 3
+    mean = 10_000
+    std = 10_000
     # log_preds = (log_norm_preds * std) + mean
     # preds = torch.exp(log_preds) - 1
     preds = (norm_preds * std) + mean
