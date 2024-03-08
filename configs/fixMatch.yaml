@@ -1,11 +1,11 @@
 info:
-  info: 'try efficientnet + diff norm + aleatoric | no ssl + augs | L1Uncertainty | 20% data | full supervised'
+  info: 'try convnext + diff norm | no ssl + augs | L1Uncertainty | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
-  pretrained_weights: 'efficientnet_b0'  # choose from timm models
+  pretrained_weights: 'convnextv2_atto.fcmae'  # choose from timm models  # efficientnet_b0
   pretrained: True
-  supervised_criterion: 'Aleatoric'
+  supervised_criterion: 'L1UncertaintyLoss'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1
   retrain: False
