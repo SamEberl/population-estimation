@@ -10,9 +10,11 @@ from tqdm import tqdm
 
 class UncertaintyLogger:
     def __init__(self,
+                 pretrained_weights='convnextv2_atto.fcmae',
                  retrain_from='convnextv2_atto.fcmae_2024_02_07-19_30_14',
                  data_dir="/home/pop-dens/data/So2Sat_POP_Part1"):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.pretrained_weights = pretrained_weights
         self.retrain_from = retrain_from
         self.teacher_model = None
         self.data_dir = data_dir
@@ -24,7 +26,7 @@ class UncertaintyLogger:
         self.create_dataloader()
 
     def create_model(self):
-        self.teacher_model = ssl_models['fixMatch'](pretrained_weights='convnextv2_atto.fcmae',
+        self.teacher_model = ssl_models['fixMatch'](pretrained_weights=self.pretrained_weights,
                                                     pretrained=False,
                                                     in_channels=3,
                                                     nbr_outputs=1,
@@ -139,7 +141,8 @@ class UncertaintyLogger:
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
 
+pretrained_weights = 'efficientnet_b0'
 retrain_from = 'efficientnet_b0_2024_03_08-10_03_43'
 print(f'Get uncertainties from {retrain_from}')
-uncertainty_logger = UncertaintyLogger(retrain_from=retrain_from)
+uncertainty_logger = UncertaintyLogger(pretrained_weights=pretrained_weights, retrain_from=retrain_from)
 uncertainty_logger.get_uncertainties()
