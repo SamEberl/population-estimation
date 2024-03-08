@@ -63,6 +63,7 @@ class fixMatch(nn.Module):
     def set_dropout(self, drop_rate):
         # Loop through modules
         for module in self.model.modules():
+            print(f'module: {module}')
             if isinstance(module, torch.nn.Dropout):
                 #module.p = drop_rate
                 print(f'drop_rate: {module.p}')
