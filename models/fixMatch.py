@@ -65,7 +65,7 @@ class fixMatch(nn.Module):
         for name, module in self.model.named_modules():
             # Check if module is a bottleneck layer (might involve specific class names)
             if isinstance(module, torch.nn.Dropout):
-                module.p = 0.3
+                module.p = 0.9
             print(f'module: {module}')
             """
             if isinstance(module, Bottleneck):  # Replace with appropriate class name
