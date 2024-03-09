@@ -125,7 +125,7 @@ class UncertaintyLogger:
             teacher_data_uncertainty = n_teacher_data_uncertainties.mean(dim=0)
 
             # Get pred
-            teacher_preds = n_teacher_preds.mean(dim=0)
+            teacher_preds = unnormalize_preds(n_teacher_preds.mean(dim=0))
 
             # Compute data uncertainty
             # self.teacher_model.eval()
