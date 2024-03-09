@@ -1,5 +1,5 @@
 info:
-  info: 'efficientnet | no ssl + augs | Aleatoric | full data | full supervised'
+  info: 'more drop, less l2 | no ssl + augs | Aleatoric | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
