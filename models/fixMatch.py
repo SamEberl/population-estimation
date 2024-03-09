@@ -29,7 +29,7 @@ class fixMatch(nn.Module):
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
-            nn.Linear(self.model.num_features + 1, self.model.num_features // 2),
+            nn.Linear(self.model.num_features, self.model.num_features // 2),
             nn.ReLU(),
             nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
             nn.ReLU(),
