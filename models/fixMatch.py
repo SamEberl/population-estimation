@@ -72,7 +72,7 @@ class fixMatch(nn.Module):
         prediction = self.fc(features).flatten()
         # prediction = torch.pow(2, prediction)
         #prediction = torch.sigmoid(prediction) * 40_000
-        features_u = torch.cat((features, prediction), dim=1)
+        features_u = torch.cat((features, prediction.unsqueeze(1)), dim=1)
         uncertainty = self.fc_uncertainty(features_u).flatten()
         #uncertainty = torch.sigmoid(uncertainty) * 5_000
         # uncertainty = torch.pow(2, uncertainty)
