@@ -42,7 +42,8 @@ class UncertaintyLogger:
         data = []
         nbr_not_found = 0
         nbr_found = 0
-        for split in ['train', 'test']:
+        #for split in ['train', 'test']:
+        for split in ['test']:
             data_sub_dir = os.path.join(self.data_dir, split)
             for city_folder in os.listdir(data_sub_dir):
                 # Load the csv file that maps datapoint names to folder names
@@ -103,15 +104,14 @@ class UncertaintyLogger:
 
             n_teacher_preds = []
             n_teacher_features = []
+            n_teacher_data_uncertainties = []
             self.teacher_model.train()  # Ensure dropout is active for approximating Bayesian-NN
             with torch.no_grad():  # Ensure no gradients are computed
                 for _ in range(self.num_samples_teacher):
                     teacher_preds, teacher_features, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
-                    # print(f'teacher_preds: {teacher_preds}')
-                    # print(f'teacher_features: {teacher_features}')
-                    # print(f'teacher_data_uncert: {teacher_data_uncertainty}')
                     n_teacher_preds.append(teacher_preds)
                     n_teacher_features.append(teacher_features)
+                    n_teacher_data_uncertainties.append(teacher_data_uncertainty)
             # Compute model uncertainty
             n_teacher_preds = torch.stack(n_teacher_preds)
             teacher_model_uncertainty = n_teacher_preds.var(dim=0)
@@ -120,11 +120,18 @@ class UncertaintyLogger:
             n_teacher_features = torch.stack(n_teacher_features)
             spread = torch.sqrt((n_teacher_features - n_teacher_features.mean(dim=0)).pow(2).sum(dim=-1)).var(dim=0)
 
+            # Get data uncertainty
+            n_teacher_data_uncertainties = torch.stack(n_teacher_data_uncertainties)
+            teacher_data_uncertainty = n_teacher_data_uncertainties.mean(dim=0)
+
+            # Get pred
+            teacher_preds = n_teacher_preds.mean(dim=0)
+
             # Compute data uncertainty
-            self.teacher_model.eval()
-            with torch.no_grad():
-                teacher_preds, _, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
-                teacher_preds = unnormalize_preds(teacher_preds)
+            # self.teacher_model.eval()
+            # with torch.no_grad():
+            #     teacher_preds, _, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
+            #     teacher_preds = unnormalize_preds(teacher_preds)
 
             self.add_uncertainty('pred', teacher_preds)
             self.add_uncertainty('label', labels)
