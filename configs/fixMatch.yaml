@@ -1,5 +1,5 @@
 info:
-  info: 'more drop, less l2 | no ssl + augs | Aleatoric | full data | full supervised'
+  info: ' add pred for uncertainty | more drop, less l2, aug p=0.5 | no ssl + Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -55,16 +55,16 @@ transform_params:
   noise_mean: 0
   noise_std_min: 0.001
   noise_std_max: 0.07
-  noise_p: 0.3
+  noise_p: 0.5
   apply_brightness: True
   brightness_range:
     - 0.8
     - 1.2
-  brightness_p: 0.3
+  brightness_p: 0.5
   apply_contrast: True
   contrast_range:
     - 0.8
     - 1.2
-  contrast_p: 0.3
+  contrast_p: 0.5
 
 
