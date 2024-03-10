@@ -1,5 +1,5 @@
 info:
-  info: 'try smaller head | efficientnet + rgb | no ssl + Aleatoric | full data | full supervised'
+  info: 'try smaller head | efficientnet + rgb | no ssl + Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -24,7 +24,7 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.93
-  reduce_data: False
+  reduce_data: True
   reduce_data_percent: 0.8
   unlabeled_data: False
   reduce_supervised: False
