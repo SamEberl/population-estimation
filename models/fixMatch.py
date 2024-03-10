@@ -34,7 +34,7 @@ class fixMatch(nn.Module):
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
-            nn.Linear(self.model.num_features + 1, self.model.num_features // 8),
+            nn.Linear(self.model.num_features, self.model.num_features // 8),
             nn.ReLU(),
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
@@ -71,8 +71,8 @@ class fixMatch(nn.Module):
     def forward(self, x):
         features = self.model(x)
         prediction = self.fc(features).flatten()
-        features_u = torch.cat((features, prediction.unsqueeze(1)), dim=1)
-        uncertainty = self.fc_uncertainty(features_u).flatten()
+        #features_u = torch.cat((features, prediction.unsqueeze(1)), dim=1)
+        uncertainty = self.fc_uncertainty(features).flatten()
         return prediction, features, uncertainty
 
     def loss_supervised(self, predictions, labels):
