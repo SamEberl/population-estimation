@@ -1,5 +1,5 @@
 info:
-  info: 'try smaller head + no pred for uncert head | efficientnet + rgb | no ssl + Aleatoric | 20% data | full supervised'
+  info: 'try new augs | no drop_path_rate | no ssl + Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -58,20 +58,20 @@ transform_params:
   noise_std_min: 0.001
   noise_std_max: 0.07
   noise_p: 0.5
-  apply_brightness: True
+  apply_brightness: False
   brightness_range:
     - 0.8
     - 1.2
   brightness_p: 0.5
-  apply_contrast: True
+  apply_contrast: False
   contrast_range:
     - 0.8
     - 1.2
   contrast_p: 0.5
-  apply_color_jitter: False
+  apply_color_jitter: True
   jitter_strength: 1
   jitter_p: 0.8
-  apply_color_drop: False
+  apply_color_drop: True
   drop_p: 0.2
 
 
