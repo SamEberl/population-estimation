@@ -1,5 +1,5 @@
 info:
-  info: 'try new augs | no drop_path_rate | no ssl + Aleatoric | 20% data | full supervised'
+  info: 'try bit bigger head | no drop_path_rate | no ssl + Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
