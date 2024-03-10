@@ -471,11 +471,11 @@ def color_jitter(image_bands, s=1.0, p=0.5):
             transforms.ColorJitter(brightness=0.8*s, contrast=0.8*s, saturation=0.8*s, hue=0.2*s)
         ])
         # Apply the transform to each channel individually if more than 3 channels
-        if image_bands.size(0) <= 3:
+        if image_bands.size[0] <= 3:
             return jitter_transform(image_bands)
         else:
             # Split the tensor into individual channels, apply jitter, then stack them back together
-            channels = [jitter_transform(image_bands[i:i+1]) for i in range(image_bands.size(0))]
+            channels = [jitter_transform(image_bands[i:i+1]) for i in range(image_bands.size[0])]
             return torch.cat(channels, dim=0)
     else:
         return image_bands
@@ -494,11 +494,11 @@ def color_drop(image_bands, p=0.5):
     if np.random.rand() < p:
         # Convert to grayscale then expand to original channel size
         grayscale = TF.rgb_to_grayscale(image_bands[:3], num_output_channels=3)
-        if image_bands.size(0) == 3:
+        if image_bands.size[0] == 3:
             return grayscale
         else:
             # Repeat the grayscale layer to match the input channel count
-            return grayscale.repeat(image_bands.size(0)//3, 1, 1)
+            return grayscale.repeat(image_bands.size[0]//3, 1, 1)
     else:
         return image_bands
 
