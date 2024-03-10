@@ -1,5 +1,5 @@
 info:
-  info: 'dropout in head | smaller head + drop_path_rate + new augs | no ssl + Aleatoric | 20% data | full supervised'
+  info: 'higher dropout | smaller head + drop_path_rate + new augs | no ssl + Aleatoric | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -13,8 +13,8 @@ model_params:
   in_channels: 3
   nbr_outputs: 1
   projection_size: 128
-  drop_rate: 0.2
-  drop_path_rate: 0.5
+  drop_rate: 0.3
+  drop_path_rate: 0.6
   # drop_rate_teacher: 0.4
 
 data_params:

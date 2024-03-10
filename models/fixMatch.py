@@ -31,13 +31,11 @@ class fixMatch(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features // 8),
             nn.ReLU(),
-            nn.Dropout(p=drop_rate),
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
             nn.Linear(self.model.num_features, self.model.num_features // 8),
             nn.ReLU(),
-            nn.Dropout(p=drop_rate),
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
         # factor to scale unsupervised_loss to be similar to supervised_loss
