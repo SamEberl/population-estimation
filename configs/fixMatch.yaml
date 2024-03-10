@@ -1,5 +1,5 @@
 info:
-  info: 'all channels | more drop, less l2, aug p=0.5 | no ssl + Aleatoric | full data | full supervised'
+  info: 'all channels | more l2 + larger bs | no ssl + Aleatoric | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -17,8 +17,8 @@ model_params:
 
 data_params:
   data_dir: "/home/pop-dens/data/So2Sat_POP_Part1"
-  train_batch_size: 32
-  val_batch_size: 32
+  train_batch_size: 128
+  val_batch_size: 128
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.93
@@ -37,7 +37,7 @@ data_params:
 train_params:
   LR: 0.00001
   max_epochs: 100
-  L2_reg: 0.05
+  L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
