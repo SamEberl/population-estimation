@@ -125,13 +125,13 @@ class UncertaintyLogger:
             teacher_data_uncertainty = n_teacher_data_uncertainties.mean(dim=0)
 
             # Get pred
-            teacher_preds = unnormalize_preds(n_teacher_preds.mean(dim=0))
+            # teacher_preds = unnormalize_preds(n_teacher_preds.mean(dim=0))
 
             # Compute data uncertainty
-            # self.teacher_model.eval()
-            # with torch.no_grad():
-            #     teacher_preds, _, teacher_data_uncertainty = self.teacher_model(teacher_inputs)
-            #     teacher_preds = unnormalize_preds(teacher_preds)
+            self.teacher_model.eval()
+            with torch.no_grad():
+                teacher_preds, _, _ = self.teacher_model(teacher_inputs)
+                teacher_preds = unnormalize_preds(teacher_preds)
 
             self.add_uncertainty('pred', teacher_preds)
             self.add_uncertainty('label', labels)

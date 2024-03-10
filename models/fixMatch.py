@@ -15,25 +15,26 @@ class fixMatch(nn.Module):
                  unsupervised_criterion='contrastive',
                  unsupervised_factor=1e5,
                  drop_rate=0,
+                 drop_path_rate=0,
+                 projection_size=128,
                  **kwargs):
         super(fixMatch, self).__init__()
-        self.model = create_model(pretrained_weights, pretrained=pretrained, drop_rate=drop_rate, num_classes=0, in_chans=in_channels)
-        self.set_dropout(drop_rate)
+        self.model = create_model(pretrained_weights, pretrained=pretrained,
+                                  drop_rate=drop_rate, drop_path_rate=drop_path_rate,
+                                  num_classes=0, in_chans=in_channels)
+        #self.set_dropout(drop_rate)
+        self.projection = nn.Sequential(
+            nn.Linear(self.model.num_features, 256),
+            nn.ReLU(),
+            nn.Linear(256, projection_size),
+        )
         self.fc = nn.Sequential(
-            nn.Linear(self.model.num_features, self.model.num_features // 2),
-            nn.ReLU(),
-            nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            nn.ReLU(),
-            nn.Linear(self.model.num_features // 4, self.model.num_features // 8),
+            nn.Linear(self.model.num_features, self.model.num_features // 8),
             nn.ReLU(),
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
         self.fc_uncertainty = nn.Sequential(
-            nn.Linear(self.model.num_features + 1, self.model.num_features // 2),
-            nn.ReLU(),
-            nn.Linear(self.model.num_features // 2, self.model.num_features // 4),
-            nn.ReLU(),
-            nn.Linear(self.model.num_features // 4, self.model.num_features // 8),
+            nn.Linear(self.model.num_features + 1, self.model.num_features // 8),
             nn.ReLU(),
             nn.Linear(self.model.num_features // 8, nbr_outputs)
         )
@@ -68,14 +69,10 @@ class fixMatch(nn.Module):
                 print(f'drop_rate: {module.p}')
 
     def forward(self, x):
-        features = self.model(x) # B x 320
+        features = self.model(x)
         prediction = self.fc(features).flatten()
-        # prediction = torch.pow(2, prediction)
-        #prediction = torch.sigmoid(prediction) * 40_000
         features_u = torch.cat((features, prediction.unsqueeze(1)), dim=1)
         uncertainty = self.fc_uncertainty(features_u).flatten()
-        #uncertainty = torch.sigmoid(uncertainty) * 5_000
-        # uncertainty = torch.pow(2, uncertainty)
         return prediction, features, uncertainty
 
     def loss_supervised(self, predictions, labels):
