@@ -1,5 +1,5 @@
 info:
-  info: 'higher dropout | smaller head + drop_path_rate + new augs | no ssl + Aleatoric | full data | full supervised'
+  info: 'full data + drop_path_rate + new augs | no ssl + Aleatoric | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
