@@ -289,16 +289,6 @@ def apply_transforms(image_bands, transform_params):
             image_bands,
         )
 
-    if transform_params['apply_noise']:
-        # Apply gaussian noise
-        image_bands = add_gaussian_noise(
-            image_bands,
-            mean=transform_params['noise_mean'],
-            std_min=transform_params['noise_std_min'],
-            std_max=transform_params['noise_std_max'],
-            p=transform_params['noise_p']
-        )
-
     if transform_params['apply_brightness']:
         # Adjust brightness
         image_bands = adjust_brightness(
@@ -315,19 +305,14 @@ def apply_transforms(image_bands, transform_params):
             p=transform_params['contrast_p']
         )
 
-    if transform_params['apply_color_jitter']:
-        # Apply color jitter
-        image_bands = color_jitter(
+    if transform_params['apply_noise']:
+        # Apply gaussian noise
+        image_bands = add_gaussian_noise(
             image_bands,
-            s=transform_params['jitter_strength'],
-            p=transform_params['jitter_p']
-        )
-
-    if transform_params['apply_color_drop']:
-        # Apply color drop
-        image_bands = color_drop(
-            image_bands,
-            p=transform_params['drop_p']
+            mean=transform_params['noise_mean'],
+            std_min=transform_params['noise_std_min'],
+            std_max=transform_params['noise_std_max'],
+            p=transform_params['noise_p']
         )
 
     image_bands = np.clip(image_bands, 0, 1)
@@ -450,56 +435,6 @@ def adjust_contrast(image_bands, contrast_range=(0.8, 1.2), p=0.5):
             image_bands[i] = (image_bands[i] - channel_mean) * contrast_factor + channel_mean
 
         return image_bands
-    else:
-        return image_bands
-
-
-def color_jitter(image_bands, s=1.0, p=0.5):
-    """
-    Conditionally apply random brightness, contrast, saturation, and hue jitter to an image in PyTorch.
-
-    Args:
-    - image_bands (torch.Tensor): Input tensor with shape (C, H, W) and expected to be in range [0, 1].
-    - s (float): Strength of color jitter in range [0, 1] (default is 1.0).
-    - p (float): Probability of applying the jitter (default is 0.5).
-
-    Returns:
-    - torch.Tensor: Jittered or original image tensor.
-    """
-    if np.random.rand() < p:
-        jitter_transform = transforms.Compose([
-            transforms.ColorJitter(brightness=0.8*s, contrast=0.8*s, saturation=0.8*s, hue=0.2*s)
-        ])
-        # Apply the transform to each channel individually if more than 3 channels
-        print(image_bands.size)
-        if image_bands.size <= 3:
-            return jitter_transform(image_bands)
-        else:
-            # Split the tensor into individual channels, apply jitter, then stack them back together
-            channels = [jitter_transform(image_bands[i:i+1]) for i in range(image_bands.size)]
-            return torch.cat(channels, dim=0)
-    else:
-        return image_bands
-
-
-def color_drop(image_bands, p=0.5):
-    """
-    Conditionally convert an image to grayscale and replicate the grayscale channel to match the original channel count.
-
-    Args:
-    - image_bands (torch.Tensor): Input tensor with shape (C, H, W).
-
-    Returns:
-    - torch.Tensor: Grayscale or original image tensor with the same number of channels as the input.
-    """
-    if np.random.rand() < p:
-        # Convert to grayscale then expand to original channel size
-        grayscale = TF.rgb_to_grayscale(image_bands[:3], num_output_channels=3)
-        if image_bands.size == 3:
-            return grayscale
-        else:
-            # Repeat the grayscale layer to match the input channel count
-            return grayscale.repeat(image_bands.size//3, 1, 1)
     else:
         return image_bands
 

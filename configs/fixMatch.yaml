@@ -58,20 +58,15 @@ transform_params:
   noise_std_min: 0.001
   noise_std_max: 0.07
   noise_p: 0.5
-  apply_brightness: False
+  apply_brightness: True
   brightness_range:
-    - 0.8
-    - 1.2
+    - 0.2
+    - 1.8
   brightness_p: 0.5
-  apply_contrast: False
+  apply_contrast: True
   contrast_range:
-    - 0.8
-    - 1.2
+    - 0.2
+    - 1.8
   contrast_p: 0.5
-  apply_color_jitter: True
-  jitter_strength: 1
-  jitter_p: 0.8
-  apply_color_drop: True
-  drop_p: 0.2
 
 
