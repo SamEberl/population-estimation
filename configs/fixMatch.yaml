@@ -1,5 +1,5 @@
 info:
-  info: 'full data + drop_path_rate + new augs | no ssl + Aleatoric | full data | full supervised'
+  info: 'less drop_path_rate + new augs | no ssl + Aleatoric | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -14,7 +14,7 @@ model_params:
   nbr_outputs: 1
   projection_size: 128
   drop_rate: 0.3
-  drop_path_rate: 0.5
+  drop_path_rate: 0.4
   # drop_rate_teacher: 0.4
 
 data_params:
