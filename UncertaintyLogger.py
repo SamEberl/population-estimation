@@ -150,7 +150,7 @@ class UncertaintyLogger:
 
 
 pretrained_weights = 'efficientnet_b0'
-retrain_from = 'efficientnet_b0_2024_03_09-09_31_04'
+retrain_from = 'efficientnet_b0_2024_03_10-16_03_41'
 print(f'Get uncertainties from {retrain_from}')
 uncertainty_logger = UncertaintyLogger(pretrained_weights=pretrained_weights, retrain_from=retrain_from)
 uncertainty_logger.get_uncertainties()
