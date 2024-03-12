@@ -1,5 +1,5 @@
 info:
-  info: 'less drop_path_rate + less l2 + new augs | no ssl + Aleatoric | full data | full supervised'
+  info: 'less drop_path_rate + new augs | no ssl + Aleatoric | full data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -38,8 +38,8 @@ data_params:
 
 train_params:
   LR: 0.00001
-  max_epochs: 100
-  L2_reg: 0.05
+  max_epochs: 200
+  L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.95
