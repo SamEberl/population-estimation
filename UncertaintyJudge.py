@@ -39,8 +39,8 @@ class UncertaintyJudge:
         self.clear()
 
     def calc_threshold_func(self, window=50, percentile=50, smoothing=10):
-        x_values = self.uncertainties
-        y_values = self.preds
+        x_values = np.array(self.uncertainties)
+        y_values = np.array(self.preds)
 
         y_values, indices = np.unique(y_values, return_index=True)
         x_values = x_values[indices]
