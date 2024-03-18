@@ -189,4 +189,6 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             writer.add_text('Parameters', param_yaml_str, 0)
         if logger.last_epoch:
             logger.save_uncertainties(config)
+            logger.print_final_stats()
+            logger.print_final_stats_latex()
         logger.clear()

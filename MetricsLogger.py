@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import os
 from datetime import datetime
+from tabulate import tabulate
 
 def calc_r2(numbers, split):
     # Filtering out the zeros and calculating the sum of the remaining numbers
@@ -107,3 +108,50 @@ class MetricsLogger:
 
             for uncertainty_name, uncertainty in self.uncertainties.items():
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
+
+    from tabulate import tabulate
+
+    def print_final_stats(self):
+        rows = []
+        for metric_name, values in self.metrics.items():
+            if 'Observe-Bias' in metric_name:
+                bias = calc_bias(values)
+                rows.append((metric_name, bias))
+            elif 'Observe-R2' in metric_name:
+                if 'train' in metric_name:
+                    r2 = calc_r2(values, 'train')
+                    rows.append((metric_name, r2))
+                elif 'valid' in metric_name:
+                    r2 = calc_r2(values, 'valid')
+                    rows.append((metric_name, r2))
+            else:
+                mean_value = sum(values) / len(values)
+                rows.append((metric_name, mean_value))
+        print(tabulate(rows, headers=['Metric', 'Value']))
+
+    def print_final_stats_latex(self):
+        # Start the table and define the header
+        latex_table = "\\begin{tabular}{l r}\n\\hline\n"
+        latex_table += "Metric & Value \\\\\n\\hline\n"
+
+        # Iterate through metrics and process them
+        for metric_name, values in self.metrics.items():
+            if 'Observe-Bias' in metric_name:
+                bias = calc_bias(values)
+                latex_table += f"{metric_name} & {bias} \\\\\n"
+            elif 'Observe-R2' in metric_name:
+                if 'train' in metric_name:
+                    r2 = calc_r2(values, 'train')
+                    latex_table += f"{metric_name} & {r2} \\\\\n"
+                elif 'valid' in metric_name:
+                    r2 = calc_r2(values, 'valid')
+                    latex_table += f"{metric_name} & {r2} \\\\\n"
+            else:
+                mean_value = sum(values) / len(values)
+                latex_table += f"{metric_name} & {mean_value} \\\\\n"
+
+        # Close the table
+        latex_table += "\\hline\n\\end{tabular}"
+
+        # Print the table
+        print(latex_table)
