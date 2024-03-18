@@ -93,7 +93,7 @@ class UncertaintyJudge:
         pred = np.array(pred.cpu().detach().numpy().flatten())
         threshold = self.threshold_func(pred)
 
-        pred_var = np.exp(uncertainty)
+        pred_var = np.exp(uncertainty.cpu().detach().numpy().flatten())
         mask = pred_var < threshold
         return mask
 
