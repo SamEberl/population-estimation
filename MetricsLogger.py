@@ -114,7 +114,7 @@ class MetricsLogger:
     def print_final_stats(self):
         # Initialize a list to hold our data
         data = []
-
+        pd.options.display.float_format = '{:.3f}'.format
         # Iterate through metrics and process them
         for metric_name, values in self.metrics.items():
             if 'Observe-Bias' in metric_name:
