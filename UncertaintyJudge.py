@@ -1,4 +1,3 @@
-import statsmodels.api as sm
 import numpy as np
 import torch
 from functools import partial
@@ -41,26 +40,6 @@ class UncertaintyJudge:
     def add_pred_var_pair(self, preds, uncertainties):
             self.preds.extend(preds.cpu().detach().numpy().flatten())
             self.uncertainties.extend(uncertainties.cpu().detach().numpy().flatten())
-
-    def calc_threshold_func_archive(self, q=0.6):
-        """
-        Fit a quantile regression model with a quantile value of 0.6.
-        Meaning 60% of the datapoints are larger than what the function predicts.
-        """
-
-        preds_log = np.log10(np.array(self.preds))
-        uncertainties_log = sm.add_constant(np.log10(np.array(self.uncertainties)))
-
-        model = sm.QuantReg(preds_log, uncertainties_log)
-        #result = model.fit(q=q, maxiter=2000)
-        result = model.fit(q=q)
-        intercept, slope = result.params
-
-        a = 10 ** intercept
-        b = slope
-
-        self.threshold_func = partial(self.power_law, a=a, b=b)
-        self.clear()
 
     def calc_threshold_func(self, window=50, percentile=50, smoothing=10):
         x_values = np.exp(np.array(self.uncertainties))  # np.exp to get variance instead of s
