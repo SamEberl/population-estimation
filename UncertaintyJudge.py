@@ -1,5 +1,6 @@
 import statsmodels.api as sm
 import numpy as np
+import torch
 from functools import partial
 from scipy.interpolate import PchipInterpolator
 
@@ -9,10 +10,33 @@ class UncertaintyJudge:
         self.uncertainties = []
         self.threshold_func = None
         self.use_judge = use_judge
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     @staticmethod
     def power_law(x, a, b):
         return a * x ** (b)
+
+    @staticmethod
+    def linear_interp1d(x, y):
+        def interpolator(x_new):
+            """
+            Interpolates the y values for new x values.
+            """
+            # Ensure x_new is a tensor for operations
+            # x_new = torch.as_tensor(x_new, dtype=x.dtype, device=x.device)
+
+            # Find indices of the closest points to the right of the new x values
+            idx = torch.searchsorted(x, x_new)
+            idx = torch.clamp(idx, 1, len(x) - 1)
+
+            x_left, x_right = x[idx - 1], x[idx]
+            y_left, y_right = y[idx - 1], y[idx]
+
+            # Linear interpolation formula
+            y_new = y_left + (x_new - x_left) * (y_right - y_left) / (x_right - x_left)
+            return y_new
+
+        return interpolator
 
     def add_pred_var_pair(self, preds, uncertainties):
             self.preds.extend(preds.cpu().detach().numpy().flatten())
@@ -77,23 +101,16 @@ class UncertaintyJudge:
         median_x_values = np.delete(median_x_values, indices_to_drop)[::smoothing]
         y_values = np.delete(y_values, indices_to_drop)[::smoothing]
 
-        median_x_values = np.append(0, median_x_values)
-        y_values = np.append(0, y_values)
-
-        median_x_values = np.append(median_x_values, median_x_values[-1] * 2)
-        y_values = np.append(y_values, max_y * 2)
-
         # interp_function = interp1d(median_x_values, median_y_values, kind='linear', fill_value='extrapolate')
         # spl = CubicSpline(median_x_values, y_values, bc_type='natural')
         # spl = Akima1DInterpolator(median_x_values, y_values)
-        self.threshold_func = PchipInterpolator(median_x_values, y_values, extrapolate=True)
+        #self.threshold_func = PchipInterpolator(median_x_values, y_values, extrapolate=True)
+        self.threshold_func = self.linear_interp1d(median_x_values, y_values)
         self.clear()
 
     def evaluate_threshold_func(self, pred, uncertainty):
-        pred = np.array(pred.cpu().detach().numpy().flatten())
         threshold = self.threshold_func(pred)
-
-        pred_var = np.exp(uncertainty.cpu().detach().numpy().flatten())
+        pred_var = torch.exp(uncertainty)
         mask = pred_var < threshold
         return mask
 
