@@ -39,7 +39,7 @@ class UncertaintyJudge:
         self.clear()
 
     def calc_threshold_func(self, window=50, percentile=50, smoothing=10):
-        x_values = np.array(self.uncertainties)
+        x_values = np.exp(np.array(self.uncertainties))  # np.exp to get variance instead of s
         y_values = np.array(self.preds)
 
         y_values, indices = np.unique(y_values, return_index=True)
@@ -91,7 +91,8 @@ class UncertaintyJudge:
 
     def evaluate_threshold_func(self, pred, uncertainty):
         threshold = self.threshold_func(pred)
-        mask = uncertainty < threshold
+        pred_var = np.exp(uncertainty)
+        mask = pred_var < threshold
         return mask
 
     def clear(self):
