@@ -74,15 +74,12 @@ class UncertaintyJudge:
             window_below = i - window // 2
             window_above = i + window // 2
             if window_below < 0:
-                # window_above -= window_below
                 window_above = i + 1
                 window_below = 0
             elif window_above > len(y_values):
-                # window_below -= (window_above - len(y_values))
                 window_below = i - 1
                 window_above = len(y_values)
             data_in_window = x_values[window_below:window_above]
-            # median_x = np.median(data_in_window)
             median_x = np.percentile(data_in_window, percentile)
             median_x_values.append(median_x)
 
@@ -101,11 +98,10 @@ class UncertaintyJudge:
         median_x_values = np.delete(median_x_values, indices_to_drop)[::smoothing]
         y_values = np.delete(y_values, indices_to_drop)[::smoothing]
 
-        # interp_function = interp1d(median_x_values, median_y_values, kind='linear', fill_value='extrapolate')
-        # spl = CubicSpline(median_x_values, y_values, bc_type='natural')
-        # spl = Akima1DInterpolator(median_x_values, y_values)
-        #self.threshold_func = PchipInterpolator(median_x_values, y_values, extrapolate=True)
-        self.threshold_func = self.linear_interp1d(median_x_values, y_values)
+        median_x_values_torch = torch.from_numpy(median_x_values).to(self.device)
+        y_values_torch = torch.from_numpy(y_values).to(self.device)
+
+        self.threshold_func = self.linear_interp1d(median_x_values_torch, y_values_torch)
         self.clear()
 
     def evaluate_threshold_func(self, pred, uncertainty):
