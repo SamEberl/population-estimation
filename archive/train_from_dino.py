@@ -22,7 +22,7 @@ def load_image(img: str) -> torch.Tensor:
 
 
 logger.info('---Start Training---')
-reg_config = parse_yaml('../configs/regBasicDINOv2.yaml')
+reg_config = parse_yaml('regBasicDINOv2.yaml')
 log_dir = reg_config['logging_params']['save_dir']
 
 

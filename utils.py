@@ -244,7 +244,7 @@ def save_data_as_jpg(reg_config, save_dir):
 
 
 def get_img_stats():
-    reg_config = parse_yaml('configs/regBasicDINOv2.yaml')
+    reg_config = parse_yaml('archive/regBasicDINOv2.yaml')
 
     data = sslDataset(**reg_config["data_params"])
     train_dataloader = data.train_dataloader()

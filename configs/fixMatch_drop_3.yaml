@@ -1,0 +1,72 @@
+info:
+  info: 'h-tuning droprate=0.3 | MSE | 10% data | full supervised'
+
+model_params:
+  architecture: 'fixMatch'
+  pretrained_weights: 'efficientnet_b0'  # choose from timm models
+  pretrained: True
+  supervised_criterion: 'MSE'
+  unsupervised_criterion: 'triplet'
+  unsupervised_factor: 1
+  retrain: False
+  retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
+  in_channels: 3
+  nbr_outputs: 1
+  projection_size: 128
+  drop_rate: 0.0
+  drop_path_rate: 0.3
+  # drop_rate_teacher: 0.4
+
+data_params:
+  data_dir: "/home/pop-dens/data/So2Sat_POP_Part1"
+  train_batch_size: 128
+  val_batch_size: 128
+  num_workers: 32
+  reduce_zeros: False
+  reduce_zeros_percent: 0.93
+  reduce_data: True
+  reduce_data_percent: 0.9
+  unlabeled_data: False
+  reduce_supervised: False
+  reduce_supervised_percent: 0.8
+  seed: 42
+  use_spring_rgb: True
+  use_lu: False
+  use_lcz: False
+  use_dem: False
+  use_viirs: False
+
+train_params:
+  LR: 0.001
+  max_epochs: 100
+  L2_reg: 0.1
+  beta1: 0.9
+  beta2: 0.999
+  ema_alpha: 0.95
+  seed: 42
+  num_samples_teacher: 50
+  use_judge: False
+
+save_dirs:
+  log_save_dir: "/home/sameberl/logs/"
+  model_save_dir: "/home/sameberl/models"
+
+transform_params:
+  apply_rot_and_flip: False
+  apply_noise: False
+  noise_mean: 0
+  noise_std_min: 0.001
+  noise_std_max: 0.07
+  noise_p: 0.5
+  apply_brightness: False
+  brightness_range:
+    - 0.2
+    - 1.8
+  brightness_p: 0.5
+  apply_contrast: False
+  contrast_range:
+    - 0.2
+    - 1.8
+  contrast_p: 0.5
+
+

@@ -2,8 +2,8 @@ from training_loops.trainFuncs import *
 
 print('---Start Training---')
 
-ae_config = parse_yaml('configs/aeResNet.yaml')
-reg_config = parse_yaml('configs/regBasic.yaml')
+ae_config = parse_yaml('archive/aeResNet.yaml')
+reg_config = parse_yaml('archive/regBasic.yaml')
 
 log_dir = ae_config['logging_params']['save_dir']
 

@@ -4,49 +4,6 @@ import os
 from datetime import datetime
 import pandas as pd
 
-def calc_r2(numbers, split):
-    # Filtering out the zeros and calculating the sum of the remaining numbers
-    non_zero_numbers = [num for num in numbers if num != 0]
-    total_sum = sum(non_zero_numbers)
-
-    # Counting the number of non-zero elements
-    non_zero_count = len(non_zero_numbers)
-
-    # Avoiding division by zero
-    if non_zero_count == 0:
-        return 0
-
-    # Calculating the mean
-    mean = total_sum / non_zero_count
-
-    r2 = 0
-    if split == 'train':
-        r2 = 1-(mean/7373152.5)
-    elif split == 'test' or split == 'val' or split == 'valid':
-        r2 = 1-(mean/9868522.0)
-
-    return r2
-
-
-def calc_bias(numbers):
-    """
-    Computes the mean of a list of numbers, excluding zeros from both the sum and the count.
-    """
-    # Filtering out the zeros and calculating the sum of the remaining numbers
-    non_zero_numbers = [num for num in numbers if num != 0]
-    total_sum = sum(non_zero_numbers)
-
-    # Counting the number of non-zero elements
-    non_zero_count = len(non_zero_numbers)
-
-    # Avoiding division by zero
-    if non_zero_count == 0:
-        return 0
-
-    # Calculating the mean
-    mean = total_sum / non_zero_count
-    return mean
-
 
 class MetricsLogger:
     def __init__(self, writer):
@@ -113,24 +70,83 @@ class MetricsLogger:
         # Initialize a list to hold our data
         data = []
         pd.options.display.float_format = '{:.3f}'.format
+        # Metrics to specifically include in add_text
+        specific_metrics = [
+            "Loss-Compare-L1/valid",
+            "Loss-Compare-RMSE/valid",
+            "Observe-R2/valid",
+            "Observe-Bias/valid"
+        ]
+        specific_data = []
+
         # Iterate through metrics and process them
         for metric_name, values in self.metrics.items():
+            processed_value = None  # This will store the processed metric value
             if 'Observe-Bias' in metric_name:
-                bias = calc_bias(values)
-                data.append({'Metric': metric_name, 'Value': bias})
+                processed_value = calc_bias(values)
             elif 'Observe-R2' in metric_name:
                 if 'train' in metric_name:
-                    r2 = calc_r2(values, 'train')
-                    data.append({'Metric': metric_name, 'Value': r2})
+                    processed_value = calc_r2(values, 'train')
                 elif 'valid' in metric_name:
-                    r2 = calc_r2(values, 'valid')
-                    data.append({'Metric': metric_name, 'Value': r2})
+                    processed_value = calc_r2(values, 'valid')
             else:
-                mean_value = sum(values) / len(values)
-                data.append({'Metric': metric_name, 'Value': mean_value})
+                processed_value = sum(values) / len(values)
 
-        # Create a DataFrame
-        df = pd.DataFrame(data)
+            # Append the processed metric to data
+            data.append({'Metric': metric_name, 'Value': processed_value})
 
-        # Print the DataFrame
-        print(df.to_string(index=False))
+            # Check if this metric is one of the specific metrics to include in add_text
+            if metric_name in specific_metrics:
+                specific_data.append({'Metric': metric_name, 'Value': processed_value})
+
+        # Format specific_data as a Markdown table for add_text
+        markdown_table = "| Metric | Value |\n|--------|-------|\n"
+        for item in specific_data:
+            markdown_table += f"| {item['Metric']} | {item['Value']:.3f} |\n"
+
+        # Use add_text with the formatted Markdown table
+        self.writer.add_text('Final Stats', markdown_table, 0)
+
+
+def calc_r2(numbers, split):
+    # Filtering out the zeros and calculating the sum of the remaining numbers
+    non_zero_numbers = [num for num in numbers if num != 0]
+    total_sum = sum(non_zero_numbers)
+
+    # Counting the number of non-zero elements
+    non_zero_count = len(non_zero_numbers)
+
+    # Avoiding division by zero
+    if non_zero_count == 0:
+        return 0
+
+    # Calculating the mean
+    mean = total_sum / non_zero_count
+
+    r2 = 0
+    if split == 'train':
+        r2 = 1-(mean/7373152.5)
+    elif split == 'test' or split == 'val' or split == 'valid':
+        r2 = 1-(mean/9868522.0)
+
+    return r2
+
+
+def calc_bias(numbers):
+    """
+    Computes the mean of a list of numbers, excluding zeros from both the sum and the count.
+    """
+    # Filtering out the zeros and calculating the sum of the remaining numbers
+    non_zero_numbers = [num for num in numbers if num != 0]
+    total_sum = sum(non_zero_numbers)
+
+    # Counting the number of non-zero elements
+    non_zero_count = len(non_zero_numbers)
+
+    # Avoiding division by zero
+    if non_zero_count == 0:
+        return 0
+
+    # Calculating the mean
+    mean = total_sum / non_zero_count
+    return mean
