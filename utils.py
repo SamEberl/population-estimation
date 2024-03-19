@@ -70,16 +70,8 @@ def open_tensorboard(log_dir):
     tensorboard_process.wait()
 
 
-def parse_yaml(config_path='configs/aeBasic.yaml'):
-    parser = argparse.ArgumentParser(description='Generic runner for VAE models')
-    parser.add_argument('--config', '-c',
-                        dest="filename",
-                        metavar='FILE',
-                        help='path to the config file',
-                        default=config_path)
-
-    args = parser.parse_args()
-    with open(args.filename, 'r') as file:
+def parse_yaml(filename):
+    with open(filename, 'r') as file:
         try:
             config = yaml.safe_load(file)
         except yaml.YAMLError as exc:
