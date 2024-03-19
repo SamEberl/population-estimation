@@ -109,8 +109,6 @@ class MetricsLogger:
             for uncertainty_name, uncertainty in self.uncertainties.items():
                 np.save(os.path.join(path, f'{uncertainty_name}.npy'), uncertainty)
 
-    from tabulate import tabulate
-
     def print_final_stats(self):
         # Initialize a list to hold our data
         data = []
