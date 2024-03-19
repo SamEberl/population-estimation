@@ -70,10 +70,11 @@ class fixMatch(nn.Module):
 
     def forward(self, x):
         features = self.model(x)
+        projection = self.projection(features).flatten()
         prediction = self.fc(features).flatten()
         #features_u = torch.cat((features, prediction.unsqueeze(1)), dim=1)
         uncertainty = self.fc_uncertainty(features).flatten()
-        return prediction, features, uncertainty
+        return prediction, projection, uncertainty
 
     def loss_supervised(self, predictions, labels):
         loss = self.supervised_criterion(predictions, labels)
