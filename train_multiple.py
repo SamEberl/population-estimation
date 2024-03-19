@@ -13,4 +13,4 @@ file_paths = [
 
 # Loop through the file paths and call train.py with each one
 for path in file_paths:
-    subprocess.run(["python", "train.py", "--file_path", path])
+    subprocess.run(["python", "train.py", "--file_path", str(path)])
