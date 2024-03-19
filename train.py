@@ -10,7 +10,7 @@ from utils import parse_yaml
 def main(file_path):
     # Your existing code that uses the file_path
     print(f"--- Training on file: {file_path} ---")
-    #config = parse_yaml(f'configs/{file_path}.yaml')
+    config = parse_yaml(f'configs/fixMatch_l2_0p1.yaml')
     #config = parse_yaml('configs/fixMatch_local.yaml')
 
     seed = config['train_params']['seed']
