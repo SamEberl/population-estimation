@@ -13,7 +13,7 @@ parser.add_argument('--file_path', type=str, required=True, help='The path to th
 args = parser.parse_args()
 file_path = args.file_path
 print(f"--- Training on file: {file_path} ---")
-config = parse_yaml(f'configs/{file_path}.yaml')
+#config = parse_yaml(f'configs/{file_path}.yaml')
 #config = parse_yaml('configs/fixMatch_local.yaml')
 
 seed = config['train_params']['seed']
