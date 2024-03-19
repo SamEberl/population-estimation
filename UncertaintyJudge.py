@@ -11,6 +11,9 @@ class UncertaintyJudge:
         self.use_judge = use_judge
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        self.median_x_values_torch = None
+        self.y_values_torch = None
+
     @staticmethod
     def power_law(x, a, b):
         return a * x ** (b)
@@ -42,6 +45,9 @@ class UncertaintyJudge:
             self.uncertainties.extend(uncertainties.cpu().detach().numpy().flatten())
 
     def calc_threshold_func(self, window=50, percentile=50, smoothing=10):
+        self.median_x_values_torch = None
+        self.y_values_torch = None
+
         x_values = np.exp(np.array(self.uncertainties))  # np.exp to get variance instead of s
         y_values = np.array(self.preds)
 
@@ -77,10 +83,10 @@ class UncertaintyJudge:
         median_x_values = np.delete(median_x_values, indices_to_drop)[::smoothing]
         y_values = np.delete(y_values, indices_to_drop)[::smoothing]
 
-        median_x_values_torch = torch.from_numpy(median_x_values).to(self.device)
-        y_values_torch = torch.from_numpy(y_values).to(self.device)
+        self.median_x_values_torch = torch.from_numpy(median_x_values).to(self.device)
+        self.y_values_torch = torch.from_numpy(y_values).to(self.device)
 
-        self.threshold_func = self.linear_interp1d(median_x_values_torch, y_values_torch)
+        self.threshold_func = self.linear_interp1d(self.median_x_values_torch, self.y_values_torch)
         self.clear()
 
     def evaluate_threshold_func(self, pred, uncertainty):
