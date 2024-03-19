@@ -1,10 +1,10 @@
 info:
-  info: 'h-tuning drop_path_rate=0.4 | MSE | 10% data | full supervised'
+  info: 'h-tuning l2=0.1 | MSE | 10% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
-  pretrained: True
+  pretrained: False
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1
@@ -14,7 +14,7 @@ model_params:
   nbr_outputs: 1
   projection_size: 128
   drop_rate: 0.0
-  drop_path_rate: 0.4
+  drop_path_rate: 0.0
   # drop_rate_teacher: 0.4
 
 data_params:
