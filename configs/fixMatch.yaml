@@ -1,5 +1,5 @@
 info:
-  info: 'h-tuning lr=0.0001 | MSE | 10% data | full supervised'
+  info: 'h-tuning lr=0.001 | MSE | 10% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -37,7 +37,7 @@ data_params:
   use_viirs: False
 
 train_params:
-  LR: 0.0001
+  LR: 0.001
   max_epochs: 20
   L2_reg: 0.1
   beta1: 0.9
