@@ -1,4 +1,4 @@
-from training_loops.trainFuncs import *
+from archive.trainFuncs import *
 import tifffile
 import torchvision.transforms as T
 from logging_utils import logger

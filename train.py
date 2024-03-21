@@ -1,5 +1,5 @@
 import argparse
-from training_loops.fixMatch_loop import *
+from fixMatch_loop import *
 from dataset import get_dataloaders
 from tensorboardX import SummaryWriter
 from datetime import datetime
