@@ -1,5 +1,5 @@
 info:
-  info: 'h-tuning droprate=0.4 | MSE | 10% data | full supervised'
+  info: 'smaller lr | h-tuning droprate=0.4 | MSE | 10% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
