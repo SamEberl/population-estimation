@@ -4,7 +4,7 @@ info:
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
-  pretrained: True
+  pretrained: False
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1
