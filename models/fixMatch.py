@@ -57,7 +57,8 @@ class fixMatch(nn.Module):
         unsupervised_losses = {'contrastive': ContrastiveLoss(),
                                'triplet': TripletLoss(),
                                'tripletModified': TripletLossModified(),
-                               'cosine': CosineSimilarity()}
+                               'cosine': CosineSimilarity(),
+                               'MSE': F.mse_loss}
 
         self.unsupervised_criterion = unsupervised_losses[unsupervised_criterion]
 

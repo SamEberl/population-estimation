@@ -1,5 +1,5 @@
 info:
-  info: 'h-tuning lr=0.0001 | MSE | 20% data | full supervised'
+  info: 'drop_path_rate=0.2 | MSE | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -14,7 +14,7 @@ model_params:
   nbr_outputs: 1
   projection_size: 128
   drop_rate: 0.0
-  drop_path_rate: 0.0
+  drop_path_rate: 0.2
   # drop_rate_teacher: 0.4
 
 data_params:
