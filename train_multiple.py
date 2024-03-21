@@ -2,8 +2,6 @@ import subprocess
 
 # Define the different file paths in a list
 file_paths = [
-    "fixMatch_l2_0p1",
-    "fixMatch_l2_1",
     "fixMatch_drop_1",
     "fixMatch_drop_2",
     "fixMatch_drop_3",
