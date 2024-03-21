@@ -25,7 +25,7 @@ data_params:
   reduce_zeros: False
   reduce_zeros_percent: 0.93
   reduce_data: True
-  reduce_data_percent: 0.9
+  reduce_data_percent: 0.
   unlabeled_data: False
   reduce_supervised: False
   reduce_supervised_percent: 0.8
