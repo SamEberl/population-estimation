@@ -4,11 +4,11 @@ from train import train_main
 
 # Define the different file paths in a list
 file_paths = [
-    "fixMatch_1",
-    "fixMatch_2",
-    "fixMatch_3",
-    "fixMatch_4",
-    "fixMatch_5",
+    "configs/fixMatch_1.yaml",
+    "configs/fixMatch_2.yaml",
+    "configs/fixMatch_3.yaml",
+    "configs/fixMatch_4.yaml",
+    "configs/fixMatch_5.yaml",
 ]
 
 configs = {}
