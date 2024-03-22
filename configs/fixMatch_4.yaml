@@ -1,5 +1,5 @@
 info:
-  info: 'aug removed=contrast | MSE | 20% data | full supervised'
+  info: 'ssl=triplet | MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -24,10 +24,10 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.93
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: False
-  reduce_supervised: False
+  unlabeled_data: True
+  reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
@@ -39,7 +39,7 @@ data_params:
 train_params:
   LR: 0.0001
   max_epochs: 100
-  L2_reg: 0.01
+  L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
@@ -63,10 +63,10 @@ transform_params:
     - 0.2
     - 1.8
   brightness_p: 0.5
-  apply_contrast: False
+  apply_contrast: True
   contrast_range:
-    - 0.2
-    - 1.8
+    - 0.8
+    - 1.6
   contrast_p: 0.5
 
 

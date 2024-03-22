@@ -1,12 +1,12 @@
 info:
-  info: 'aug removed=flip&rot | MSE | 20% data | full supervised'
+  info: 'ssl=contrastive | MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
   pretrained: False
   supervised_criterion: 'MSE'
-  unsupervised_criterion: 'triplet'
+  unsupervised_criterion: 'contrastive'
   unsupervised_factor: 1
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
@@ -24,10 +24,10 @@ data_params:
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.93
-  reduce_data: True
+  reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: False
-  reduce_supervised: False
+  unlabeled_data: True
+  reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
@@ -39,7 +39,7 @@ data_params:
 train_params:
   LR: 0.0001
   max_epochs: 100
-  L2_reg: 0.01
+  L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
@@ -52,7 +52,7 @@ save_dirs:
   model_save_dir: "/home/sameberl/models"
 
 transform_params:
-  apply_rot_and_flip: False
+  apply_rot_and_flip: True
   apply_noise: True
   noise_mean: 0
   noise_std_min: 0.001
@@ -65,8 +65,8 @@ transform_params:
   brightness_p: 0.5
   apply_contrast: True
   contrast_range:
-    - 0.2
-    - 1.8
+    - 0.8
+    - 1.6
   contrast_p: 0.5
 
 
