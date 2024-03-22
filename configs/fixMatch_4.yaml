@@ -1,5 +1,5 @@
 info:
-  info: 'l2=0.1 | MSE | 20% data | full supervised'
+  info: 'aug removed=contrast | MSE | 20% data | full supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -52,13 +52,13 @@ save_dirs:
   model_save_dir: "/home/sameberl/models"
 
 transform_params:
-  apply_rot_and_flip: False
-  apply_noise: False
+  apply_rot_and_flip: True
+  apply_noise: True
   noise_mean: 0
   noise_std_min: 0.001
   noise_std_max: 0.07
   noise_p: 0.5
-  apply_brightness: False
+  apply_brightness: True
   brightness_range:
     - 0.2
     - 1.8
