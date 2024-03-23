@@ -90,10 +90,10 @@ def forward_unsupervised(student_model,
             pseudo_label_mask = torch.ones(student_inputs.shape[0]).to(student_inputs.device)
 
         if torch.sum(pseudo_label_mask) > 0:
-            # dearanged_teacher_features = derangement_shuffle(teacher_features)
-            #unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
-            dearanged_student_features = derangement_shuffle(student_features)
-            unsupervised_loss = student_model.loss_unsupervised(teacher_features, student_features, dearanged_student_features, mask=pseudo_label_mask)
+            dearanged_teacher_features = derangement_shuffle(teacher_features)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
+            # dearanged_student_features = derangement_shuffle(student_features)
+            # unsupervised_loss = student_model.loss_unsupervised(teacher_features, student_features, dearanged_student_features, mask=pseudo_label_mask)
             logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
             return unsupervised_loss
         else:
