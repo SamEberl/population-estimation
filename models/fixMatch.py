@@ -17,6 +17,7 @@ class fixMatch(nn.Module):
                  drop_rate=0,
                  drop_path_rate=0,
                  projection_size=128,
+                 margin=1,
                  **kwargs):
         super(fixMatch, self).__init__()
         self.model = create_model(pretrained_weights, pretrained=pretrained,
@@ -40,6 +41,7 @@ class fixMatch(nn.Module):
         )
         # factor to scale unsupervised_loss to be similar to supervised_loss
         self.unsupervised_factor = unsupervised_factor  # 1_000_000 / self.model.num_features
+        self.margin = margin
 
         supervised_losses = {'L1': F.l1_loss,
                              'MSE': F.mse_loss,
@@ -93,8 +95,8 @@ class fixMatch(nn.Module):
         loss = self.supervised_criterion(predictions, labels, log_var, cur_step, total_step)
         return loss
 
-    def loss_unsupervised(self, student_features, teacher_features, dearanged_teacher_features, mask, margin=1):
-        loss = self.unsupervised_criterion(student_features, teacher_features, dearanged_teacher_features, mask, margin)
+    def loss_unsupervised(self, student_features, teacher_features, dearanged_teacher_features, mask):
+        loss = self.unsupervised_criterion(student_features, teacher_features, dearanged_teacher_features, mask, self.margin)
         loss = loss * self.unsupervised_factor
         return loss
 

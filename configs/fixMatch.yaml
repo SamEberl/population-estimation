@@ -1,10 +1,10 @@
 info:
-  info: 'h-tuning l2=0.01 | MSE | 10% data | full supervised'
+  info: 'test ssl | MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
-  pretrained: True
+  pretrained: False
   supervised_criterion: 'MSE'
   unsupervised_criterion: 'triplet'
   unsupervised_factor: 1
@@ -14,20 +14,21 @@ model_params:
   nbr_outputs: 1
   projection_size: 128
   drop_rate: 0.0
-  drop_path_rate: 0.0
+  drop_path_rate: 0.4
   # drop_rate_teacher: 0.4
+  margin: 100
 
 data_params:
   data_dir: "/home/pop-dens/data/So2Sat_POP_Part1"
-  train_batch_size: 128
-  val_batch_size: 128
+  train_batch_size: 32
+  val_batch_size: 32
   num_workers: 32
   reduce_zeros: False
   reduce_zeros_percent: 0.93
   reduce_data: True
-  reduce_data_percent: 0.
-  unlabeled_data: False
-  reduce_supervised: False
+  reduce_data_percent: 0.8
+  unlabeled_data: True
+  reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
   use_spring_rgb: True
@@ -37,12 +38,12 @@ data_params:
   use_viirs: False
 
 train_params:
-  LR: 0.001
+  LR: 0.0001
   max_epochs: 100
-  L2_reg: 0.01
+  L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
-  ema_alpha: 0.95
+  ema_alpha: 0.90
   seed: 42
   num_samples_teacher: 50
   use_judge: False
@@ -52,21 +53,21 @@ save_dirs:
   model_save_dir: "/home/sameberl/models"
 
 transform_params:
-  apply_rot_and_flip: False
-  apply_noise: False
+  apply_rot_and_flip: True
+  apply_noise: True
   noise_mean: 0
   noise_std_min: 0.001
   noise_std_max: 0.07
   noise_p: 0.5
-  apply_brightness: False
+  apply_brightness: True
   brightness_range:
     - 0.2
     - 1.8
   brightness_p: 0.5
-  apply_contrast: False
+  apply_contrast: True
   contrast_range:
-    - 0.2
-    - 1.8
+    - 0.8
+    - 1.6
   contrast_p: 0.5
 
 
