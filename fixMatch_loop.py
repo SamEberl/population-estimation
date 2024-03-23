@@ -90,10 +90,8 @@ def forward_unsupervised(student_model,
             pseudo_label_mask = torch.ones(student_inputs.shape[0]).to(student_inputs.device)
 
         if torch.sum(pseudo_label_mask) > 0:
-            dearanged_teacher_features = derangement_shuffle(teacher_features)
-            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_teacher_features, mask=pseudo_label_mask)
-            # dearanged_student_features = derangement_shuffle(student_features)
-            # unsupervised_loss = student_model.loss_unsupervised(teacher_features, student_features, dearanged_student_features, mask=pseudo_label_mask)
+            dearanged_student_features = derangement_shuffle(student_features)
+            unsupervised_loss = student_model.loss_unsupervised(student_features, teacher_features, dearanged_student_features, mask=pseudo_label_mask)
             logger.add_metric(f'Loss-Unsupervised', 'train', unsupervised_loss.item())
             return unsupervised_loss
         else:
@@ -163,10 +161,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             # Update teacher model using exponential moving average
             with torch.no_grad():  # Ensure no gradients are computed for this operation
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-                    ema_alpha = 0.99
-                    print(f'teacher: {teacher_param[0]}')
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data, alpha=(1 - ema_alpha))
-                    print(f'after: {teacher_param[0]}')
             for train_data_unlabeled in train_dataloader_unlabeled:
                 student_model.train()
                 teacher_model.eval()
