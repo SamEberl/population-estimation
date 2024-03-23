@@ -163,7 +163,7 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             # Update teacher model using exponential moving average
             with torch.no_grad():  # Ensure no gradients are computed for this operation
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-                    ema_alpha = 0.8
+                    ema_alpha = 0.99
                     print(f'teacher: {teacher_param[0]}')
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data, alpha=(1 - ema_alpha))
                     print(f'after: {teacher_param[0]}')
