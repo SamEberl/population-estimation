@@ -1,12 +1,12 @@
 info:
-  info: 'ema-a=0.999 | MSE | full data | 20% supervised'
+  info: 'ssl=contrastive| MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
   pretrained: True
   supervised_criterion: 'MSE'
-  unsupervised_criterion: 'triplet'
+  unsupervised_criterion: 'contrastive'
   unsupervised_factor: 1
   retrain: False
   retrain_from: 'convnextv2_atto.fcmae_2024_02_07-19_30_14.pt'
@@ -42,7 +42,7 @@ train_params:
   L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
-  ema_alpha: 0.999
+  ema_alpha: 0.99
   seed: 42
   num_samples_teacher: 50
   use_judge: False

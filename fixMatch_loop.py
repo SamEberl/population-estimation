@@ -121,40 +121,40 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
 
     # Train the model
     for epoch in range(num_epochs):
-        # print(f"\nStart Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
-        # if epoch == (num_epochs - 1):
-        #     logger.last_epoch = True
-        #
-        # for train_data in train_dataloader:
-        #     inputs, labels = train_data
-        #     inputs = inputs.to(device)
-        #     labels = labels.to(device)
-        #     student_model.train()
-        #     supervised_loss = forward_supervised(student_model,
-        #                                          inputs,
-        #                                          labels,
-        #                                          supervised_loss_name,
-        #                                          split='train',
-        #                                          logger=logger)
-        #     # Backward pass and optimization
-        #     optimizer.zero_grad()
-        #     supervised_loss.backward()
-        #     optimizer.step()
-        #
-        # print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
-        # for i, valid_data in enumerate(valid_dataloader):
-        #     inputs, labels = valid_data
-        #     inputs = inputs.to(device)
-        #     labels = labels.to(device)
-        #     student_model.eval()
-        #     with torch.no_grad():
-        #         val_loss = forward_supervised(
-        #                 student_model=student_model,
-        #                 student_inputs=inputs,
-        #                 labels=labels,
-        #                 supervised_loss_name=supervised_loss_name,
-        #                 split='valid',
-        #                 logger=logger)
+        print(f"\nStart Epoch: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
+        if epoch == (num_epochs - 1):
+            logger.last_epoch = True
+
+        for train_data in train_dataloader:
+            inputs, labels = train_data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            student_model.train()
+            supervised_loss = forward_supervised(student_model,
+                                                 inputs,
+                                                 labels,
+                                                 supervised_loss_name,
+                                                 split='train',
+                                                 logger=logger)
+            # Backward pass and optimization
+            optimizer.zero_grad()
+            supervised_loss.backward()
+            optimizer.step()
+
+        print(f"Start Valid: [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
+        for i, valid_data in enumerate(valid_dataloader):
+            inputs, labels = valid_data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            student_model.eval()
+            with torch.no_grad():
+                val_loss = forward_supervised(
+                        student_model=student_model,
+                        student_inputs=inputs,
+                        labels=labels,
+                        supervised_loss_name=supervised_loss_name,
+                        split='valid',
+                        logger=logger)
 
         if unlabeled_data:
             print(f"Start SSL  : [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
