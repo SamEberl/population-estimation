@@ -161,8 +161,12 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
         if unlabeled_data:
             print(f"Start SSL  : [{epoch + 1}/{num_epochs}] | {datetime.now().strftime('%H:%M:%S')} | {info}")
             # Update teacher model using exponential moving average
-            for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
-                teacher_param.data.mul_(ema_alpha).add_(student_param.data * (1 - ema_alpha))
+            with torch.no_grad():  # Ensure no gradients are computed for this operation
+                for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
+                    print(f'teacher: {teacher_param}')
+                    teacher_param.data.mul_(ema_alpha).add_(student_param.data, alpha=(1 - ema_alpha))
+                    print(f'after: {teacher_param}')
+                    exit()
             for train_data_unlabeled in train_dataloader_unlabeled:
                 student_model.train()
                 teacher_model.eval()

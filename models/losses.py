@@ -220,13 +220,12 @@ class TripletLoss(nn.Module):
         positive_distance = (anchor - positive).pow(2).sum(1)
         negative_distance = (anchor - negative).pow(2).sum(1)
 
-        print(f'anchor: {anchor}')
-        print(f'pos: {positive}')
-        print(f'neg: {negative}')
-        print(f'pos_dis: {positive_distance}')
-        print(f'neg_dis: {negative_distance}')
-        print('----------------------------------------------------')
-        exit()
+        # print(f'anchor: {anchor}')
+        # print(f'pos: {positive}')
+        # print(f'neg: {negative}')
+        # print(f'pos_dis: {positive_distance}')
+        # print(f'neg_dis: {negative_distance}')
+        # print('----------------------------------------------------')
 
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)
