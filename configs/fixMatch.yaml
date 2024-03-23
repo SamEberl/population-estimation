@@ -16,7 +16,7 @@ model_params:
   drop_rate: 0.0
   drop_path_rate: 0.4
   # drop_rate_teacher: 0.4
-  margin: 1
+  margin: 2
 
 data_params:
   data_dir: "/home/pop-dens/data/So2Sat_POP_Part1"
