@@ -3,19 +3,19 @@ from train import train_main
 
 
 # Define the different file paths in a list
-file_paths = [
-    "configs/fixMatch_0_1.yaml",
-    "configs/fixMatch_0_2.yaml",
-    "configs/fixMatch_0_3.yaml",
-]
-
 # file_paths = [
-#     "configs/fixMatch_1.yaml",
-#     "configs/fixMatch_2.yaml",
-#     "configs/fixMatch_3.yaml",
-#     "configs/fixMatch_4.yaml",
-#     "configs/fixMatch_5.yaml",
+#     "configs/fixMatch_0_1.yaml",
+#     "configs/fixMatch_0_2.yaml",
+#     "configs/fixMatch_0_3.yaml",
 # ]
+
+file_paths = [
+    "configs/fixMatch_1.yaml",
+    "configs/fixMatch_2.yaml",
+    "configs/fixMatch_3.yaml",
+    "configs/fixMatch_4.yaml",
+    "configs/fixMatch_5.yaml",
+]
 
 configs = {}
 
