@@ -226,6 +226,7 @@ class TripletLoss(nn.Module):
         print(f'pos_dis: {positive_distance}')
         print(f'neg_dis: {negative_distance}')
         print('----------------------------------------------------')
+        exit()
 
         # Compute the loss
         losses = torch.relu(positive_distance - negative_distance + margin)

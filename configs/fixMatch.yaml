@@ -43,7 +43,7 @@ train_params:
   L2_reg: 0.1
   beta1: 0.9
   beta2: 0.999
-  ema_alpha: 0.90
+  ema_alpha: 0.99
   seed: 42
   num_samples_teacher: 50
   use_judge: False
