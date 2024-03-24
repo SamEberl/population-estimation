@@ -1,5 +1,5 @@
 info:
-  info: 'ssl=triplet| MSE | full data | 20% supervised'
+  info: 'l2=0.01 + ssl=triplet| MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -39,7 +39,7 @@ data_params:
 train_params:
   LR: 0.0001
   max_epochs: 100
-  L2_reg: 0.1
+  L2_reg: 0.01
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
