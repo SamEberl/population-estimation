@@ -1,5 +1,5 @@
 info:
-  info: 'base | Aleatoric | full data | 20% supervised'
+  info: 'ssl | Aleatoric | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -26,7 +26,7 @@ data_params:
   reduce_zeros_percent: 0.93
   reduce_data: False
   reduce_data_percent: 0.8
-  unlabeled_data: False
+  unlabeled_data: True
   reduce_supervised: True
   reduce_supervised_percent: 0.8
   seed: 42
