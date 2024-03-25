@@ -12,8 +12,8 @@ file_paths = [
     "configs/fixMatch_1.yaml",
     "configs/fixMatch_2.yaml",
     "configs/fixMatch_3.yaml",
-    "configs/fixMatch_4.yaml",
-    "configs/fixMatch_5.yaml",
+    #"configs/fixMatch_4.yaml",
+    #"configs/fixMatch_5.yaml",
 ]
 
 configs = {}

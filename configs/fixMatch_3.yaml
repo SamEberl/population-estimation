@@ -1,11 +1,11 @@
 info:
-  info: 'contrastive + l2=0.005 + ema-a=0.99 | MSE | full data | 20% supervised'
+  info: 'ssl | Aleatoric | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
   pretrained_weights: 'efficientnet_b0'  # choose from timm models
   pretrained: True
-  supervised_criterion: 'MSE'
+  supervised_criterion: 'Aleatoric'
   unsupervised_criterion: 'contrastive'
   unsupervised_factor: 1
   retrain: False
@@ -39,7 +39,7 @@ data_params:
 train_params:
   LR: 0.0001
   max_epochs: 100
-  L2_reg: 0.005
+  L2_reg: 0.01
   beta1: 0.9
   beta2: 0.999
   ema_alpha: 0.99
