@@ -195,11 +195,10 @@ class ContrastiveLoss(nn.Module):
         euclidean_distance_neg = torch.sqrt(torch.sum(torch.pow(anchor - negative, 2), dim=1))
 
         # Compute loss for each pair and then average over the batch
-        loss_contrastive_pos = torch.pow(euclidean_distance_pos, 2)
-        loss_contrastive_neg = torch.pow(torch.clamp(margin - euclidean_distance_neg, min=0.0), 2)
+        loss_contrastive_pos = euclidean_distance_pos
+        loss_contrastive_neg = torch.clamp(margin - euclidean_distance_neg, min=0.0)
 
         # Scale to be on the same magnitude as the supervised loss
-        #TODO Handle mask being all zeros
         loss = torch.sum((loss_contrastive_pos + loss_contrastive_neg) * mask) / torch.sum(mask)
 
         return loss
