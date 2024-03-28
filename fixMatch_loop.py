@@ -162,14 +162,14 @@ def train_fix_match(config, writer, student_model, teacher_model, train_dataload
             with torch.no_grad():  # Ensure no gradients are computed for this operation
                 for teacher_param, student_param in zip(teacher_model.parameters(), student_model.parameters()):
                     teacher_param.data.mul_(ema_alpha).add_(student_param.data, alpha=(1 - ema_alpha))
-            total_batches = len(train_dataloader)
-            processed_batches = 0
+            # total_batches = len(train_dataloader)
+            # processed_batches = 0
             for train_data_unlabeled in train_dataloader_unlabeled:
-                if processed_batches >= total_batches:
-                    # Break the loop if we've processed 1/3 of the batches
-                    break
-                else:
-                    processed_batches += 1
+                # if processed_batches >= total_batches:
+                #     # Break the loop if we've processed 1/3 of the batches
+                #     break
+                # else:
+                #     processed_batches += 1
                 student_model.train()
                 teacher_model.eval()
                 inputs_ssl, inputs_ssl_transformed = train_data_unlabeled

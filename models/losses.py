@@ -190,6 +190,9 @@ class ContrastiveLoss(nn.Module):
         :param margin: Margin for the loss (default is 1.0)
         :return: Masked contrastive loss for the batch
         """
+        anchor = F.normalize(anchor, p=2, dim=1)
+        positive = F.normalize(positive, p=2, dim=1)
+        negative = F.normalize(negative, p=2, dim=1)
         # Calculate Euclidean distances
         euclidean_distance_pos = torch.sqrt(torch.sum(torch.pow(anchor - positive, 2), dim=1))
         euclidean_distance_neg = torch.sqrt(torch.sum(torch.pow(anchor - negative, 2), dim=1))
