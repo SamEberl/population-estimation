@@ -1,5 +1,5 @@
 info:
-  info: 'ssl=contrastive no pow(2) + normalize | MSE | full data | 20% supervised'
+  info: 'ssl=contrastive no pow(2) + drop 93% zeros | MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
@@ -22,7 +22,7 @@ data_params:
   train_batch_size: 128
   val_batch_size: 128
   num_workers: 32
-  reduce_zeros: False
+  reduce_zeros: True
   reduce_zeros_percent: 0.93
   reduce_data: False
   reduce_data_percent: 0.8
