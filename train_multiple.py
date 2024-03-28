@@ -4,7 +4,7 @@ from train import train_main
 
 file_paths = [
     "configs/fixMatch_0_1.yaml",
-    # "configs/fixMatch_0_2.yaml",
+    "configs/fixMatch_0_2.yaml",
     # "configs/fixMatch_0_3.yaml",
 ]
 
