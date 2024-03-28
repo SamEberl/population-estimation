@@ -1,5 +1,5 @@
 info:
-  info: 'ssl=contrastive no pow(2) | MSE | full data | 20% supervised'
+  info: 'ssl=contrastive no pow(2) + normalize | MSE | full data | 20% supervised'
 
 model_params:
   architecture: 'fixMatch'
